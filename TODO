@@ -1,0 +1,50 @@
+* Route caching support
+
+    When a path is firstly resolved through the route tree, we should
+    cache the result for future calls.
+
+    The path would be the cache key, the first route the value.
+
+        1 - GET / -> first call, so browse the route tree
+        2 - GET / -> second call, return cache('/');
+
+* Conditions support for route matching: 
+
+    get '/foo', {agent => 'Songbird (\d\.\d)[\d\/]*?'} => sub {
+        ...
+    };
+
+* Helper support
+
+    We should provide a way to define helpers, that are basically, methods
+    accessible from the action code blocks.
+
+    Well, this is certainly useless in Perl (whereas it's not in Ruby) because
+    any sub defined would be accessible....
+
+
+* Error handler support
+
+    Could be interesting to have a real error handler mechanism instead of the 
+    single `Dancer::Renderer->render_error' method.
+
+* Environment support
+
+    It should be possible to run a Dancer server with a specific environment,
+    like development or production.
+
+    This could be done like the following:
+
+    $ ./my-dancer-app.pl --environment=development (which would be the default)
+
+    Then the script appdir/environments/development.pl would be loaded.
+
+    It could contain the following information:
+
+        # a bunch of settings
+        setting access_log => 1;
+        setting verbosity => 1;
+
+* Templates
+
+    - support for changing views extensions
