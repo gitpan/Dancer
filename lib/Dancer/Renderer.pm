@@ -28,7 +28,7 @@ sub render_action {
 }
 
 sub render_error {
-    my $request = Dancer::SharedData->request;
+    my $request = Dancer::SharedData->cgi;
     my $path = $request->path_info;
     my $method = $request->request_method;
 
@@ -83,7 +83,10 @@ sub print_response($$) {
     print $st;
     print $request->header($ct);
     print $resp->{body};
-    print STDERR "== $method $path $st";
+    
+    if (setting('access_log')) {
+        print STDERR "== $method $path $st";
+    }
 }
 
 # private
