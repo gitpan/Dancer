@@ -2,12 +2,15 @@ package Dancer;
 
 use strict;
 use warnings;
+use Carp 'confess';
 use vars qw($VERSION $AUTHORITY @EXPORT);
 
 use Dancer::Config 'setting';
+use Dancer::Environment;
 use Dancer::FileUtils;
 use Dancer::GetOpt;
 use Dancer::Helpers;
+use Dancer::Logger;
 use Dancer::Renderer;
 use Dancer::Response;
 use Dancer::Route;
@@ -17,14 +20,18 @@ use HTTP::Server::Simple::CGI;
 use base 'Exporter', 'HTTP::Server::Simple::CGI';
 
 $AUTHORITY = 'SUKRIA';
-$VERSION = '0.9901';
+$VERSION = '0.9902';
 @EXPORT = qw(
     before
     content_type
+    dance
+    debug
     dirname
+    error
     false
     get 
     layout
+    logger
     mime_type
     params
     pass
@@ -40,16 +47,20 @@ $VERSION = '0.9901';
     true
     var
     vars
+    warning
 );
 
 # Dancer's syntax 
 
 sub before       { Dancer::Route->before_filter(@_) }
 sub content_type { Dancer::Response::content_type(@_) }
+sub debug        { Dancer::Logger->debug(@_) }
 sub dirname      { Dancer::FileUtils::dirname(@_) }
+sub error        { Dancer::Logger->error(@_) }
 sub false        { 0 }
 sub get          { Dancer::Route->add('get', @_) }
 sub layout       { set(layout => shift) }
+sub logger       { set(logger => @_) && Dancer::Logger->init }
 sub mime_type    { Dancer::Config::mime_types(@_) }
 sub params       { Dancer::SharedData->params  }
 sub pass         { Dancer::Response::pass() }
@@ -65,26 +76,40 @@ sub template     { Dancer::Helpers::template(@_) }
 sub true         { 1 }
 sub var          { Dancer::SharedData->var(@_) }
 sub vars         { Dancer::SharedData->vars }
+sub warning      { Dancer::Logger->warning(@_) }
 
 # The run method to call for starting the job
 sub dance { 
-    my $class = shift;
-
     # read options on the command line and set 
     # settings accordingly
     Dancer::GetOpt->process_args();
+
+    # Load default config
+    load_default_config();
+
+    # Load environment
+    Dancer::Environment->load(setting('environment'));
 
     my $ipaddr = setting 'server';
     my $port   = setting 'port';
 
     if (setting('daemon')) {
-        my $pid = $class->new($port)->background();
+        my $pid = Dancer->new($port)->background();
         print ">> Process $pid listening on $ipaddr:$port\n" if setting('access_log');
         return $pid;
     }
     else {
         print ">> Listening on $ipaddr:$port\n";
-        $class->new($port)->run();
+        Dancer->new($port)->run();
+    }
+}
+
+# This has to be in Dancer.pm so all the syntax sugar is possible in 
+# the config file.
+sub load_default_config {
+    my $conf = path(setting('appdir'), 'config.pl');
+    if (-e $conf && -r $conf) {
+        do $conf or confess "Unable to load configuration file `$conf': $@";
     }
 }
 
@@ -299,6 +324,58 @@ that will be accessible in the action blocks with the keyword 'var'.
 The request keyword returns the current CGI object representing the incoming request.
 See the documentation of the L<CGI> module for details.
 
+=head1 CONFIGURATION AND ENVIRONMENTS
+
+Configuring a Dancer application can be done in many ways. The easiest one (and
+maybe the the dirtiest) is to put all your settings statements at the top of
+your script, before calling the dance() method.
+
+Other ways are possible, you can write all your setting calls in the file
+`appdir/config.pl'. That's better than the first option, but it's still not
+perfect as you can't switch easily from an environment to another without
+rewriting the config.pl file.
+
+The better way is to have one config.pl file that just set the environment
+setting:
+
+    # appdir/config.pl
+    set environment => 'development';
+
+And then write as many environment file as you like in appdir/environements.
+That way, you just have to change the value of appdir/config.pl to switch to
+another environment.
+
+Note that you can also overide the config.pl enviroment value by using the
+--environment commandline switch.
+
+If the setting `environment' is set, Dancer will try to load the corresponding 
+environment file (appdir/environments/$environment.pl).
+
+If the setting `environment' is not defined, no environment file will be
+loaded.
+
+=head1 LOGGING
+
+It's possible to log messages sent by the application. In the current version,
+only one method is possible for logging messages but it may come in future
+releases new methods.
+
+In order to enable the logging system for your application, you first have to
+start the logger engine in your config.pl (or directly within your application
+code), do:
+
+    logger => 'file'; 
+
+Then you can choose which kind of messages you want to actually log:
+
+    set log => 'debug';     # will log debug, warning and errors
+    set log => 'warning';   # will log warning and errors
+    set log => 'error';     # will log only errors
+
+A directory appdir/logs will be created and will host one logfile per
+environment. The log message contains the time it was written, the PID of the
+current process, the message and the caller information (file and line).
+
 =head1 USING TEMPLATES
 
 =head1 VIEWS 
@@ -458,7 +535,9 @@ L<http://github.com/sukria/Dancer>
 
 Dancer depends on the following modules:
 
-=over 4
+The following modules are mandatory (Dancer cannot run without them)
+
+=over 8
 
 =item L<HTTP::Server::Simple>
 
@@ -469,6 +548,16 @@ Dancer depends on the following modules:
 =item L<File::Spec>
 
 =item L<File::Basename>
+
+=back
+
+The following modules are optional 
+
+=over 8
+
+=item L<Template>           needed for the views rendering system
+
+=item L<Logger::Syslog>     needed for logging information to syslog
 
 =back
 

@@ -5,6 +5,9 @@ use warnings;
 use base 'Exporter';
 use vars '@EXPORT_OK';
 
+use Dancer::FileUtils 'path';
+use Carp 'confess';
+
 @EXPORT_OK = qw(setting mime_types);
 
 # singleton for storing settings
