@@ -6,7 +6,6 @@ use Carp 'confess';
 use vars qw($VERSION $AUTHORITY @EXPORT);
 
 use Dancer::Config 'setting';
-use Dancer::Environment;
 use Dancer::FileUtils;
 use Dancer::GetOpt;
 use Dancer::Helpers;
@@ -20,7 +19,7 @@ use HTTP::Server::Simple::CGI;
 use base 'Exporter', 'HTTP::Server::Simple::CGI';
 
 $AUTHORITY = 'SUKRIA';
-$VERSION = '0.9902';
+$VERSION = '0.9903';
 @EXPORT = qw(
     before
     content_type
@@ -37,6 +36,7 @@ $VERSION = '0.9902';
     pass
     path
     post 
+    put
     r
     request
     send_file
@@ -58,7 +58,8 @@ sub debug        { Dancer::Logger->debug(@_) }
 sub dirname      { Dancer::FileUtils::dirname(@_) }
 sub error        { Dancer::Logger->error(@_) }
 sub false        { 0 }
-sub get          { Dancer::Route->add('get', @_) }
+sub get          { Dancer::Route->add('head', @_); 
+                   Dancer::Route->add('get', @_);}
 sub layout       { set(layout => shift) }
 sub logger       { set(logger => @_) && Dancer::Logger->init }
 sub mime_type    { Dancer::Config::mime_types(@_) }
@@ -66,6 +67,7 @@ sub params       { Dancer::SharedData->params  }
 sub pass         { Dancer::Response::pass() }
 sub path         { Dancer::FileUtils::path(@_) }
 sub post         { Dancer::Route->add('post', @_) }
+sub put          { Dancer::Route->add('put', @_) }
 sub r            { {regexp => $_[0]} }
 sub request      { Dancer::SharedData->cgi }
 sub send_file    { Dancer::Helpers::send_file(@_) }
@@ -84,32 +86,20 @@ sub dance {
     # settings accordingly
     Dancer::GetOpt->process_args();
 
-    # Load default config
-    load_default_config();
-
-    # Load environment
-    Dancer::Environment->load(setting('environment'));
+    # load config.yml if found
+    Dancer::Config->load;
 
     my $ipaddr = setting 'server';
     my $port   = setting 'port';
 
     if (setting('daemon')) {
         my $pid = Dancer->new($port)->background();
-        print ">> Process $pid listening on $ipaddr:$port\n" if setting('access_log');
+        print ">> Dancer $pid listening on $port\n";
         return $pid;
     }
     else {
         print ">> Listening on $ipaddr:$port\n";
         Dancer->new($port)->run();
-    }
-}
-
-# This has to be in Dancer.pm so all the syntax sugar is possible in 
-# the config file.
-sub load_default_config {
-    my $conf = path(setting('appdir'), 'config.pl');
-    if (-e $conf && -r $conf) {
-        do $conf or confess "Unable to load configuration file `$conf': $@";
     }
 }
 
@@ -126,7 +116,8 @@ sub handle_request {
 
 sub print_banner {
     if (setting('access_log')) {
-        print "== Entering the dance floor ...\n";
+        my $env = setting('environment');
+        print "== Entering the $env dance floor ...\n";
     }
 }
 
@@ -175,7 +166,7 @@ composed by an HTTP method, a path pattern and a code block.
 The code block given to the route handler has to return a string which will be
 used as the content to render to the client.
 
-Routes are defined for a given HTTP method (get or post). For each method
+Routes are defined for a given HTTP method. For each method
 supported, a keyword is exported by the module. 
 
 Here is an example of a route definition:
@@ -188,6 +179,29 @@ Here is an example of a route definition:
 
 The route is defined for the method 'get', so only GET requests will be honoured
 by that route.
+
+=head2 HTTP METHODS
+
+All existing HTTP methods are defined in the RFC 2616
+L<http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html>. 
+
+Here are the ones you can use to define your route handlers.
+
+=over 8
+
+=item B<GET>        The GET method retrieves information (when defining a route
+                    handler for the GET method, Dancer automatically defines a 
+                    route handler for the HEAD method, in order to honour HEAD
+                    requests for each of your GET route handlers).
+
+=item B<POST>       The POST method is used to create a ressource on the
+                    server.
+
+=item B<PUT>        The PUT method is used to update an existing ressource.
+
+=back
+
+=head2 ROUTE HANDLERS
 
 The route action is the code reference declared, it can access parameters through 
 the `params' keyword, which returns an hashref.
@@ -241,7 +255,7 @@ script. The following options are supported:
 
 =over 8
 
-=item B<--port=XXXX>    set the port to listen to (default is 1915)
+=item B<--port=XXXX>    set the port to listen to (default is 3000)
 
 =item B<--daemon>       run the webserver in the background
 
@@ -331,28 +345,39 @@ maybe the the dirtiest) is to put all your settings statements at the top of
 your script, before calling the dance() method.
 
 Other ways are possible, you can write all your setting calls in the file
-`appdir/config.pl'. That's better than the first option, but it's still not
+`appdir/config.yml'. For this, you must have installed the YAML module, and of
+course, write the conffile in YAML. 
+
+That's better than the first option, but it's still not
 perfect as you can't switch easily from an environment to another without
-rewriting the config.pl file.
+rewriting the config.yml file.
 
-The better way is to have one config.pl file that just set the environment
-setting:
+The better way is to have one config.yml file with default global settings,
+like the following:
 
-    # appdir/config.pl
-    set environment => 'development';
+    # appdir/config.yml
+    logger: 'file'
+    layout: 'main'
 
 And then write as many environment file as you like in appdir/environements.
-That way, you just have to change the value of appdir/config.pl to switch to
-another environment.
+That way, the good environment config file will be loaded according to the
+running environment (if none specified, it will be 'development').
 
-Note that you can also overide the config.pl enviroment value by using the
---environment commandline switch.
+Note that you can change the running environment using the --environment
+commandline switch.
 
-If the setting `environment' is set, Dancer will try to load the corresponding 
-environment file (appdir/environments/$environment.pl).
+Typically, you'll want to set the following values in a development config
+file:
 
-If the setting `environment' is not defined, no environment file will be
-loaded.
+    # appdir/environments/development.yml
+    log: 'debug'
+    access_log: 1
+
+And in a production one:
+
+    # appdir/environments/production.yml
+    log: 'warning'
+    access_log: 0
 
 =head1 LOGGING
 
@@ -361,16 +386,15 @@ only one method is possible for logging messages but it may come in future
 releases new methods.
 
 In order to enable the logging system for your application, you first have to
-start the logger engine in your config.pl (or directly within your application
-code), do:
+start the logger engine in your config.yml
 
-    logger => 'file'; 
+    log: 'file'
 
 Then you can choose which kind of messages you want to actually log:
 
-    set log => 'debug';     # will log debug, warning and errors
-    set log => 'warning';   # will log warning and errors
-    set log => 'error';     # will log only errors
+    log: 'debug'     # will log debug, warning and errors
+    log: 'warning'   # will log warning and errors
+    log: 'error'     # will log only errors
 
 A directory appdir/logs will be created and will host one logfile per
 environment. The log message contains the time it was written, the PID of the
