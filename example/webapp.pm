@@ -1,7 +1,8 @@
-#!/usr/bin/perl
+package webapp;
 
 use Dancer;
 use Template;
+set apphandler => 'PSGI';
 
 before sub {
     var note => "I ARE IN TEH BEFOR FILTERZ";
@@ -14,8 +15,8 @@ get '/foo/*' => sub {
    
     use Data::Dumper;
 
-    "note: '".vars->{note}."'\n<BR>".
-    "match: $match\n<BR>".
+    "note: '".vars->{note}."'\n".
+    "match: $match\n".
     "request: ".Dumper(request);
 };
 
@@ -69,3 +70,5 @@ get r('/(.*)') => sub {
 };
 
 dance;
+
+1;

@@ -13,45 +13,55 @@ use Dancer::SharedData;
 
 sub render_file {
     my $request = Dancer::SharedData->cgi;
-    my $response = get_file_response();
-    if ($response) {
-        print_response($response, $request);
-    }
+    return get_file_response();
 }
 
 sub render_action {
     my $request = Dancer::SharedData->cgi;
-    my $response = get_action_response();
-    if ($response) {
-        print_response($response, $request);
-    }
+    return get_action_response();
 }
+
+# Here comes the gruick code for web server compat :(
+sub get_path {
+    my ($req) = @_;
+    my $path = "";
+
+    if (defined $ENV{'SCRIPT_NAME'}) {
+        $path = $ENV{'SCRIPT_NAME'};
+        $path .= $ENV{'PATH_INFO'} if $ENV{'PATH_INFO'};
+    }
+    else {
+        $path = $req->path_info;
+    }
+    return $path;
+}
+
+sub get_request_method { $ENV{REQUEST_METHOD} || $_[0]->request_method }
 
 sub render_error {
     my $request = Dancer::SharedData->cgi;
-    my $path = $request->path_info;
-    my $method = $request->request_method;
+    my $path = get_path($request, \%ENV);
+    my $method = get_request_method($request);
 
-    print Dancer::HTTP::status('not_found');
-    print $request->header,
-          $request->start_html('Not found'),
-          $request->h1('Not found'),
-          "<p>No route matched your request `$path'.</p>\n".
-          "<p>".
-          "appdir is <code>".setting('appdir')."</code><br>\n".
-          "public is <code>".setting('public')."</code>".
-          "</p>",
-          $request->end_html;
-
-    print STDERR "== $method $path 404 Not found\n" if setting('access_log');
+    return Dancer::Response->new(
+        status => 404,
+        headers => { 'Content-Type' => 'text/html' },
+        content => $request->start_html('Not found').
+        $request->h1('Not found').
+        "<p>No route matched your request `$path'.</p>\n".
+        "<p>".
+        "appdir is <code>".setting('appdir')."</code><br>\n".
+        "public is <code>".setting('public')."</code>".
+        "</p>".
+        $request->end_html);
 }
 
 sub get_action_response() {
     Dancer::Route->run_before_filters;
 
     my $request = Dancer::SharedData->cgi;
-    my $path = $request->path_info;
-    my $method = $request->request_method;
+    my $path = get_path($request);
+    my $method = get_request_method($request);
     
     my $handler = Dancer::Route->find($path, $method);
     Dancer::Route->call($handler) if $handler;
@@ -59,35 +69,17 @@ sub get_action_response() {
 
 sub get_file_response() {
     my $request = Dancer::SharedData->cgi;
-    my $path = $request->path_info;
+    my $path = get_path($request);
     my $static_file = path(setting('public'), $path);
     
-    
     if (-f $static_file) {
-        return {
-            head => {content_type => get_mime_type($static_file)},
-            body => read_file_content($static_file),
-        };
+        open my $fh, "<", $static_file;
+        return Dancer::Response->new(
+            status => 200,
+            headers => { 'Content-Type' => get_mime_type($static_file) }, 
+            content => $fh);
     }
     return undef;
-}
-
-sub print_response($$) {
-    my ($resp, $request) = @_;
-    my $path = $request->path_info;
-    my $method = $request->request_method;
-
-    my $ct = $resp->{head}{content_type} || setting('content_type');
-    my $st = Dancer::HTTP::status($resp->{head}{status}) || Dancer::HTTP::status('ok');
-
-    print $st;
-    print $request->header($ct);
-    print $resp->{body};
-    
-    if (setting('access_log')) {
-        print STDERR "== $method $path $st";
-    }
-    return 1;
 }
 
 # private

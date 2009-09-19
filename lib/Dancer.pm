@@ -14,12 +14,12 @@ use Dancer::Renderer;
 use Dancer::Response;
 use Dancer::Route;
 use Dancer::SharedData;
+use Dancer::Handler;
 
-use HTTP::Server::Simple::CGI;
-use base 'Exporter', 'HTTP::Server::Simple::CGI';
+use base 'Exporter';
 
 $AUTHORITY = 'SUKRIA';
-$VERSION = '0.9903';
+$VERSION = '0.9904';
 @EXPORT = qw(
     before
     content_type
@@ -80,47 +80,6 @@ sub var          { Dancer::SharedData->var(@_) }
 sub vars         { Dancer::SharedData->vars }
 sub warning      { Dancer::Logger->warning(@_) }
 
-# The run method to call for starting the job
-sub dance { 
-    # read options on the command line and set 
-    # settings accordingly
-    Dancer::GetOpt->process_args();
-
-    # load config.yml if found
-    Dancer::Config->load;
-
-    my $ipaddr = setting 'server';
-    my $port   = setting 'port';
-
-    if (setting('daemon')) {
-        my $pid = Dancer->new($port)->background();
-        print ">> Dancer $pid listening on $port\n";
-        return $pid;
-    }
-    else {
-        print ">> Listening on $ipaddr:$port\n";
-        Dancer->new($port)->run();
-    }
-}
-
-# HTTP server overload comes here
-sub handle_request {
-    my ($self, $cgi) = @_;
-    
-    Dancer::SharedData->cgi($cgi);
-
-    return Dancer::Renderer->render_file
-        || Dancer::Renderer->render_action
-        || Dancer::Renderer->render_error;
-}
-
-sub print_banner {
-    if (setting('access_log')) {
-        my $env = setting('environment');
-        print "== Entering the $env dance floor ...\n";
-    }
-}
-
 # When importing the package, strict and warnings pragma are loaded, 
 # and the appdir detection is performed.
 sub import {
@@ -135,7 +94,14 @@ sub import {
     Dancer->export_to_level(1, @_);
 }
 
-'Dancer';
+# Start/Run the application with the chosen apphandler
+sub dance { 
+    my ($class, $cgi) = @_;
+    Dancer::Config->load;
+    Dancer::Handler->get_handler()->dance($cgi);
+}
+
+1;
 __END__
 
 =pod 
@@ -572,6 +538,8 @@ The following modules are mandatory (Dancer cannot run without them)
 =item L<File::Spec>
 
 =item L<File::Basename>
+
+=item L<Template>
 
 =back
 

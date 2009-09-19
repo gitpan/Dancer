@@ -3,6 +3,7 @@ package Dancer::Route;
 use strict;
 use warnings;
 use Dancer::SharedData;
+use Dancer::Config 'setting';
 
 # singleton for stroing the routes defined
 my $REG = { routes => {}, before_filters => [] };
@@ -89,7 +90,8 @@ sub call($$) {
     my $compilation_warning = warning;
 
     # trap errors
-    if ($@ || $warning || $compilation_warning) {
+    if ( $@ || 
+        (setting('warnings') && ($warning || $compilation_warning))) {
 
         my $message = "Route Handler Error\n\n";
         $message .= "Compilation warning: $compilation_warning\n" 
@@ -98,10 +100,10 @@ sub call($$) {
         $message .= "Runtime Error: $@\n" if $@;
 
         Dancer::SharedData->reset_all();
-        return {
-            head => {status => 'error', content_type => 'text/plain'},
-                 body => $message,
-        };
+        return Dancer::Response->new(
+            status  => 500,
+            headers => {'Content-Type' => 'text/plain'},
+            content => $message);
     }
 
     my $response = Dancer::Response->current;
@@ -112,21 +114,23 @@ sub call($$) {
         }
         else {
             Dancer::SharedData->reset_all();
-            return {
-                head => {status => 404, content_type => 'text/plain'},
-                body => "pass, but unable to find another matching route",
-            };
+            return Dancer::Response->new(
+                status  => 404,
+                headers => {'Content-Type' => 'text/plain'},
+                content => "route passed, but unable to find another matching route");
         }
     }
     else {
         # drop the content if this is a HEAD request
         $content = '' if $handler->{method} eq 'head';
-
+        my $ct = $response->{content_type} || setting('content_type');
+        my $st = $response->{status} || 200;
         Dancer::SharedData->reset_all();
-        return {
-            head => $response, 
-            body => $content
-        };
+
+        return Dancer::Response->new(
+            status  => $st,
+            headers => { 'Content-Type' => $ct }, 
+            content => $content);
     }
 }
 

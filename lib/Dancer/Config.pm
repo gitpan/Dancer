@@ -96,6 +96,8 @@ sub load_default_settings {
     $SETTINGS->{access_log}   ||= 1;
     $SETTINGS->{daemon}       ||= 0;
     $SETTINGS->{environment}  ||= 'development';
+    $SETTINGS->{apphandler}   ||= 'standalone';
+    $SETTINGS->{warnings}     ||= 0;
 }
 load_default_settings();
 

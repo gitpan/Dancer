@@ -1,0 +1,91 @@
+Thu Sep 17 15:31:40 2009 [24979] (debug) Dancer::Handler::handle_request $VAR1 = {
+          'cgi' => bless( {
+                            '.parameters' => [],
+                            'use_tempfile' => 1,
+                            '.charset' => 'ISO-8859-1',
+                            '.path_info' => '',
+                            '.fieldnames' => {},
+                            '.iterator' => 1,
+                            'param' => {},
+                            'escape' => 1
+                          }, 'CGI' ),
+          'self' => bless( {}, 'Dancer::Handler::PSGI' )
+        }; in t/07_apphandlers/02_apache2_plack.t l. 78
+Thu Sep 17 15:32:24 2009 [25080] (debug) Dancer::Handler::handle_request $VAR1 = {
+          'cgi' => bless( {
+                            '.parameters' => [],
+                            'use_tempfile' => 1,
+                            '.charset' => 'ISO-8859-1',
+                            '.path_info' => '',
+                            '.fieldnames' => {},
+                            '.iterator' => 1,
+                            'param' => {},
+                            'escape' => 1
+                          }, 'CGI' ),
+          'self' => bless( {}, 'Dancer::Handler::PSGI' )
+        }; in t/07_apphandlers/02_apache2_plack.t l. 78
+Thu Sep 17 15:32:38 2009 [25103] (debug) Dancer::Handler::handle_request $VAR1 = {
+          'cgi' => bless( {
+                            '.parameters' => [],
+                            'use_tempfile' => 1,
+                            '.charset' => 'ISO-8859-1',
+                            '.path_info' => '',
+                            '.fieldnames' => {},
+                            '.iterator' => 1,
+                            'param' => {},
+                            'escape' => 1
+                          }, 'CGI' ),
+          'self' => bless( {}, 'Dancer::Handler::PSGI' )
+        }; in t/07_apphandlers/02_apache2_plack.t l. 78
+Thu Sep 17 15:34:18 2009 [25356] (debug) Dancer::Handler::handle_request $VAR1 = {
+          'cgi' => bless( {
+                            '.parameters' => [],
+                            'use_tempfile' => 1,
+                            '.charset' => 'ISO-8859-1',
+                            '.path_info' => '',
+                            '.fieldnames' => {},
+                            '.iterator' => 1,
+                            'param' => {},
+                            'escape' => 1
+                          }, 'CGI' ),
+          'self' => bless( {}, 'Dancer::Handler::PSGI' )
+        }; in t/07_apphandlers/02_apache2_plack.t l. 78
+Thu Sep 17 15:34:32 2009 [25399] (debug) Dancer::Handler::handle_request $VAR1 = {
+          'cgi' => bless( {
+                            '.parameters' => [],
+                            'use_tempfile' => 1,
+                            '.charset' => 'ISO-8859-1',
+                            '.path_info' => '',
+                            '.fieldnames' => {},
+                            '.iterator' => 1,
+                            'param' => {},
+                            'escape' => 1
+                          }, 'CGI' ),
+          'self' => bless( {}, 'Dancer::Handler::PSGI' )
+        }; in t/07_apphandlers/02_apache2_plack.t l. 78
+Thu Sep 17 15:43:11 2009 [26563] (debug) Dancer::Handler::handle_request $VAR1 = {
+          'cgi' => bless( {
+                            '.parameters' => [],
+                            'use_tempfile' => 1,
+                            '.charset' => 'ISO-8859-1',
+                            '.path_info' => '',
+                            '.fieldnames' => {},
+                            '.iterator' => 1,
+                            'param' => {},
+                            'escape' => 1
+                          }, 'CGI' ),
+          'self' => bless( {}, 'Dancer::Handler::PSGI' )
+        }; in t/07_apphandlers/02_apache2_plack.t l. 77
+Thu Sep 17 15:47:27 2009 [27057] (debug) Dancer::Handler::handle_request $VAR1 = {
+          'cgi' => bless( {
+                            '.parameters' => [],
+                            'use_tempfile' => 1,
+                            '.charset' => 'ISO-8859-1',
+                            '.path_info' => '',
+                            '.fieldnames' => {},
+                            '.iterator' => 1,
+                            'param' => {},
+                            'escape' => 1
+                          }, 'CGI' ),
+          'self' => bless( {}, 'Dancer::Handler::PSGI' )
+        }; in t/07_apphandlers/02_apache2_plack.t l. 77
