@@ -8,6 +8,7 @@ use vars qw($VERSION $AUTHORITY @EXPORT);
 use Dancer::Config 'setting';
 use Dancer::FileUtils;
 use Dancer::GetOpt;
+use Dancer::Error;
 use Dancer::Helpers;
 use Dancer::Logger;
 use Dancer::Renderer;
@@ -19,7 +20,7 @@ use Dancer::Handler;
 use base 'Exporter';
 
 $AUTHORITY = 'SUKRIA';
-$VERSION = '0.9904';
+$VERSION = '0.9905';
 @EXPORT = qw(
     before
     content_type
@@ -40,6 +41,7 @@ $VERSION = '0.9904';
     r
     request
     send_file
+    send_error
     set
     splat
     status
@@ -57,6 +59,7 @@ sub content_type { Dancer::Response::content_type(@_) }
 sub debug        { Dancer::Logger->debug(@_) }
 sub dirname      { Dancer::FileUtils::dirname(@_) }
 sub error        { Dancer::Logger->error(@_) }
+sub send_error   { Dancer::Helpers->error(@_) }
 sub false        { 0 }
 sub get          { Dancer::Route->add('head', @_); 
                    Dancer::Route->add('get', @_);}
@@ -90,6 +93,7 @@ sub import {
     setting appdir => dirname(File::Spec->rel2abs($script));
     setting public => path(setting('appdir'), 'public');
     setting views  => path(setting('appdir'), 'views');
+    setting logger => 'file';
 
     Dancer->export_to_level(1, @_);
 }
@@ -282,6 +286,31 @@ keyword B<content_type>
 
         # here we can dump the contents of params->{txtfile}
     };
+
+=head1 ERROR HANDLING
+
+=head2 DEFAULT ERROR PAGES
+
+When an error is renderered (the action responded with a status code different
+than 200), Dancer first looks in the public directory for an HTML file matching
+the error code (eg: 500.html or 404.html).
+
+If such a file exists, it's used to render the error, otherwise, a default
+error page will be rendered on the fly.
+
+=head2 EXECUTION ERRORS
+
+When an error occurs during the route execution, Dancer will render an error
+page with the HTTP status code 500.
+
+It's possible either to display the content of the error message or to hide it
+with a generic error page.
+
+This is a choice left to the end-user and can be set with the
+B<show_errors> setting.
+
+Note that you can also choose to consider all warnings in your route handlers
+as errors when the setting B<warnings> is set to 1.
 
 =head1 FILTERS
 

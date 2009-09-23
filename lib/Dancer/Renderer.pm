@@ -3,8 +3,10 @@ package Dancer::Renderer;
 use strict;
 use warnings;
 
+use CGI qw/:standard/;
 use Dancer::Route;
 use Dancer::HTTP;
+use Dancer::Request;
 use Dancer::Response;
 use Dancer::Config 'setting';
 use Dancer::FileUtils qw(path dirname read_file_content);
@@ -21,61 +23,75 @@ sub render_action {
     return get_action_response();
 }
 
-# Here comes the gruick code for web server compat :(
-sub get_path {
-    my ($req) = @_;
-    my $path = "";
-
-    if (defined $ENV{'SCRIPT_NAME'}) {
-        $path = $ENV{'SCRIPT_NAME'};
-        $path .= $ENV{'PATH_INFO'} if $ENV{'PATH_INFO'};
-    }
-    else {
-        $path = $req->path_info;
-    }
-    return $path;
-}
-
-sub get_request_method { $ENV{REQUEST_METHOD} || $_[0]->request_method }
-
 sub render_error {
-    my $request = Dancer::SharedData->cgi;
-    my $path = get_path($request, \%ENV);
-    my $method = get_request_method($request);
+    my ($class, $error_code) = @_;
+
+    my $request = Dancer::Request->new;
+    my $path    = $request->path;
+    my $method  = $request->method;
+    my $cgi     = $request->{_cgi};
+
+    my $static_file = path(setting('public'), "$error_code.html");
+    my $response = Dancer::Renderer->get_file_response_for_path(
+        $static_file => $error_code);
+    return $response if $response;
 
     return Dancer::Response->new(
-        status => 404,
+        status => $error_code,
         headers => { 'Content-Type' => 'text/html' },
-        content => $request->start_html('Not found').
-        $request->h1('Not found').
-        "<p>No route matched your request `$path'.</p>\n".
-        "<p>".
-        "appdir is <code>".setting('appdir')."</code><br>\n".
-        "public is <code>".setting('public')."</code>".
-        "</p>".
-        $request->end_html);
+        content => Dancer::Renderer->html_page(
+            "Error $error_code" =>
+            "<h2>Unable to process your query</h2>".
+            "The page you requested is not available"));
+}
+
+sub html_page {
+    my ($class, $title, $content, $style) = @_;
+    $style ||= 'style';
+
+    my $cgi = CGI->new;
+    return start_html(
+        -title => $title, 
+        -style => "/css/$style.css")
+             . h1($title)
+             . "<div id=\"content\">"
+             . "<p>$content</p>"
+             . "</div>"
+             . '<div id="footer">'
+             . 'Powered by <a href="http://dancer.sukria.net">Dancer</a>'
+             . '</div>'
+             . end_html();
 }
 
 sub get_action_response() {
     Dancer::Route->run_before_filters;
 
-    my $request = Dancer::SharedData->cgi;
-    my $path = get_path($request);
-    my $method = get_request_method($request);
+    my $request = Dancer::Request->new;
+    my $path = $request->path;
+    my $method = $request->method;
     
     my $handler = Dancer::Route->find($path, $method);
     Dancer::Route->call($handler) if $handler;
 }
 
 sub get_file_response() {
-    my $request = Dancer::SharedData->cgi;
-    my $path = get_path($request);
+    my $request = Dancer::Request->new;
+    my $path = $request->path;
     my $static_file = path(setting('public'), $path);
-    
+    return Dancer::Renderer->get_file_response_for_path($static_file);
+}
+
+sub get_file_response_for_path {
+    my ($class, $static_file, $status) = @_;
+    $status ||= 200;
+
     if (-f $static_file) {
+        Dancer::Logger->debug("mime for $static_file is :
+        ".get_mime_type($static_file));
+
         open my $fh, "<", $static_file;
         return Dancer::Response->new(
-            status => 200,
+            status => $status,
             headers => { 'Content-Type' => get_mime_type($static_file) }, 
             content => $fh);
     }

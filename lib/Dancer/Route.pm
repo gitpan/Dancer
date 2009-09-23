@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Dancer::SharedData;
 use Dancer::Config 'setting';
+use Dancer::Error;
 
 # singleton for stroing the routes defined
 my $REG = { routes => {}, before_filters => [] };
@@ -89,21 +90,41 @@ sub call($$) {
     eval { $content = $handler->{code}->() };
     my $compilation_warning = warning;
 
+    # Log warnings
+    if ($warning || $compilation_warning) {
+        Dancer::Logger->warning($compilation_warning) 
+            if $compilation_warning;
+        Dancer::Logger->warning($warning) if $warning;
+    }
+
     # trap errors
     if ( $@ || 
         (setting('warnings') && ($warning || $compilation_warning))) {
-
-        my $message = "Route Handler Error\n\n";
-        $message .= "Compilation warning: $compilation_warning\n" 
-            if $compilation_warning;
-        $message .= "Runtime Warning: $warning\n" if $warning;
-        $message .= "Runtime Error: $@\n" if $@;
-
+        
         Dancer::SharedData->reset_all();
-        return Dancer::Response->new(
-            status  => 500,
-            headers => {'Content-Type' => 'text/plain'},
-            content => $message);
+
+        my $error;
+        if ($@) {
+            $error = Dancer::Error->new(code => 500, 
+                title   => 'Route Handler Error',
+                type    => 'Execution failed',
+                message => $@);
+
+        }
+        elsif ($warning) {
+            $error = Dancer::Error->new(code => 500, 
+                title   => 'Route Handler Error',
+                type    => 'Runtime Warning',
+                message => $warning);
+
+        }
+        else {
+            $error = Dancer::Error->new(code => 500, 
+                title   => 'Route Handler Error',
+                type    => 'Compilation Warning',
+                message => $compilation_warning);
+        }
+        return $error->render;
     }
 
     my $response = Dancer::Response->current;
@@ -114,19 +135,23 @@ sub call($$) {
         }
         else {
             Dancer::SharedData->reset_all();
-            return Dancer::Response->new(
-                status  => 404,
-                headers => {'Content-Type' => 'text/plain'},
-                content => "route passed, but unable to find another matching route");
+            my $error = Dancer::Error->new(code => 404, 
+                message => "<h2>Route Resolution Failed</h2>"
+                         . "<p>Last matching route passed, "
+                         . "but no other route left.</p>");
+            return $error->render;
         }
     }
     else {
+
         # drop the content if this is a HEAD request
         $content = '' if $handler->{method} eq 'head';
         my $ct = $response->{content_type} || setting('content_type');
         my $st = $response->{status} || 200;
+        
         Dancer::SharedData->reset_all();
-
+        
+        return $content if ref($content) eq 'Dancer::Response';
         return Dancer::Response->new(
             status  => $st,
             headers => { 'Content-Type' => $ct }, 
