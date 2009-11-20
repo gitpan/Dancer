@@ -6,11 +6,12 @@ use warnings;
 use CGI qw/:standard/;
 use Dancer::Route;
 use Dancer::HTTP;
+use Dancer::Cookie;
+use Dancer::Cookies;
 use Dancer::Request;
 use Dancer::Response;
 use Dancer::Config 'setting';
 use Dancer::FileUtils qw(path dirname read_file_content);
-use File::MimeInfo;
 use Dancer::SharedData;
 
 sub render_file {
@@ -20,7 +21,10 @@ sub render_file {
 
 sub render_action {
     my $request = Dancer::SharedData->cgi;
-    return get_action_response();
+    my $resp = get_action_response();
+    return (defined $resp) 
+        ? response_with_headers($resp) 
+        : undef;
 }
 
 sub render_error {
@@ -38,11 +42,29 @@ sub render_error {
 
     return Dancer::Response->new(
         status => $error_code,
-        headers => { 'Content-Type' => 'text/html' },
+        headers => [ 'Content-Type' => 'text/html' ],
         content => Dancer::Renderer->html_page(
             "Error $error_code" =>
             "<h2>Unable to process your query</h2>".
             "The page you requested is not available"));
+}
+
+# Takes a response object and add default headers
+sub response_with_headers {
+    my $response = shift;
+
+    $response->{headers} ||= [];
+    push @{$response->{headers}}, 
+        ('X-Powered-By' => "Perl Dancer ${Dancer::VERSION}");
+
+    # add cookies
+    foreach my $c (keys %{ Dancer::Cookies->cookies }) {
+        my $cookie = Dancer::Cookies->cookies->{$c};
+        if (Dancer::Cookies->has_changed($cookie)) {
+            push @{$response->{headers}}, ('Set-Cookie' => $cookie->to_header);
+        }
+    }
+    return $response;
 }
 
 sub html_page {
@@ -86,13 +108,10 @@ sub get_file_response_for_path {
     $status ||= 200;
 
     if (-f $static_file) {
-        Dancer::Logger->debug("mime for $static_file is :
-        ".get_mime_type($static_file));
-
         open my $fh, "<", $static_file;
         return Dancer::Response->new(
             status => $status,
-            headers => { 'Content-Type' => get_mime_type($static_file) }, 
+            headers => [ 'Content-Type' => get_mime_type($static_file) ], 
             content => $fh);
     }
     return undef;
@@ -106,9 +125,16 @@ sub get_mime_type {
     my $ext = $tokens[0];
     
     my $mime = Dancer::Config::mime_types($ext);
-    return (defined $mime) 
-        ? $mime
-        : mimetype($filename);
+    return $mime if defined $mime;
+
+    if (Dancer::ModuleLoader->load('File::MimeInfo::Simple')) {
+        return File::MimeInfo::Simple::mimetype($filename);
+    }
+    else {
+        die "unknown mime_type for '$filename', "
+          . "register it with 'mime_type' or install "
+          . "'File::MimeInfo::Simple'";
+    }
 }
 
-'Dancer::Renderer';
+1;

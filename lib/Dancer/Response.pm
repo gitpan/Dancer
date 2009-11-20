@@ -10,11 +10,10 @@ use Dancer::HTTP;
 sub new {
     my ($class, %args) = @_;
     my $self = {
-        status => 200,
-        headers => {
-            'Content-Type' => setting('content_type')},
+        status  => 200,
+        headers => [],
         content => "",
-        pass => 0,
+        pass    => 0,
         %args,
     };
     bless $self, $class;
@@ -38,5 +37,4 @@ sub status       { $CURRENT->{status} = shift }
 sub content_type { $CURRENT->{content_type} = shift }
 sub pass         { $CURRENT->{pass} = 1 }
 
-
-'Dancer::Response';
+1;

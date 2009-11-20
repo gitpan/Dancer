@@ -3,6 +3,7 @@ package Dancer::Handler;
 use strict;
 use warnings;
 
+use Dancer::Logger;
 use Dancer::GetOpt;
 use Dancer::SharedData;
 use Dancer::Renderer;
@@ -38,6 +39,24 @@ sub handle_request {
     my ($self, $cgi) = @_;
     Dancer::SharedData->cgi($cgi);
     
+    # read cookies from client
+    Dancer::Cookies->init;
+
+    if (setting('auto_reload')) {
+        eval "use Module::Refresh";
+        if ($@) {
+            Dancer::Logger->warning("auto_reload is set, ".
+                "but Module::Refresh is not installed");
+        }
+        else {
+            my $orig_reg = Dancer::Route->registry;
+            Dancer::Route->purge_all;
+            Module::Refresh->refresh;
+            my $new_reg = Dancer::Route->registry;
+            Dancer::Route->merge_registry($orig_reg, $new_reg); 
+        }
+    }
+
     my $response = Dancer::Renderer->render_file
         || Dancer::Renderer->render_action
         || Dancer::Renderer->render_error(404);

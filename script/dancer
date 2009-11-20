@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Template;
+use Dancer::Template::Simple;
 use File::Basename 'basename', 'dirname';
 use File::Spec::Functions;
 use Getopt::Long;
@@ -141,10 +141,10 @@ sub write_file {
 
 sub process_template {
     my ($template, $tokens) = @_;
-    my $tt = Template->new; 
-    my $result = "";
-    $tt->process(\$template, $tokens, \$result);
-    return $result;
+    my $engine = Dancer::Template::Simple->new;
+    $engine->{start_tag} = '__';
+    $engine->{stop_tag} = '__';
+    return $engine->render(\$template, $tokens);
 }
 
 sub templates($) {
@@ -154,25 +154,23 @@ sub templates($) {
 'app.psgi'  => 
 
 "# This is a PSGI application file for Apache+Plack support
-use lib '[% appdir %]';
+use CGI::PSGI;
+use lib '__appdir__';
 use $appname;
 
 use Dancer::Config 'setting';
 setting apphandler  => 'PSGI';
-setting environment => 'production';
 Dancer::Config->load;
 
 my \$handler = sub {
     my \$env = shift;
-    local *ENV = \$env;
-    my \$cgi = CGI->new();
-    Dancer->dance(\$cgi);
+    Dancer->dance(CGI::PSGI->new(\$env));
 };
 ",
 'index.tt'  => '<h2>It Works!</h2>
 
 <p>
-I\'m in <code>[% appdir %]/views/index.tt</code>
+I\'m in <code>__appdir__/views/index.tt</code>
 </p>
 ',
 
@@ -336,6 +334,7 @@ logger: "file"
 'log: "debug"
 warnings: 1
 show_errors: 1
+auto_reload: 1
 
 ',
 
@@ -343,6 +342,7 @@ show_errors: 1
 'log: "warning"
 warnings: 0
 show_errors: 0
+auto_reload: 0
 
 ',
     };

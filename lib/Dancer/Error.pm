@@ -14,6 +14,7 @@ sub new {
     bless $self, $class;
 
     $self->{title}   ||= "Error ".$self->code;
+    $self->{type}    ||= "runtime error";
     
     my $html_output = "<h2>".$self->{type}."</h2>";
     $html_output .= $self->backtrace;
@@ -103,7 +104,7 @@ sub render {
     my $self = shift;
     return Dancer::Response->new(
         status  => $self->code,
-        headers => {'Content-Type' => 'text/html'},
+        headers => ['Content-Type' => 'text/html'],
         content => Dancer::Renderer->html_page(
                        $self->title, $self->message, 'error'))
         if setting('show_errors');

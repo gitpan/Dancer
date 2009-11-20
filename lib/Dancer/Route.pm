@@ -7,13 +7,75 @@ use Dancer::Config 'setting';
 use Dancer::Error;
 
 # singleton for stroing the routes defined
-my $REG = { routes => {}, before_filters => [] };
+my $REG = init_registry();
 
 # accessor for setting up a new route
 sub add {
     my ($class, $method, $route, $code) = @_;
     $REG->{routes}{$method} ||= [];
     push @{ $REG->{routes}{$method} }, {method => $method, route => $route, code => $code};
+}
+
+# helpers needed by the auto_reload feature
+sub init_registry     { {routes => {}, before_filters => [] } }
+sub purge_all         { $REG = init_registry() }
+sub registry          { $REG }
+sub set_registry      { $REG = $_[1] }
+
+# look for a route in the given array
+sub find_route  { 
+    my ($r, $reg) = @_;
+    foreach my $route (@$reg) {
+        return $route if ($r->{route} eq $route->{route});
+    }
+    return undef;
+}
+
+sub merge_registry    { 
+    my ($class, $orig_reg, $new_reg) = @_;
+    my $merged_reg = init_registry();
+
+    # walking through all the routes, using the newest when exists
+    foreach my $method (
+        keys(%{$new_reg->{routes}}), 
+        keys(%{$orig_reg->{routes}})
+    ) {
+        # don't work out a mehtod if already done
+        next if exists $merged_reg->{routes}{$method};
+
+        my $merged_routes = [];
+        my $orig_routes   = $orig_reg->{routes}{$method};
+        my $new_routes    = $new_reg->{routes}{$method};
+
+        # walk through all the orig elements, if we have a new version,
+        # overwrite it, else, keep the old one.
+        foreach my $route (@$orig_routes) {
+            my $new = find_route($route, $new_routes);
+            if (defined $new) {
+                push @$merged_routes, $new;
+            }
+            else {
+                push @$merged_routes, $route;
+            }
+        }
+        
+        # now, walk through all the new elements, looking for a new route
+        foreach my $route (@$new_routes) {
+            push @$merged_routes, $route 
+                unless find_route($route, $merged_routes);
+        }
+
+        $merged_reg->{routes}{$method} = $merged_routes;
+    }
+   
+    # NOTE: we have to warn the user about mixing before_filters in different
+    # files, that's not supported. Only the last before_filters block is used.
+    $merged_reg->{before_filters} = 
+        (scalar(@{ $new_reg->{before_filters} }) > 0) 
+        ? $new_reg->{before_filters}
+        : $orig_reg->{before_filters};
+
+    Dancer::Route->set_registry($merged_reg);
 }
 
 # return the first route that matches the path
@@ -23,12 +85,14 @@ sub find {
     $method ||= 'get';
     $method = lc($method);
     
+    my $registry = Dancer::Route->registry;
+
     # browse all matching routes, and return the first one with 
     # a copy of the next matches, so we can call the next route if the 
     # action chooses to pass.
     my $prev;
     my $first_match;
-    foreach my $r (@{$REG->{routes}{$method}}) {
+    foreach my $r (@{$registry->{routes}{$method}}) {
         my $params = match($path, $r->{route});
         if ($params) {
             $r->{params} = $params;
@@ -46,8 +110,9 @@ sub find {
 
 sub before_filter {
     my ($class, $filter) = @_; 
-    $REG->{before_filters} ||= [];
-    push @{$REG->{before_filters}}, $filter;
+    my $registry = Dancer::Route->registry;
+    $registry->{before_filters} ||= [];
+    push @{$registry->{before_filters}}, $filter;
 }
 
 sub before_filters { @{$REG->{before_filters}} }
@@ -97,64 +162,73 @@ sub call($$) {
         Dancer::Logger->warning($warning) if $warning;
     }
 
-    # trap errors
-    if ( $@ || 
-        (setting('warnings') && ($warning || $compilation_warning))) {
+	# maybe a not retarded way to listen for the exceptions
+	# would be good here :)
+	# Halt: just stall everything and return the Response singleton
+	# useful for the redirect helper
+	if(Dancer::Exception::Halt->caught) {
+		return Dancer::Response->current;
+	} elsif
+	# Pass: pass to the next route if available. otherwise, 404.
+		(Dancer::Exception::Pass->caught) {
+			if ($handler->{'next'}) {
+	            return Dancer::Route->call($handler->{'next'});
+	        }
+	        else {
+	            Dancer::SharedData->reset_all();
+	            my $error = Dancer::Error->new(code => 404,
+	                message => "<h2>Route Resolution Failed</h2>"
+	                         . "<p>Last matching route passed, "
+	                         . "but no other route left.</p>");
+	            return $error->render;
+	        }
+	# no exceptions? continue the old way, although this
+	# mechanism should be dropped in favor of exceptions in the
+	# future
+	} else {
+        # trap errors
+	    if ( $@ ||
+	        (setting('warnings') && ($warning || $compilation_warning))) {
         
-        Dancer::SharedData->reset_all();
+	        Dancer::SharedData->reset_all();
 
-        my $error;
-        if ($@) {
-            $error = Dancer::Error->new(code => 500, 
-                title   => 'Route Handler Error',
-                type    => 'Execution failed',
-                message => $@);
+	        my $error;
+	        if ($@) {
+	            $error = Dancer::Error->new(code => 500,
+	                title   => 'Route Handler Error',
+	                type    => 'Execution failed',
+	                message => $@);
 
-        }
-        elsif ($warning) {
-            $error = Dancer::Error->new(code => 500, 
-                title   => 'Route Handler Error',
-                type    => 'Runtime Warning',
-                message => $warning);
+	        }
+	        elsif ($warning) {
+	            $error = Dancer::Error->new(code => 500,
+	                title   => 'Route Handler Error',
+	                type    => 'Runtime Warning',
+	                message => $warning);
 
-        }
-        else {
-            $error = Dancer::Error->new(code => 500, 
-                title   => 'Route Handler Error',
-                type    => 'Compilation Warning',
-                message => $compilation_warning);
-        }
-        return $error->render;
-    }
+	        }
+	        else {
+	            $error = Dancer::Error->new(code => 500,
+	                title   => 'Route Handler Error',
+	                type    => 'Compilation Warning',
+	                message => $compilation_warning);
+	        }
+	        return $error->render;
+	    }
 
-    my $response = Dancer::Response->current;
-
-    if ($response->{pass}) {
-        if ($handler->{'next'}) {
-            return Dancer::Route->call($handler->{'next'});
-        }
-        else {
-            Dancer::SharedData->reset_all();
-            my $error = Dancer::Error->new(code => 404, 
-                message => "<h2>Route Resolution Failed</h2>"
-                         . "<p>Last matching route passed, "
-                         . "but no other route left.</p>");
-            return $error->render;
-        }
-    }
-    else {
+	    my $response = Dancer::Response->current;
 
         # drop the content if this is a HEAD request
         $content = '' if $handler->{method} eq 'head';
         my $ct = $response->{content_type} || setting('content_type');
         my $st = $response->{status} || 200;
-        
+
         Dancer::SharedData->reset_all();
-        
+
         return $content if ref($content) eq 'Dancer::Response';
         return Dancer::Response->new(
             status  => $st,
-            headers => { 'Content-Type' => $ct }, 
+            headers => [ 'Content-Type' => $ct ], 
             content => $content);
     }
 }
@@ -190,6 +264,7 @@ sub make_regexp_from_route {
     my ($route) = @_;
     my @params;
     my $pattern = $route;
+    my $registry = Dancer::Route->registry;
 
     if (ref($route) eq 'HASH' && $route->{regexp}) {
         $pattern = $route->{regexp};
@@ -198,7 +273,7 @@ sub make_regexp_from_route {
         # look for route with params (/hello/:foo)
         @params = $pattern =~ /:([^\/]+)/g;
         if (@params) {
-            $REG->{route_params}{$route} = \@params;
+            $registry->{route_params}{$route} = \@params;
             $pattern =~ s/(:[^\/]+)/\(\[\^\/\]\+\)/g;
         }
         

@@ -5,37 +5,44 @@ use warnings;
 use base 'Exporter';
 use vars '@EXPORT_OK';
 
+use Dancer::Template;
+use Dancer::ModuleLoader;
 use Dancer::FileUtils 'path';
 use Carp 'confess';
 
 @EXPORT_OK = qw(setting mime_types);
 
 # singleton for storing settings
-my $SETTINGS = {};
+my $SETTINGS = {
+	# default mime_types
+	mime_types => Dancer::FileUtils->mime_types,
+};
 sub settings { $SETTINGS }
 
 my $setters = {
     logger => sub {
-        my ($key, $value)  = @_;
-        if (@_ == 2) {
-            $SETTINGS->{logger} = $value;
-            Dancer::Logger->init;
-        }
-        else {
-            $SETTINGS->{logger};
-        }
+        my ($setting, $value) = @_;
+        Dancer::Logger->init($value);
+    },
+    session => sub {
+        my ($setting, $value) = @_;
+        Dancer::Session->init($value);
+    },
+    template => sub {
+        my ($setting, $value) = @_;
+        Dancer::Template->init($value);
     },
 };
 
 # public accessor for get/set
 sub setting {
     my ($setting, $value) = @_;
+    
+    # run the hook if setter
+    $setters->{$setting}->(@_) 
+        if (@_ == 2) && defined $setters->{$setting};
 
-    # specific setter/getter
-    return $setters->{$setting}->(@_) 
-        if defined $setters->{$setting};
-
-    # generic setter/getter
+    # setter/getter
     (@_ == 2) 
         ? $SETTINGS->{$setting} = $value
         : $SETTINGS->{$setting} ;
@@ -63,9 +70,8 @@ sub load {
     return 1 unless -f conffile;
 
     # load YAML
-    eval "use YAML";
-    confess "Configuration file found but YAML is not installed" if $@;
-    YAML->import;
+    confess "Configuration file found but YAML is not installed"
+      unless Dancer::ModuleLoader->load('YAML');
 
     load_default_settings();
     load_settings_from_yaml(conffile);
@@ -99,6 +105,9 @@ sub load_default_settings {
     $SETTINGS->{environment}  ||= 'development';
     $SETTINGS->{apphandler}   ||= 'standalone';
     $SETTINGS->{warnings}     ||= 0;
+    $SETTINGS->{auto_reload}  ||= 0;
+
+    setting template => 'simple';
 }
 load_default_settings();
 
@@ -125,20 +134,28 @@ You can change a setting with the keyword B<set>, like the following:
     set content_type => 'text/plain';
     set access_log => 0;
 
-Here is the list of all supported settings.
+A better way of defining settings exists: using YAML file. For this to be
+possible, you have to install the L<YAML> module. If a file named B<config.yml>
+exists in the application directory, it will be loaded, as a setting group.
 
-=head2 server (UNSUPPORTED)
+The same is done for the environment file located in the B<environments>
+directory.
 
-The IP address or servername to bind to.
-This setting is not yet implemented.
+=head1 SUPPORTED SETTINGS
 
-=head2 port 
+=head2 port (int)
 
 The port Dancer will listen to.
 
-Default value is 3000.
+Default value is 3000. This setting can be changed on the command-line with the
+B<--port> switch.
 
-=head2 content_type 
+=head2 daemon (boolean)
+
+If set to true, runs the standalone webserver in the background.
+This setting can be changed on the command-line with the B<--daemon> flag.
+
+=head2 content_type (string)
 
 The default content type of outgoing content.
 Default value is 'text/html'.
@@ -146,13 +163,9 @@ Default value is 'text/html'.
 =head2 charset
 
 The default charset of outgoing content.
-Default value is 'UTF-8'.
+Default value is 'UTF-8'. (not implemented yet)
 
-=head2 access_log
-
-If set to 1 (default), Dancer will print on STDEER one line per hit received.
-
-=head2 public 
+=head2 public (string)
 
 This is the path of the public directory, where static files are stored. Any
 existing file in that directory will be served as a static file, before
@@ -161,9 +174,57 @@ mathcing any route.
 By default, it points to APPDIR/public where APPDIR is the directory that 
 contains your Dancer script.
 
+=head2 layout (string)
+
+name of the layout to use when rendering view. Dancer will look for 
+a matching template in the directory $appdir/views/layout.
+
+=head2 warnings (boolean)
+
+If set to true, tells Dancer to consider all warnings as blocking errors.
+
+=head2 log (enum)
+
+Tells which log messages should be actullay logged. Possible values are
+B<debug>, B<warning> or B<error>.
+
+=over 4
+
+=item B<debug> : all messages are logged
+
+=item B<warning> : only warning and error messages are logged
+
+=item B<error> : only error messages are logged
+
+=back
+
+=head2 show_errors (boolean)
+
+If set to true, Dancer will render a detailed debug screen whenever an error is
+catched. If set to false, Dancer will render the default error page, using
+$public/$error_code.html if it exists.
+
+=head2 auto_reload (boolean)
+
+If set to true, Dancer will reload the route handlers whenever the file where
+they are defined is changed. This is very useful in development environment but
+should not be enabled in production.
+
+When this flag is set, you don't have to restart your webserver whenever you
+make a change in a route handler.
+
+=head2 session (enum)
+
+This setting lets you enable a session engine for your web application. Be
+default, sessions are disabled in Dancer, you must choose a session engine to
+use them.
+
+See L<Dancer::Session> for supported engines and their respective configuration.
+
 =head1 AUTHOR
 
-This module has been written by Alexis Sukrieh <sukria@cpan.org>
+This module has been written by Alexis Sukrieh <sukria@cpan.org> and others,
+see the AUTHORS file that comes with this distribution for details.
 
 =head1 LICENSE
 

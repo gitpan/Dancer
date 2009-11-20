@@ -9,20 +9,23 @@ use Dancer::Config 'setting';
 use Dancer::FileUtils;
 use Dancer::GetOpt;
 use Dancer::Error;
+use Dancer::Exceptions;
 use Dancer::Helpers;
 use Dancer::Logger;
 use Dancer::Renderer;
 use Dancer::Response;
 use Dancer::Route;
+use Dancer::Session;
 use Dancer::SharedData;
 use Dancer::Handler;
 
 use base 'Exporter';
 
 $AUTHORITY = 'SUKRIA';
-$VERSION = '0.9905';
+$VERSION = '1.000';
 @EXPORT = qw(
     before
+    cookies
     content_type
     dance
     debug
@@ -31,6 +34,7 @@ $VERSION = '0.9905';
     false
     get 
     layout
+    load
     logger
     mime_type
     params
@@ -39,10 +43,13 @@ $VERSION = '0.9905';
     post 
     put
     r
+    redirect
     request
     send_file
     send_error
     set
+    set_cookie
+    session
     splat
     status
     template
@@ -55,6 +62,7 @@ $VERSION = '0.9905';
 # Dancer's syntax 
 
 sub before       { Dancer::Route->before_filter(@_) }
+sub cookies      { Dancer::Cookies->cookies }
 sub content_type { Dancer::Response::content_type(@_) }
 sub debug        { Dancer::Logger->debug(@_) }
 sub dirname      { Dancer::FileUtils::dirname(@_) }
@@ -64,17 +72,31 @@ sub false        { 0 }
 sub get          { Dancer::Route->add('head', @_); 
                    Dancer::Route->add('get', @_);}
 sub layout       { set(layout => shift) }
-sub logger       { set(logger => @_) && Dancer::Logger->init }
+sub logger       { set(logger => @_) }
+sub load         { require $_ for @_ }
 sub mime_type    { Dancer::Config::mime_types(@_) }
 sub params       { Dancer::SharedData->params  }
-sub pass         { Dancer::Response::pass() }
+# sub pass         { Dancer::Response::pass() }
+sub pass         { pass_exception }
 sub path         { Dancer::FileUtils::path(@_) }
 sub post         { Dancer::Route->add('post', @_) }
 sub put          { Dancer::Route->add('put', @_) }
 sub r            { {regexp => $_[0]} }
+sub redirect     { Dancer::Helpers::redirect(@_) }
 sub request      { Dancer::SharedData->cgi }
 sub send_file    { Dancer::Helpers::send_file(@_) }
 sub set          { setting(@_) }
+sub set_cookie   { Dancer::Helpers::set_cookie(@_) }
+sub session      { 
+    if (@_ == 0) {
+        return Dancer::Session->get;
+    }
+    else {
+        return (@_ == 1) 
+            ? Dancer::Session->read(@_) 
+            : Dancer::Session->write(@_) 
+    }
+}
 sub splat        { @{ Dancer::SharedData->params->{splat} } }
 sub status       { Dancer::Response::status(@_) }
 sub template     { Dancer::Helpers::template(@_) }
@@ -257,6 +279,22 @@ take care to your return value.
 In order to change the default behaviour of the rendering of an action, you can
 use the following keywords.
 
+=head2 redirect
+
+The redirect action is a helper and shortcut to a common HTTP response code (302).
+You can either redirect to a complete different site or you can also do it
+within the application:
+
+    get '/twitter', sub {
+	    redirect 'http://twitter.com/me';
+    };
+
+You can also force Dancer to return an specific 300-ish HTTP response code:
+
+    get '/old/:resouce', sub {
+        redirect '/new/'.params->{resource}, 301;
+    };
+
 =head2 status
 
 By default, an action will produce an 'HTTP 200 OK' status code, meaning
@@ -373,6 +411,26 @@ And in a production one:
     # appdir/environments/production.yml
     log: 'warning'
     access_log: 0
+
+=head2 load
+
+You can use the load method to include additional routes into your application:
+
+    get '/go/:value', sub {
+        # foo
+    };
+
+    load 'more_routes.pl';
+
+    # then, in the file more_routes.pl:
+    get '/yes', sub {
+        'orly?';
+    };
+
+B<load> is just a wrapper for B<require>, but you can also specify a list of
+routes files:
+
+    load 'login_routes.pl', 'session_routes.pl', 'misc_routes.pl';
 
 =head1 LOGGING
 
@@ -543,7 +601,8 @@ This is a possible webapp created with Dancer :
 
 =head1 AUTHOR
 
-This module has been written by Alexis Sukrieh <sukria@cpan.org>
+This module has been written by Alexis Sukrieh <sukria@cpan.org> and others,
+see the AUTHORS file that comes with this distribution for details.
 
 =head1 SOURCE CODE
 
@@ -562,12 +621,6 @@ The following modules are mandatory (Dancer cannot run without them)
 
 =item L<CGI>
 
-=item L<File::MimeInfo>
-
-=item L<File::Spec>
-
-=item L<File::Basename>
-
 =item L<Template>
 
 =back
@@ -576,9 +629,9 @@ The following modules are optional
 
 =over 8
 
-=item L<Template>           needed for the views rendering system
+=item L<YAML> : needed for configuration file support
 
-=item L<Logger::Syslog>     needed for logging information to syslog
+=item L<File::MimeInfo::Simple>
 
 =back
 
