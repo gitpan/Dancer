@@ -31,18 +31,18 @@ sub parse_branches {
     my $should_bufferize = 1;
     my $opened_tag = 0;
     my $bufferize_if_token = 0;
-    $content =~ s/${start}(\S)/${start} $1/sg; 
-    $content =~ s/(\S)${stop}/$1 ${stop}/sg; 
+    $content =~ s/\Q${start}\E(\S)/${start} $1/sg; 
+    $content =~ s/(\S)\Q${stop}\E/$1 ${stop}/sg; 
     
     foreach my $word (split / /, $content) {
-        if ($word =~ /(.*)$start/s) {
+        if ($word =~ /(.*)\Q$start\E/s) {
             my $junk = $1;
             $opened_tag = 1;
             if (defined($junk) && length($junk)) {
                 $prefix = $junk;
             }
         }
-        elsif ($word =~ /$stop(.*)/s) {
+        elsif ($word =~ /\Q$stop\E(.*)/s) {
             my $junk = $1;
             if (defined($junk) && length($junk)) {
                 if (@buffer) {
@@ -82,20 +82,6 @@ sub parse_branches {
     }
 
     return join " ", @buffer;
-}
-
-# this is pure variable interpolation, without branch conditions
-sub interpolate {
-    my ($self, $content, $tokens) = @_;
-    my ($start, $stop) = ($self->start_tag, $self->stop_tag);
-    
-    while ($content =~ /${start}\s*(\S+)\s*${stop}/) {
-        my $key = $1;
-        my $value = _find_value_from_token_name($key, $tokens);
-        $value    = _interpolate_value($value); 
-        $content  =~ s/${start}\s*(\S+)\s*${stop}/$value/;
-    }
-    return $content;
 }
 
 # private

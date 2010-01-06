@@ -10,6 +10,7 @@ use Dancer::Config 'setting';
 my $ENGINES = {
     yaml      => 'Dancer::Session::YAML',
     memcached => 'Dancer::Session::Memcached',
+    cookie    => 'Dancer::Session::Cookie',
 };
 
 # Singleton representing the session engine class to use
@@ -35,12 +36,12 @@ sub init {
         : die "unsupported session engine: `$setting'";
 }
 
-# retreive or create a session for the client
+# retrieve or create a session for the client
 sub get_current_session {
     my $sid = engine->read_session_id;
     my $session = undef;
 
-    $session = engine->retreive($sid) if $sid;
+    $session = engine->retrieve($sid) if $sid;
 
     if (not defined $session) {
         $session = engine->create();
@@ -139,6 +140,16 @@ The following engines are supported:
 
 A YAML file-based session backend, pretty convininent for development purposes,
 but maybe not the best for production needs.
+
+=item L<Dancer::Session::Memcached>
+
+Session are stored in Memcached servers. This is good for production matters
+and is a good way to use a distributed session storage.
+
+=item L<Dancer::Session::Cookie>
+
+This module implements a session engine for sessions stored entirely
+inside encrypted cookies (this engine doesn't use a server-side storage).
 
 =back
 

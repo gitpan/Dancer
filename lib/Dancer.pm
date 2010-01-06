@@ -22,13 +22,15 @@ use Dancer::Handler;
 use base 'Exporter';
 
 $AUTHORITY = 'SUKRIA';
-$VERSION = '1.000';
+$VERSION = '1.100';
 @EXPORT = qw(
+    any
     before
     cookies
     content_type
     dance
     debug
+    del
     dirname
     error
     false
@@ -61,6 +63,7 @@ $VERSION = '1.000';
 
 # Dancer's syntax 
 
+sub any          { Dancer::Route->add_any(@_) }
 sub before       { Dancer::Route->before_filter(@_) }
 sub cookies      { Dancer::Cookies->cookies }
 sub content_type { Dancer::Response::content_type(@_) }
@@ -80,6 +83,7 @@ sub params       { Dancer::SharedData->params  }
 sub pass         { pass_exception }
 sub path         { Dancer::FileUtils::path(@_) }
 sub post         { Dancer::Route->add('post', @_) }
+sub del          { Dancer::Route->add('delete', @_) }
 sub put          { Dancer::Route->add('put', @_) }
 sub r            { {regexp => $_[0]} }
 sub redirect     { Dancer::Helpers::redirect(@_) }
@@ -185,13 +189,35 @@ Here are the ones you can use to define your route handlers.
                     handler for the GET method, Dancer automatically defines a 
                     route handler for the HEAD method, in order to honour HEAD
                     requests for each of your GET route handlers).
+                    To define a GET action, use the B<get> keyword.
 
 =item B<POST>       The POST method is used to create a ressource on the
                     server.
+                    To define a POST action, use the B<post> keyword.
 
 =item B<PUT>        The PUT method is used to update an existing ressource.
+                    To define a PUT action, use the B<put> keyword.
+
+=item B<DELETE>     The DELETE method requests that the origin server delete
+                    the resource identified by the Request-URI.
+                    To define a DELETE action, use the B<del> keyword.
 
 =back
+
+You can also use the special keyword B<any> to define a route for multiple
+methods at once. For instance, you may want to define a route for both GET and
+POST methods, this is done like the following:
+
+    any ['get', 'post'] => '/myaction' => sub {
+        # code
+    };
+
+Or even, a route handler that would match any HTTP methods:
+
+    any '/myaction' => sub {
+        # code
+    };
+
 
 =head2 ROUTE HANDLERS
 
@@ -465,9 +491,13 @@ your templates are located in the 'templates' directory, do the following:
 
     set views => path(dirname(__FILE__), 'templates');
 
-A view should have a '.tt' extension and is rendered with the
-L<Template> module. You have to import the `Template' module in your script if
-you want to render views within your actions.
+By default, the internal template engine is used (L<Dancer::Template::Simple)
+but you may want to upgrade to Template::Toolkit. If you do so, you have to
+enable this engine in your settings as explained in
+L<Dancer::Template::TemplateToolkit>. If you do so, you'll also have to import
+the L<Template> module in your application code.
+
+Note that a view should have a '.tt', this may change in the future.
 
 In order to render a view, just call the 'template' keyword at the end of the
 action by giving the view name and the HASHREF of tokens to interpolate in the
