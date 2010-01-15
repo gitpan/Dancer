@@ -146,7 +146,7 @@ sub build_params {
     my ($handler, $request) = @_;
     
     my $current_params = Dancer::SharedData->params || {};
-    my $request_params = scalar($request->Vars) || {};
+    my $request_params = scalar($request->params) || {};
     my $route_params = $handler->{params} || {};
 
     return { 
@@ -156,35 +156,21 @@ sub build_params {
     };
 }
 
-# We catch compilation-time warnings here
-my $COMPILATION_WARNING;
-sub warning { 
-    (@_ == 1) 
-        ? $COMPILATION_WARNING = $_[0] 
-        : $COMPILATION_WARNING;
-}
-BEGIN { $SIG{'__WARN__'} = sub { warning($_[0]) } }
-
 # Recursive call of actions through the matching tree
 sub call($$) {
     my ($class, $handler) = @_;
     
-    my $cgi = Dancer::SharedData->cgi;
-    my $params = build_params($handler, $cgi);
+    my $request = Dancer::SharedData->request;
+    my $params = build_params($handler, $request);
     Dancer::SharedData->params($params);
 
     my $content;
     my $warning; # reset any previous warning seen
     local $SIG{__WARN__} = sub { $warning = $_[0] };
     eval { $content = $handler->{code}->() };
-    my $compilation_warning = warning;
 
     # Log warnings
-    if ($warning || $compilation_warning) {
-        Dancer::Logger->warning($compilation_warning) 
-            if $compilation_warning;
-        Dancer::Logger->warning($warning) if $warning;
-    }
+    Dancer::Logger->warning($warning) if $warning;
 
 	# maybe a not retarded way to listen for the exceptions
 	# would be good here :)
@@ -211,8 +197,7 @@ sub call($$) {
 	# future
 	} else {
         # trap errors
-	    if ( $@ ||
-	        (setting('warnings') && ($warning || $compilation_warning))) {
+	    if ( $@ || (setting('warnings') && $warning)) {
         
 	        Dancer::SharedData->reset_all();
 
@@ -230,12 +215,6 @@ sub call($$) {
 	                type    => 'Runtime Warning',
 	                message => $warning);
 
-	        }
-	        else {
-	            $error = Dancer::Error->new(code => 500,
-	                title   => 'Route Handler Error',
-	                type    => 'Compilation Warning',
-	                message => $compilation_warning);
 	        }
 	        return $error->render;
 	    }

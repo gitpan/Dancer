@@ -22,7 +22,7 @@ use Dancer::Handler;
 use base 'Exporter';
 
 $AUTHORITY = 'SUKRIA';
-$VERSION = '1.110';
+$VERSION = '1.120';
 @EXPORT = qw(
     any
     before
@@ -39,6 +39,7 @@ $VERSION = '1.110';
     load
     logger
     mime_type
+    options
     params
     pass
     path
@@ -84,10 +85,11 @@ sub pass         { pass_exception }
 sub path         { Dancer::FileUtils::path(@_) }
 sub post         { Dancer::Route->add('post', @_) }
 sub del          { Dancer::Route->add('delete', @_) }
+sub options      { Dancer::Route->add('options', @_) }
 sub put          { Dancer::Route->add('put', @_) }
 sub r            { {regexp => $_[0]} }
 sub redirect     { Dancer::Helpers::redirect(@_) }
-sub request      { Dancer::SharedData->cgi }
+sub request      { Dancer::SharedData->request }
 sub send_file    { Dancer::Helpers::send_file(@_) }
 sub set          { setting(@_) }
 sub set_cookie   { Dancer::Helpers::set_cookie(@_) }
@@ -112,23 +114,29 @@ sub warning      { Dancer::Logger->warning(@_) }
 # When importing the package, strict and warnings pragma are loaded, 
 # and the appdir detection is performed.
 sub import {
+    my ($class, $symbol) = @_;
     my ($package, $script) = caller;
     strict->import;
     warnings->import;
+
+    $class->export_to_level( 1, $class, @EXPORT );
+
+    # if :syntax option exists, don't change settings
+    if ( $symbol && $symbol eq ':syntax' ) {
+        return;
+    }
 
     setting appdir => dirname(File::Spec->rel2abs($script));
     setting public => path(setting('appdir'), 'public');
     setting views  => path(setting('appdir'), 'views');
     setting logger => 'file';
-
-    Dancer->export_to_level(1, @_);
 }
 
 # Start/Run the application with the chosen apphandler
 sub dance { 
-    my ($class, $cgi) = @_;
+    my ($class, $request) = @_;
     Dancer::Config->load;
-    Dancer::Handler->get_handler()->dance($cgi);
+    Dancer::Handler->get_handler()->dance($request);
 }
 
 1;
@@ -458,6 +466,23 @@ routes files:
 
     load 'login_routes.pl', 'session_routes.pl', 'misc_routes.pl';
 
+=head1 importing just the syntax
+
+If you want to use more complex files hierarchies, you can import just the syntax of Dancer.
+
+    package App;
+
+    use Dancer;            # App may contain generic routes
+    use App::User::Routes; # user-related routes
+
+Then in App/User/Routes.pm:
+
+    use Dancer ':syntax';
+
+    get '/user/view/:id' => sub {
+        ...
+    };
+
 =head1 LOGGING
 
 It's possible to log messages sent by the application. In the current version,
@@ -491,13 +516,15 @@ your templates are located in the 'templates' directory, do the following:
 
     set views => path(dirname(__FILE__), 'templates');
 
-By default, the internal template engine is used (L<Dancer::Template::Simple)
+By default, the internal template engine is used (L<Dancer::Template::Simple>)
 but you may want to upgrade to Template::Toolkit. If you do so, you have to
 enable this engine in your settings as explained in
 L<Dancer::Template::TemplateToolkit>. If you do so, you'll also have to import
-the L<Template> module in your application code.
+the L<Template> module in your application code. Note that Dancer configures
+the Template::Toolkit engine to use <% %> brackets instead of its default
+[% %] brackets.
 
-Note that a view should have a '.tt', this may change in the future.
+All views must have a '.tt' extension. This may change in the future.
 
 In order to render a view, just call the 'template' keyword at the end of the
 action by giving the view name and the HASHREF of tokens to interpolate in the

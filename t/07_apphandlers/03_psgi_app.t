@@ -1,36 +1,39 @@
-use Dancer::Config 'setting';
 use Test::More;
+use strict;
+use warnings;
+use Dancer::Config 'setting';
+use Dancer::ModuleLoader;
 
-eval "use Test::Requires ('Plack::Loader', 'LWP::UserAgent')";
-eval "use Test::TCP";
-plan skip_all => "Test::Requires and Test::TCP are needed for this test" if $@;
-
+plan skip_all => "Plack is needed to run this test"
+    unless Dancer::ModuleLoader->load('Plack::Loader');
+plan skip_all => "LWP is needed to run this test"
+    unless Dancer::ModuleLoader->load('LWP::UserAgent');
+plan skip_all => "Test::TCP is needed to run this test"
+    unless Dancer::ModuleLoader->load('Test::TCP');
 
 my $app = sub {
     my $env = shift;
-    local *ENV = $env;
-    my $cgi = CGI->new();
-    Dancer->dance($cgi);
+    my $request = Dancer::Request->new($env);
+    Dancer->dance($request);
 };
 
 plan tests => 3;
-test_tcp(
+Test::TCP::test_tcp(
     client => sub {
         my $port = shift;
         my $ua = LWP::UserAgent->new;
         
         my $res = $ua->get("http://127.0.0.1:$port/env");
-        like $res->content, qr/psgi\.version/;
+        like $res->content, qr/psgi\.version/, 
+            'content looks good for /env';
         
         $res = $ua->get("http://127.0.0.1:$port/name/bar");
-        like $res->content, qr/Your name: bar/;
+        like $res->content, qr/Your name: bar/,
+            'content looks good for /name/bar';
 
         $res = $ua->get("http://127.0.0.1:$port/name/baz");
-        like $res->content, qr/Your name: baz/;
-
-# FIXME this blocks for some random reason, don't know why
-#        $res = $ua->post("http://127.0.0.1:$port/name", { name => "xxx" });
-#        like $res->content, qr/Your name: xxx/;
+        like $res->content, qr/Your name: baz/,
+            'content looks good for /name/baz';
     },
     server => sub {
         my $port = shift;
