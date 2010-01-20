@@ -11,7 +11,17 @@ use Dancer::SharedData;
 use HTTP::Body;
 
 use base 'Dancer::Object';
-Dancer::Request->attributes('path', 'method', 'content_type', 'content_length');
+Dancer::Request->attributes(
+    # query
+    'path', 'method', 
+    'content_type', 'content_length',
+
+    # http env 
+    'user_agent', 'host',
+    'accept_language', 'accept_charset', 
+    'accept_encoding', 'keep_alive',
+    'connection', 'accept',
+    );
 
 sub new {
     my ($class, $env) = @_;
@@ -31,7 +41,7 @@ sub new {
         _raw_body => '',
         _read_position => 0,
     };
-    
+
     bless $self, $class;
     $self->_init();
     return $self;
@@ -54,19 +64,20 @@ sub new_for_request {
 
 sub normalize {
     my ($class, $request) = @_;
+    die "normalize() must be called as a class method"
+        if (ref $class);
 
-    if (ref($request) eq 'CGI') {
+    my $req_class = ref($request);
+    return $request if $req_class eq $class;
+
+    if (($req_class eq 'CGI') || ($req_class eq 'CGI::PSGI')) {
         return $class->new_for_request(
             $request->request_method,
             $request->path_info,
             scalar($request->Vars));
     }
-    elsif (ref($request) eq $class ) {
-        return $request;
-    }
-    else {
-        die "Invalid request, unable to process the query (".ref($request).")"
-    }
+    
+    die "Invalid request, unable to process the query ($req_class)";
 }
 
 # public interface compat with CGI.pm objects
@@ -89,6 +100,7 @@ sub _init {
     my ($self) = @_;
     $self->_build_path() unless $self->path;
     $self->_build_method() unless $self->method;
+    $self->_build_request_env();
     
     # input for POST/PUT data are taken from PSGI if present, 
     # fallback to STDIN
@@ -96,6 +108,15 @@ sub _init {
     $self->{_http_body} = HTTP::Body->new(
         $self->content_type, $self->content_length);
     $self->_build_params();
+}
+
+sub _build_request_env {
+    my ($self) = @_;
+    foreach my $http_env (grep /^HTTP_/, keys %ENV) {
+        my $key = lc $http_env;
+        $key =~ s/^http_//;
+        $self->{$key} = $ENV{$http_env};
+    }
 }
 
 sub _build_params {
@@ -162,7 +183,22 @@ sub _parse_params {
         my ($key, $val) = split(/=/, $token);
         $key = $self->_url_decode($key);
         $val = $self->_url_decode($val);
-        $$r_params->{$key} = $val;
+        
+        # looking for multi-value params
+        if (exists $$r_params->{$key}) {
+            my $prev_val = $$r_params->{$key};
+            if (ref($prev_val) && ref($prev_val) eq 'ARRAY') {
+                push @{$$r_params->{$key}}, $val;
+            }
+            else {
+                $$r_params->{$key} = [$prev_val, $val];
+            }
+        }
+        
+        # simple value param (first time we see it)
+        else {
+            $$r_params->{$key} = $val;
+        }
     }
     return $r_params;
 }
