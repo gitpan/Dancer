@@ -1,0 +1,30 @@
+--- #YAML:1.0
+name:               Dancer
+version:            1.150
+abstract:           A minimal-effort oriented web application framework
+author:  []
+license:            perl
+distribution_type:  module
+configure_requires:
+    ExtUtils::MakeMaker:  0
+build_requires:
+    ExtUtils::MakeMaker:  0
+requires:
+    Exception::Class:     0
+    File::Basename:       0
+    File::Spec:           0
+    HTTP::Body:           0
+    HTTP::Server::Simple::PSGI:  0.11
+    MIME::Types:          0
+    Test::More:           0
+    URI:                  0
+resources:
+    repository:  http://github.com/sukria/Dancer
+no_index:
+    directory:
+        - t
+        - inc
+generated_by:       ExtUtils::MakeMaker version 6.52
+meta-spec:
+    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
+    version:  1.4

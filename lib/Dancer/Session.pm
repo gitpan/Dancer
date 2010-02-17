@@ -5,6 +5,7 @@ use warnings;
 
 use Dancer::Cookies;
 use Dancer::Config 'setting';
+use Dancer::Engine;
 
 # Singleton representing the session engine class to use
 my $ENGINE = undef;
@@ -12,15 +13,9 @@ sub engine {$ENGINE}
 
 # This wrapper look for the session engine and try to load it.
 sub init {
-    my ($class, $setting) = @_;
-
-    $ENGINE =
-      Dancer::ModuleLoader->class_from_setting('Dancer::Session' => $setting);
-
-    die "unsupported session engine: `$setting'"
-      unless Dancer::ModuleLoader->require($ENGINE);
-
-    $ENGINE->init();
+    my ($class, $name, $config) = @_;
+    $ENGINE = Dancer::Engine->build(session => $name, $config);
+    #$ENGINE->init(); already done 
 }
 
 # retrieve or create a session for the client
@@ -67,9 +62,9 @@ Dancer::Session - session engine for the Dancer framework
 
 =head1 DESCRIPTION
 
-This module provides support for server-side session for the Dancer micro
+This module provides support for server-side sessions for the L<Dancer> web
 framework. The session is accessible to the user via an abstraction layer
-implemented by the Dancer::Session class.
+implemented by the L<Dancer::Session> class.
 
 =head1 USAGE
 
@@ -115,6 +110,12 @@ C</home> actions using the session engine.
             redirect '/login';
         }
     };
+
+Of course, you probably don't want to have to duplicate the code to check
+whether the user is logged in for each route handler; there's an example in the
+L<Dancer::Cookbook> showing how to use a before filter to check whether the user
+is logged in before all requests, and redirect to a login page if not.
+
 
 =head1 SUPPORTED ENGINES
 
