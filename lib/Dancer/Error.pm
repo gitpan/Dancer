@@ -7,6 +7,7 @@ use Dancer::Response;
 use Dancer::Renderer;
 use Dancer::Config 'setting';
 use Dancer::Logger;
+use Dancer::Session;
 
 sub new {
     my ($class, %params) = @_;
@@ -95,13 +96,43 @@ sub tabulate {
 
 sub dumper {
     my $obj = shift;
+    return "Unavailable without Data::Dumper"
+        unless Dancer::ModuleLoader->load('Data::Dumper');
 
-    my $content = "";
-    while (my ($k, $v) = each %$obj) {
-        $content
-          .= "<span class=\"key\">$k</span> : <span class=\"value\">$v</span>\n";
+
+    # Take a copy of the data, so we can mask sensitive-looking stuff:
+    my %data = %$obj;
+    my $censored = _censor(\%data); 
+   
+    #use Data::Dumper;
+    my $dd = Data::Dumper->new([\%data]);
+    $dd->Terse(1)->Quotekeys(0)->Indent(1);
+    my $content = $dd->Dump();
+    $content =~ s{(\s*)(\S+)(\s*)=>}{$1<span class="key">$2</span>$3 =>}g;
+    if ($censored) {
+        $content .= "\n\nNote: Values of $censored sensitive-looking keys hidden\n";
     }
     return $content;
+}
+
+# Given a hashref, censor anything that looks sensitive.  Returns number of
+# items which were "censored".
+sub _censor {
+    my $hash = shift;
+    if (!$hash || ref $hash ne 'HASH') {
+        warn "_censor given incorrect input: $hash";
+        return;
+    }
+    my $censored = 0;
+    for my $key (keys %$hash) {
+        if (ref $hash->{$key} eq 'HASH') {
+            $censored += _censor($hash->{$key});
+        } elsif ($key =~ /(pass|card?num|pan|secret)/i) {
+            $hash->{$key} = "Hidden (looks potentially sensitive)";
+            $censored++;
+        }
+    }
+    return $censored;
 }
 
 sub render {
@@ -135,7 +166,14 @@ sub environment {
         "<div class=\"title\">Stack</div><pre class=\"content\">"
       . $self->get_caller
       . "</pre>";
-    return "$source $settings $env";
+    my $session = "";
+    if (setting('session')) {
+        $session = 
+            qq[<div class="title">Session</div><pre class="content">]
+            . dumper(  Dancer::Session->get  )
+            . "</pre>";
+    }
+    return "$source $settings $session $env";
 }
 
 sub get_caller {

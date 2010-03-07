@@ -33,6 +33,10 @@ my $setters = {
         my ($setting, $value) = @_;
         Dancer::Template->init($value, settings());
     },
+    route_cache => sub {
+        my ($setting, $value) = @_;
+        Dancer::Route::Cache->reset();
+    },
 };
 
 # public accessor for get/set
@@ -59,14 +63,20 @@ sub mime_types {
       : $SETTINGS->{mime_types}{$ext};
 }
 
-sub conffile { path(setting('appdir'), 'config.yml') }
+sub conffile { path(setting('confdir') || setting('appdir'), 'config.yml') }
 
 sub environment_file {
     my $env = setting('environment');
     return path(setting('appdir'), 'environments', "$env.yml");
 }
 
+sub init_confdir {
+    return setting('confdir') if setting('confdir');
+    setting confdir => $ENV{DANCER_CONFDIR} || setting('appdir');
+}
+
 sub load {
+    init_confdir(); 
 
     # look for the conffile
     return 1 unless -f conffile;
@@ -100,17 +110,20 @@ sub load_settings_from_yaml {
 
 
 sub load_default_settings {
-    $SETTINGS->{server}       ||= '0.0.0.0';
-    $SETTINGS->{port}         ||= '3000';
-    $SETTINGS->{content_type} ||= 'text/html';
-    $SETTINGS->{charset}      ||= 'UTF-8';
-    $SETTINGS->{access_log}   ||= 1;
-    $SETTINGS->{daemon}       ||= 0;
-    $SETTINGS->{environment}  ||= 'development';
-    $SETTINGS->{apphandler}   ||= 'standalone';
-    $SETTINGS->{warnings}     ||= 0;
-    $SETTINGS->{auto_reload}  ||= 0;
-
+    $SETTINGS->{server}       ||= $ENV{DANCER_SERVER} || '0.0.0.0';
+    $SETTINGS->{port}         ||= $ENV{DANCER_PORT} || '3000';
+    $SETTINGS->{content_type} ||= $ENV{DANCER_CONTENT_TYPE} || 'text/html';
+    $SETTINGS->{charset}      ||= $ENV{DANCER_CHARSET} || 'UTF-8';
+    $SETTINGS->{access_log}   ||= $ENV{DANCER_ACCESS_LOG} || 1;
+    $SETTINGS->{daemon}       ||= $ENV{DANCER_DAEMON} || 0;
+    $SETTINGS->{apphandler}   ||= $ENV{DANCER_APPHANDLER} || 'standalone';
+    $SETTINGS->{warnings}     ||= $ENV{DANCER_WARNINGS} || 0;
+    $SETTINGS->{auto_reload}  ||= $ENV{DANCER_AUTO_RELOAD} || 0;
+    $SETTINGS->{environment}
+      ||= $ENV{DANCER_ENVIRONMENT}
+      || $ENV{PLACK_ENV}
+      || 'development';
+    
     setting template => 'simple';
 }
 load_default_settings();
@@ -213,7 +226,8 @@ $public/$error_code.html if it exists.
 
 If set to true, Dancer will reload the route handlers whenever the file where
 they are defined is changed. This is very useful in development environment but
-should not be enabled in production.
+B<should not be enabled in production>. Enabling this flag in production yields
+a major negative effect on performance because of L<Module::Refresh>.
 
 When this flag is set, you don't have to restart your webserver whenever you
 make a change in a route handler.

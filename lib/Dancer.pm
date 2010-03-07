@@ -9,7 +9,6 @@ use Dancer::Config 'setting';
 use Dancer::FileUtils;
 use Dancer::GetOpt;
 use Dancer::Error;
-use Dancer::Exceptions;
 use Dancer::Helpers;
 use Dancer::Logger;
 use Dancer::Renderer;
@@ -22,7 +21,7 @@ use Dancer::Handler;
 use base 'Exporter';
 
 $AUTHORITY = 'SUKRIA';
-$VERSION   = '1.150';
+$VERSION   = '1.160';
 @EXPORT    = qw(
   any
   before
@@ -91,7 +90,7 @@ sub logger     { set(logger => @_) }
 sub load       { require $_ for @_ }
 sub mime_type  { Dancer::Config::mime_types(@_) }
 sub params     { Dancer::SharedData->request->params(@_) }
-sub pass       {pass_exception}
+sub pass       { Dancer::Response->pass }
 sub path       { Dancer::FileUtils::path(@_) }
 sub post       { Dancer::Route->add('post', @_) }
 sub prefix     { Dancer::Route->prefix(@_) }
@@ -139,10 +138,13 @@ sub import {
         return;
     }
 
+    Dancer::GetOpt->process_args();
     setting appdir => dirname(File::Spec->rel2abs($script));
     setting public => path(setting('appdir'), 'public');
     setting views  => path(setting('appdir'), 'views');
     setting logger => 'file';
+    setting confdir => $ENV{DANCER_CONFDIR} || setting('appdir');
+    Dancer::Config->load;
 }
 
 # Start/Run the application with the chosen apphandler
@@ -573,9 +575,10 @@ the config keyword:
     };
 
 
-=head1 importing just the syntax
+=head1 Importing just the syntax
 
-If you want to use more complex files hierarchies, you can import just the syntax of Dancer.
+If you want to use more complex files hierarchies, you can import just the
+syntax of Dancer.
 
     package App;
 
@@ -599,7 +602,7 @@ releases new methods.
 In order to enable the logging system for your application, you first have to
 start the logger engine in your config.yml
 
-    log: 'file'
+    logger: 'file'
 
 Then you can choose which kind of messages you want to actually log:
 
@@ -741,6 +744,23 @@ Or even if you want your index page to be a plain old index.html file, just do:
         send_file '/index.html'
     };
 
+=head2 ROUTE CACHING
+
+Dancer automatically supports default caching for routes. What this means is
+that Dancer remembers for each path what route it took, so it doesn't have to
+match it again.
+
+This makes things B<much> faster, especially when dealing with many routes.
+There are default limitations on the size of the cache and the number of
+entries, so it doesn't get out of proportion.
+
+Route caching can turned on using the I<route_cache> option in the
+configuration:
+
+    route_cache = 1
+
+The default limitations are 10M in size or 600 entries in the cache.
+
 =head1 SETTINGS
 
 It's possible to change quite every parameter of the application via the
@@ -754,7 +774,7 @@ See L<Dancer::Config> for complete details about supported settings.
 
 =head1 EXAMPLE
 
-This is a possible webapp created with Dancer :
+This is a possible webapp created with Dancer:
 
     #!/usr/bin/perl
 
@@ -792,8 +812,6 @@ The following modules are mandatory (Dancer cannot run without them)
 =over 8
 
 =item L<HTTP::Server::Simple::PSGI>
-
-=item L<Exception::Class>
 
 =item L<HTTP::Body>
 

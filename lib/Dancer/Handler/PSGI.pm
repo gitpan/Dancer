@@ -12,6 +12,7 @@ sub new {
     my $class = shift;
     my $self  = {};
     bless $self, $class;
+    Dancer::Route->init();
     return $self;
 }
 

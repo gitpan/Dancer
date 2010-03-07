@@ -13,11 +13,6 @@ use Dancer::Config 'setting';
 use Dancer::Handler::PSGI;
 use Dancer::Handler::Standalone;
 
-sub init {
-    Dancer::GetOpt->process_args();
-    Dancer::Config->load;
-}
-
 # This is where we choose which application handler to return
 sub get_handler {
     if (setting('apphandler') eq 'PSGI') {

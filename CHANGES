@@ -1,3 +1,50 @@
+Dancer 1.160
+
+    [ David Precious ]
+    * Added session backend Dancer::Session::Simple
+    * Dump session contents on development error page, if session is in use
+    * Censor sensitive-looking information on development error page settings /
+      session dumps, to help avoid passwords / card details etc being leaked.
+    * Add deployment guide
+
+    [ Alexis Sukrieh ]
+    * Dancer helper propagates its perl executable into the generated
+      $appname.pl script (FIX for RT #54759).
+    * FIX for issue #34
+      No more warnings undeer Win32 for tests script that needs a tempdir
+    * FIX (unknown bug)
+      The standalone server now parses commandline options (was broken
+      since 1.140).
+    * FIX for issue #37
+      A new setting "confdir" is provided for making Dancer
+      read the application configuration files from an
+      alternate location.
+    * Core settings can be initialized via environment
+      variables, prefixed with "DANCER_" (e.g.  "DANCER_DAEMON"
+      for the setting "daemon").
+    * Config and command-line arguments are parsed and loaded at import time,
+      rather than when the handler is initialized.
+    * Routes are compiled at startup instead of being compiled whenever a 
+      request is handled.  This can increase performances up to 50%.
+    * FIX Params are not polluted anymore by the 'splat' keyword when no capture
+      is needed by the pattern.
+    * New feature 'auto_page' (closes: #41)
+	  Lets the user have automatic route resolution for 
+      requests that match an existing template in the views dir. Thanks to 
+      David Precious for the idea and his help.
+
+    [ Daniel Tasov ]
+    * Plack environment is propagated to Dancer if none specified.
+
+    [ Sawyer X ]
+    * Route Caching with size and path number limits: Dancer::Route::Cache.
+    * FIX for issue #39.
+    * Dancer::ModuleLoader documentation
+    * Cleaned Dancer::Template::Abstract docs
+    * Cleaner die in Dancer::Engine if can't find engine
+    * Added default route example in Dancer::Cookbook
+
+
 Dancer 1.150
 
     [ Alexis Sukrieh ]
@@ -5,9 +52,9 @@ Dancer 1.150
     * Support for engine configuration via config files
     * Each core template engine now uses start_tag/stop_tag from the
       configuration instead of harcoding '<%' and '%>'.
-	* FIX for issue #34
-	  Cookies can now be used when the application is ran under a Plack 
-	  server.
+    * FIX for issue #34
+      Cookies can now be used when the application is ran under a Plack 
+      server.
     
     [ David Precious ]
     * Lots of documentation cleaning and fixes.

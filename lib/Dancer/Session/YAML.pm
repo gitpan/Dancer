@@ -61,9 +61,9 @@ sub destroy {
 
 sub flush {
     my $self = shift;
-    open SESSION, '>', yaml_file($self->id) or die $!;
-    print SESSION YAML::Dump($self);
-    close SESSION;
+    open(my $sessionfh, '>', yaml_file($self->id)) or die $!;
+    print {$sessionfh} YAML::Dump($self);
+    close $sessionfh;
     return $self;
 }
 
@@ -85,15 +85,15 @@ transparent session storage for the developer.
 This backend is intended to be used in development environments, when looking
 inside a session can be useful.
 
-It's not recommended to use this session engine in production environements.
+It's not recommended to use this session engine in production environments.
 
 =head1 CONFIGURATION
 
 The setting B<session> should be set to C<YAML> in order to use this session
 engine in a Dancer application.
 
-Files will be stored to the value of the setting C<session_dir>, which default value is
-C<appdir/sessions>.
+Files will be stored to the value of the setting C<session_dir>, whose default 
+value is C<appdir/sessions>.
 
 Here is an example configuration that use this session engine and stores session
 files in /tmp/dancer-sessions

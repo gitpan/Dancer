@@ -8,14 +8,7 @@ use HTTP::Body;
 use URI;
 
 use base 'Dancer::Object';
-Dancer::Request->attributes(
-
-    # query
-    'env',          'path', 'method',
-    'content_type', 'content_length',
-    'body',         'path_info',
-
-    # http env
+my @http_env_keys = (
     'user_agent',      'host',
     'accept_language', 'accept_charset',
     'accept_encoding', 'keep_alive',
@@ -23,10 +16,18 @@ Dancer::Request->attributes(
     'referer',
 );
 
+Dancer::Request->attributes(
+    # query
+    'env',          'path', 'method',
+    'content_type', 'content_length',
+    'body',         'path_info',
+    @http_env_keys,
+);
+
 # aliases
 sub agent                 { $_[0]->user_agent }
-sub remote_address        { $_[0]->env->{'REMOTE_ADDR'} }
-sub forwarded_for_address { $_[0]->env->{'X_FORWARDED_FOR'} }
+sub remote_address        { $_[0]->{env}->{'REMOTE_ADDR'} }
+sub forwarded_for_address { $_[0]->{env}->{'X_FORWARDED_FOR'} }
 
 sub new {
     my ($class, $env) = @_;
@@ -75,7 +76,7 @@ sub base {
         SERVER_NAME HTTP_HOST SERVER_PORT SCRIPT_NAME psgi.url_scheme
     );
 
-    my ($server, $host, $port, $path, $scheme) = @{$self->env}{@env_names};
+    my ($server, $host, $port, $path, $scheme) = @{$self->{env}}{@env_names};
 
     my $uri = URI->new;
     $uri->scheme($scheme);
@@ -150,11 +151,20 @@ sub _set_route_params {
 
 sub _build_request_env {
     my ($self) = @_;
-    foreach my $http_env (grep /^HTTP_/, keys %{$self->env}) {
-        my $key = lc $http_env;
-        $key =~ s/^http_//;
-        $self->{$key} = $self->env->{$http_env};
-    }
+
+    # Don't refactor that, it's called whenever a request object is needed, that
+    # means at least once per request. If refactored in a loop, this will cost 4
+    # times more than the following static map.
+    $self->{user_agent}      = $self->{env}{HTTP_USER_AGENT};
+    $self->{host}            = $self->{env}{HTTP_HOST};
+    $self->{accept_language} = $self->{env}{HTTP_ACCEPT_LANGUAGE};
+    $self->{accept_charset}  = $self->{env}{HTTP_ACCEPT_CHARSET};
+    $self->{accept_encoding} = $self->{env}{HTTP_ACCEPT_ENCODING};
+    $self->{keep_alive}      = $self->{env}{HTTP_KEEP_ALIVE};
+    $self->{connection}      = $self->{env}{HTTP_CONNECTION};
+    $self->{accept}          = $self->{env}{HTTP_ACCEPT};
+    $self->{referer}         = $self->{env}{HTTP_REFERER};
+
 }
 
 sub _build_params {
@@ -183,15 +193,15 @@ sub _build_path {
     my ($self) = @_;
     my $path = "";
 
-    $path .= $self->env->{'SCRIPT_NAME'}
-      if defined $self->env->{'SCRIPT_NAME'};
-    $path .= $self->env->{'PATH_INFO'}
-      if defined $self->env->{'PATH_INFO'};
+    $path .= $self->{env}{'SCRIPT_NAME'}
+      if defined $self->{env}->{'SCRIPT_NAME'};
+    $path .= $self->{env}->{'PATH_INFO'}
+      if defined $self->{env}->{'PATH_INFO'};
 
     # fallback to REQUEST_URI if nothing found
     # we have to decode it, according to PSGI specs.
-    $path ||= $self->_url_decode($self->env->{REQUEST_URI})
-      if defined $self->env->{REQUEST_URI};
+    $path ||= $self->_url_decode($self->{env}->{REQUEST_URI})
+      if defined $self->{env}->{REQUEST_URI};
 
     die "Cannot resolve path" if not $path;
     $self->{path} = $path;
@@ -199,7 +209,7 @@ sub _build_path {
 
 sub _build_path_info {
     my ($self) = @_;
-    my $info = $self->env->{'PATH_INFO'};
+    my $info = $self->{env}->{'PATH_INFO'};
     if (defined $info) {
         # Empty path info will be interpreted as "root".
         $info ||= '/';
@@ -212,7 +222,7 @@ sub _build_path_info {
 
 sub _build_method {
     my ($self) = @_;
-    $self->{method} = $self->env->{REQUEST_METHOD}
+    $self->{method} = $self->{env}->{REQUEST_METHOD}
       || $self->{request}->request_method();
 }
 
@@ -240,6 +250,8 @@ sub _parse_get_params {
     my $source = $self->{env}{QUERY_STRING} || '';
     foreach my $token (split /&/, $source) {
         my ($key, $val) = split(/=/, $token);
+        next unless defined $key;
+        $val ||= "";
         $key = $self->_url_decode($key);
         $val = $self->_url_decode($val);
 
@@ -286,7 +298,7 @@ sub _has_something_to_read {
 # taken from Miyagawa's Plack::Request::BodyParser
 sub _read {
     my ($self,)   = @_;
-    my $remaining = $self->env->{CONTENT_LENGTH} - $self->{_read_position};
+    my $remaining = $self->{env}->{CONTENT_LENGTH} - $self->{_read_position};
     my $maxlength = $self->{_chunk_size};
 
     return if ($remaining <= 0);

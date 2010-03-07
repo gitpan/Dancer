@@ -2,6 +2,7 @@ package Dancer::Template::TemplateToolkit;
 
 use strict;
 use warnings;
+use Dancer::Config 'setting';
 use Dancer::ModuleLoader;
 use Dancer::FileUtils 'path';
 
@@ -18,6 +19,7 @@ sub init {
     my $tt_config = {
         ANYCASE   => 1,
         ABSOLUTE  => 1,
+        %{$self->config},
     };
 
     my $start_tag = $self->config->{start_tag} || '<%';
@@ -28,8 +30,7 @@ sub init {
     $tt_config->{START_TAG} = $start_tag if $start_tag ne '[%';
     $tt_config->{END_TAG}   = $stop_tag  if $stop_tag  ne '%]';
 
-    $tt_config->{INCLUDE_PATH} = path($self->{settings}{'appdir'}, 'views')
-      if $self->{settings} && $self->{settings}{'appdir'};
+    $tt_config->{INCLUDE_PATH} = setting('views');
 
     $_engine = Template->new(%$tt_config);
 }

@@ -12,7 +12,6 @@ use Dancer::Config 'setting';
 use Dancer::FileUtils 'path';
 use Dancer::Session;
 use Dancer::SharedData;
-use Dancer::Exceptions;
 use Dancer::Template;
 
 sub send_file {
@@ -40,6 +39,14 @@ sub template {
     $view .= ".tt" if $view !~ /\.tt$/;
     $view = path(setting('views'), $view);
 
+    if (! -r $view) {
+        my $error = Dancer::Error->new(
+            code    => 404,
+            message => "Page not found",
+        );
+        return Dancer::Response::set($error->render);
+    }
+
     $tokens ||= {};
     $tokens->{request} = Dancer::SharedData->request;
     $tokens->{params}  = Dancer::SharedData->request->params;
@@ -62,19 +69,19 @@ sub template {
 sub error {
     my ($class, $content, $status) = @_;
     $status ||= 500;
-
     my $error = Dancer::Error->new(code => $status, message => $content);
     Dancer::Response::set($error->render);
-    halt;
 }
 
 sub redirect {
     my ($destination, $status) = @_;
-
+    if($destination =~ m!^/!) {
+        # no absolute uri here, build one, RFC 2616 forces us to do so
+        my $request = Dancer::SharedData->request;
+        $destination = $request->uri_for($destination);
+    }
     Dancer::Response::status($status || 302);
     Dancer::Response::headers('Location' => $destination);
-
-    halt;    # w00t!
 }
 
 #

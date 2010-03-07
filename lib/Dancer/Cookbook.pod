@@ -160,18 +160,72 @@ request to C</foo/oversee>; this means that, whatever path was requested, it
 will be treated as though the path requested was C</foo/oversee>.
 
 
+=head2 Default route
+
+In case you want to avoid a I<404 error>, or handle multiple routes in the same
+way and you don't feel like configuring all of them, you can set up a default
+route handler.
+
+The default route handler will handle any request that doesn't get served by
+any other route.
+
+All you need to do is set up the following route as the B<last> route:
+
+    any r('.*') => sub {
+        status 'not_found';
+        template => 'special_404', { path => request->path };
+    };
+
+Then you can set up the template as such:
+
+    You tried to reach <% path %>, but it is unavailable at the moment.
+
+    Please try again or contact us at our email at <...>.
+
+
+
+=head2 Using the auto_page feature for automatic route creation
+
+For simple pages where you're not doing anything dynamic, but still want to use
+the template engine to provide headers etc, you can use the auto_page feature to
+avoid the need to create a route for each page.
+
+With C<auto_page> enabled, if the requested path does not match any specific
+route, Dancer will check in the views directory for a matching template, and use
+it to satisfy the request if found.
+
+Simply enable auto_page in your config:
+
+    auto_page: 1
+
+Then, if you request C</foo/bar>, Dancer will look in the views dir for
+C</foo/bar.tt>.
+
+
+
 =head2 Handling sessions
 
 It's common to want to use sessions to give your web applications state; for
 instance, allowing a user to log in, creating a session, and checking that
 session on subsequent requests.
 
-To make use of sessions, you must first enable the session engine - in your
+To make use of sessions, you must first enable the session engine - pick the
+session engine you want to use, then declare it in your config file:
 config file, add:
 
-    session: "YAML"
+    session: Simple
 
-Or, to enable it from within your code,
+The L<Dancer::Session::Simple> backend implements very simple in-memory session
+storage.  This will be fast and useful for testing, but sessions do not persist
+between restarts of your app.
+
+You can also use the L<Dancer::Session::YAML> backend included with Dancer,
+which stores session data on disc in YAML files (since YAML is a nice
+human-readable format, it makes inspecting the contents of sessions a breeze):
+
+    session: YAML
+
+Or, to enable session support from within your code,
 
     set session => 'YAML';
 
@@ -179,7 +233,7 @@ Or, to enable it from within your code,
 the example is the session backend to use; this is shorthand for
 L<Dancer::Session::YAML>.  There are other session backends you may wish to use,
 for instance L<Dancer::Session::Memcache>, but the YAML backend is a simple and
-easy to use example which stores session data in a YAML file in sessions/.
+easy to use example which stores session data in a YAML file in sessions).
 
 
 =head3 Storing data in the session
@@ -198,6 +252,22 @@ Retrieving data from the session is as easy as:
 Or, alternatively,
 
     session->{varname}
+
+
+=head3 Controlling where sessions are stored
+
+For disc-based session back ends like L<Dancer::Session::YAML>,
+L<Dancer::Session::Storable> etc, session files are written to the session dir
+specified by the C<session_dir> setting, which defaults to C<appdir/sessions> if
+not specifically set.
+
+If you need to control where session files are created, you can do so quickly
+and easily within your config file, for example:
+
+    session_dir: /tmp/dancer-sessions
+
+If the directory you specify does not exist, Dancer will attempt to create it
+for you.
 
 
 
@@ -223,7 +293,7 @@ This can easily be handled with a before filter to check their session:
 
     post '/login' => sub {
         # Validate the username and password they supplied
-        if ($params->{user} eq 'bob' && params->{pass} eq 'letmein) {
+        if ($params->{user} eq 'bob' && params->{pass} eq 'letmein') {
             session user => $params->{user};
             redirect params->{path} || '/';
         } else {
@@ -246,7 +316,7 @@ view. The `appdir/views' directory is the place where views are located.
 
 You can change this location by changing the setting 'views'.
 
-By default, the internal template engine is used L<Dancer::Template::Simple> 
+By default, the internal template engine L<Dancer::Template::Simple> is used,
 but you may want to upgrade to Template::Toolkit. If you do so, you have to 
 enable this engine in your settings as explained in
 L<Dancer::Template::TemplateToolkit>.  If you do so, you'll also have to 
@@ -382,7 +452,7 @@ additional logging options.
 In order to enable the logging system for your application, you first have to
 start the logger engine in your config.yml
 
-    log: 'file'
+    logger: 'file'
 
 Then you can choose which kind of messages you want to actually log:
 
