@@ -26,11 +26,17 @@ sub get_handler {
 # handle an incoming request, process it and return a response
 sub handle_request {
     my ($self, $request) = @_;
+
+    # deserialize the request body if possible
+    $request = Dancer::Serializer->process_request($request) if setting('serializer');
+
+    # save the request object
     Dancer::SharedData->request($request);
 
     # read cookies from client
     Dancer::Cookies->init;
 
+    # TODO : move that elsewhere
     if (setting('auto_reload')) {
         eval "use Module::Refresh";
         if ($@) {
@@ -51,7 +57,6 @@ sub handle_request {
       || Dancer::Renderer->render_action
       || Dancer::Renderer->render_error(404);
 
-    Dancer::SharedData->reset_all();
     return $self->render_response($response);
 }
 
@@ -60,8 +65,14 @@ sub handle_request {
 sub render_response {
     my ($self, $response) = @_;
 
+    # serializing magick occurs here! (only if needed)
+    $response = Dancer::Serializer->process_response($response)
+        if setting('serializer');
+
     my $content = $response->{content};
     $content = [$content] unless (ref($content) eq 'GLOB');
+
+    Dancer::SharedData->reset_all();
 
     return [$response->{status}, $response->{headers}, $content];
 }

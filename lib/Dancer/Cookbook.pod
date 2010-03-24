@@ -343,8 +343,7 @@ example:
 
     get '/hello/:name' => sub {
         my $name = params->{name};
-        my $browser = request->{user_agent};
-        template 'hello.tt', { name => $name, $browser => $browser };
+        template 'hello.tt', { name => $name };
     };
 
 The template 'hello.tt' could contain, for example:
@@ -469,6 +468,13 @@ current process, the message and the caller information (file and line).
 Just call  C<debug>, C<warning> or C<error> with your message:
 
     debug "This is a debug message from my app.";
+
+
+=head2 Deploying your Dancer applications
+
+For examples on deploying your Dancer applications (including standalone, behind
+proxy/load-balancing software, and using common web servers including Apache to
+run via CGI/FastCGI etc, see L<Dancer::Deployment>.
 
 
 =head1 AUTHORS

@@ -21,7 +21,7 @@ use Dancer::Handler;
 use base 'Exporter';
 
 $AUTHORITY = 'SUKRIA';
-$VERSION   = '1.160';
+$VERSION   = '1.170';
 @EXPORT    = qw(
   any
   before
@@ -60,6 +60,7 @@ $VERSION   = '1.160';
   status
   template
   true
+  upload
   uri_for
   var
   vars
@@ -118,6 +119,7 @@ sub splat    { @{Dancer::SharedData->request->params->{splat}} }
 sub status   { Dancer::Response::status(@_) }
 sub template { Dancer::Helpers::template(@_) }
 sub true     {1}
+sub upload   { Dancer::SharedData->request->upload(@_) }
 sub uri_for  { Dancer::SharedData->request->uri_for(@_) }
 sub var      { Dancer::SharedData->var(@_) }
 sub vars     { Dancer::SharedData->vars }
@@ -177,7 +179,8 @@ Dancer - Lightweight yet powerful web application framework
 
 The above is a basic but functional web app created with Dancer.  If you want to
 see more examples and get up and running quickly, check out the
-L<Dancer::Cookbook>.
+L<Dancer::Cookbook>.  For examples on deploying your Dancer applications, see
+L<Dancer::Deployment>.
 
 
 =head1 DESCRIPTION
@@ -292,7 +295,7 @@ be set in the params hashref.
 A route can contain a wildcard (represented by a '*'). Each wildcard match will
 be returned in an arrayref, accessible via the `splat' keyword.
 
-    get '/download/*.* => sub {
+    get '/download/*.*' => sub {
         my ($file, $ext) = splat;
         # do something with $file.$ext here
     };
@@ -390,9 +393,9 @@ within the application:
 	    redirect 'http://twitter.com/me';
     };
 
-You can also force Dancer to return an specific 300-ish HTTP response code:
+You can also force Dancer to return a specific 300-ish HTTP response code:
 
-    get '/old/:resouce', sub {
+    get '/old/:resource', sub {
         redirect '/new/'.params->{resource}, 301;
     };
 
@@ -414,6 +417,43 @@ render the response accordingly.
 
 The status keyword receives the name of the status to render, it can be either
 an HTTP code or its alias, as defined in L<Dancer::HTTP>.
+
+=head2 file uploads
+
+Dancer provides a common interface to handle file uploads. Any uploaded file is
+accessible as a L<Dancer::Request::Upload> object. you can access all parsed
+uploads via the upload keyword, like the following:
+
+    post '/some/route' => sub {
+        my $file = upload('file_input_foo');
+        # file is a Dancer::Request::Upload object
+    };
+
+If you named multiple input of type "file" with the same name, the upload
+keyword will return an array of Dancer::Request::Upload objects:
+
+    post '/some/route' => sub {
+        my ($file1, $file2) = upload('files_input');
+        # $file1 and $file2 are Dancer::Request::Upload objects
+    };
+
+You can also access the raw hashref of parsed uploads via the current requesrt
+object:
+
+    post '/some/route' => sub {
+        my $all_uploads = request->uploads;
+        # $all_uploads->{'file_input_foo'} is a Dancer::Request::Upload object
+        # $all_uploads->{'files_input'} is an array ref of Dancer::Request::Upload objects
+    };
+
+Note that you can also access the filename of the upload received via the params
+keyword:
+
+    post '/some/route' => sub {
+        # params->{'files_input'} is the filename of the file uploaded
+    };
+
+See L<Dancer::Request::Upload> for details about the interface provided.
 
 =head2 content_type
 
@@ -596,8 +636,8 @@ Then in App/User/Routes.pm:
 =head1 LOGGING
 
 It's possible to log messages sent by the application. In the current version,
-only one method is possible for logging messages but it may come in future
-releases new methods.
+only one method is possible for logging messages but future releases may add
+additional logging methods, for instance logging to syslog.
 
 In order to enable the logging system for your application, you first have to
 start the logger engine in your config.yml
@@ -637,13 +677,13 @@ enable this engine in your settings as explained in
 L<Dancer::Template::TemplateToolkit>. If you do so, you'll also have to import
 the L<Template> module in your application code. Note that Dancer configures
 the Template::Toolkit engine to use <% %> brackets instead of its default
-[% %] brackets.
+[% %] brackets, although you can change this in your config file.
 
 All views must have a '.tt' extension. This may change in the future.
 
 In order to render a view, just call the 'template' keyword at the end of the
 action by giving the view name and the HASHREF of tokens to interpolate in the
-view (note that the request, session and route params are automatically 
+view (note that the request, session and route params are automatically
 accessible in the view, named request, session and params):
 
     use Dancer;
@@ -759,7 +799,14 @@ configuration:
 
     route_cache = 1
 
-The default limitations are 10M in size or 600 entries in the cache.
+The default limitations are 10M in size or 600 entries in the cache, however you
+can override these by settings the following settings:
+
+    # limiting the size of the route cache
+    route_cache_size_limit: 50M
+
+    # limiting the number of paths that will be cached
+    route_cache_path_limit: 300
 
 =head1 SETTINGS
 
@@ -770,7 +817,64 @@ A setting is key/value pair assigned by the keyword B<set>:
 
     set setting_name => 'setting_value';
 
+More usefully, settings can be defined in a YAML configuration file.
+Environment-specific settings can also be defined in environment-specific files
+(for instance, you don't want auto_reload in production, and might want extra
+logging in development).  See the cookbook for examples.
+
 See L<Dancer::Config> for complete details about supported settings.
+
+=head1 SERIALIZERS
+
+When writing a webservice, data serialization/deserialization is a common issue
+to deal with. Dancer can automaticall handle that for you, via a serializer.
+
+When setting up a serializer, a new behaviour is authorized for any route
+handler you define: any non-scalar response will be rendered as a serialized
+string, via the current serializer.
+
+Here is an example of a route handler that will return a HashRef
+
+    use Dancer;
+    set serializer => 'JSON';
+
+    get '/user/:id'/ => sub {
+        { foo => 42,
+          number => 100234,
+          list => [qw(one two three)],
+        }
+    };
+
+As soon as the content is not a scalar - and a serializer is set, which is not
+the case by default - Dancer renders the response via the current
+serializer.
+
+Hence, with the JSON serializer set, the route handler above would result in a content like the following:
+
+    {"number":100234,"foo":42,"list":["one","two","three"]}
+
+The following serializers are available, be aware they dynamically depend on
+Perl modules you may not have on your system.
+
+=over 4
+
+=item B<JSON>
+
+requires L<JSON>
+
+=item B<YAML>
+
+requires L<YAML>
+
+=item B<XML>
+
+requires L<XML::Simple>
+
+=item B<Mutable>
+
+will try to find the appropriate serializer using the B<Content-Type> and B<Accept-type> header of the request.
+
+=back
 
 =head1 EXAMPLE
 
@@ -802,6 +906,17 @@ see the AUTHORS file that comes with this distribution for details.
 
 The source code for this module is hosted on GitHub
 L<http://github.com/sukria/Dancer>
+
+
+=head1 GETTING HELP / CONTRIBUTING
+
+The Dancer development team can be found on #dancer on irc.perl.org:
+L<irc://irc.perl.org/dancer>
+
+There is also a Dancer users mailing list available - subscribe at:
+
+L<http://lists.perldancer.org/cgi-bin/listinfo/dancer-users>
+
 
 =head1 DEPENDENCIES
 

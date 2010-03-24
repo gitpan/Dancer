@@ -3,9 +3,11 @@ package Dancer::Request;
 use strict;
 use warnings;
 use Dancer::Object;
+use Dancer::Request::Upload;
 use Dancer::SharedData;
 use HTTP::Body;
 use URI;
+use URI::Escape;
 
 use base 'Dancer::Object';
 my @http_env_keys = (
@@ -15,12 +17,14 @@ my @http_env_keys = (
     'connection',      'accept',
     'referer',
 );
+my $count = 0;
 
 Dancer::Request->attributes(
     # query
     'env',          'path', 'method',
     'content_type', 'content_length',
-    'body',         'path_info',
+    'body',         'path_info', 'id',
+    'uploads',
     @http_env_keys,
 );
 
@@ -28,6 +32,10 @@ Dancer::Request->attributes(
 sub agent                 { $_[0]->user_agent }
 sub remote_address        { $_[0]->{env}->{'REMOTE_ADDR'} }
 sub forwarded_for_address { $_[0]->{env}->{'X_FORWARDED_FOR'} }
+sub is_post               { $_[0]->{method} eq 'POST' }
+sub is_get                { $_[0]->{method} eq 'GET' }
+sub is_put                { $_[0]->{method} eq 'PUT' }
+sub is_delete             { $_[0]->{method} eq 'DELETE' }
 
 sub new {
     my ($class, $env) = @_;
@@ -42,6 +50,7 @@ sub new {
         content_length => $env->{CONTENT_LENGTH} || 0,
         content_type   => $env->{CONTENT_TYPE} || '',
         env            => $env,
+        id             => ++$count,
         _chunk_size    => 4096,
         _read_position => 0,
         _body_params   => undef,
@@ -87,7 +96,7 @@ sub base {
 }
 
 sub uri_for {
-    my ($self, $part, $params) = @_;
+    my ( $self, $part, $params, $dont_escape ) = @_;
     my $uri = $self->base;
 
     # Make sure there's exactly one slash between the base and the new part
@@ -97,7 +106,8 @@ sub uri_for {
     $uri->path("$base/$part");
 
     $uri->query_form($params) if $params;
-    return $uri->canonical;
+
+    return $dont_escape ? uri_unescape( $uri->canonical ) : $uri->canonical;
 }
 
 # public interface compat with CGI.pm objects (FIXME do Dancer's users really
@@ -128,24 +138,58 @@ sub params {
     }
 }
 
+sub is_ajax {
+    my $self = shift;
+
+    return 0 unless defined $self->{'x_requested_with'};
+    return 0 if $self->{'x_requested_with'} ne 'XMLHttpRequest';
+    return 1;
+}
+
+# context-aware accessor for uploads
+sub upload {
+    my ($self, $name) = @_;
+    my $res = $self->{uploads}{$name};
+    
+    return $res unless wantarray;
+    return () unless defined $res;
+    return (ref($res) eq 'ARRAY') ? @$res : $res;
+}
+
 # private
 
 sub _init {
     my ($self) = @_;
 
+    $self->_build_request_env();
     $self->_build_path()      unless $self->path;
     $self->_build_method()    unless $self->method;
     $self->_build_path_info() unless $self->path_info;
-    $self->_build_request_env();
 
     $self->{_http_body} =
       HTTP::Body->new($self->content_type, $self->content_length);
     $self->_build_params();
+    $self->_build_uploads unless $self->uploads;
 }
 
+# Some Dancer's core components sometimes need to alter
+# the parsed request params, these protected accessors are provided
+# for this purpose
 sub _set_route_params {
     my ($self, $params) = @_;
     $self->{_route_params} = $params;
+    $self->_build_params();
+}
+
+sub _set_body_params {
+    my ($self, $params) = @_;
+    $self->{_body_params} = $params;
+    $self->_build_params();
+}
+
+sub _set_query_params {
+    my ($self, $params) = @_;
+    $self->{_query_params} = $params;
     $self->_build_params();
 }
 
@@ -155,15 +199,16 @@ sub _build_request_env {
     # Don't refactor that, it's called whenever a request object is needed, that
     # means at least once per request. If refactored in a loop, this will cost 4
     # times more than the following static map.
-    $self->{user_agent}      = $self->{env}{HTTP_USER_AGENT};
-    $self->{host}            = $self->{env}{HTTP_HOST};
-    $self->{accept_language} = $self->{env}{HTTP_ACCEPT_LANGUAGE};
-    $self->{accept_charset}  = $self->{env}{HTTP_ACCEPT_CHARSET};
-    $self->{accept_encoding} = $self->{env}{HTTP_ACCEPT_ENCODING};
-    $self->{keep_alive}      = $self->{env}{HTTP_KEEP_ALIVE};
-    $self->{connection}      = $self->{env}{HTTP_CONNECTION};
-    $self->{accept}          = $self->{env}{HTTP_ACCEPT};
-    $self->{referer}         = $self->{env}{HTTP_REFERER};
+    $self->{user_agent}         = $self->{env}{HTTP_USER_AGENT};
+    $self->{host}               = $self->{env}{HTTP_HOST};
+    $self->{accept_language}    = $self->{env}{HTTP_ACCEPT_LANGUAGE};
+    $self->{accept_charset}     = $self->{env}{HTTP_ACCEPT_CHARSET};
+    $self->{accept_encoding}    = $self->{env}{HTTP_ACCEPT_ENCODING};
+    $self->{keep_alive}         = $self->{env}{HTTP_KEEP_ALIVE};
+    $self->{connection}         = $self->{env}{HTTP_CONNECTION};
+    $self->{accept}             = $self->{env}{HTTP_ACCEPT};
+    $self->{referer}            = $self->{env}{HTTP_REFERER};
+    $self->{'x_requested_with'} = $self->{env}{'HTTP_X_REQUESTED_WITH'};
 
 }
 
@@ -181,8 +226,8 @@ sub _build_params {
     # and merge everything
     $self->{params} = {
         %$previous,
-        %{$self->{_query_params}}, 
-        %{$self->{_route_params}}, 
+        %{$self->{_query_params}},
+        %{$self->{_route_params}},
         %{$self->{_body_params}},
     };
 }
@@ -236,7 +281,7 @@ sub _url_decode {
 
 sub _parse_post_params {
     my ($self) = @_;
-    return $self->{_body_params} if defined $self->{_body_params}; 
+    return $self->{_body_params} if defined $self->{_body_params};
 
     my $body = $self->_read_to_end();
     $self->{_body_params} = $self->{_http_body}->param;
@@ -251,7 +296,7 @@ sub _parse_get_params {
     foreach my $token (split /&/, $source) {
         my ($key, $val) = split(/=/, $token);
         next unless defined $key;
-        $val ||= "";
+        $val = (defined $val) ? $val : '';
         $key = $self->_url_decode($key);
         $val = $self->_url_decode($val);
 
@@ -318,6 +363,40 @@ sub _read {
     }
 }
 
+# Taken gently from Plack::Request, thanks to Plack authors.
+sub _build_uploads {
+    my ($self) = @_;
+
+    my $uploads = $self->{_http_body}->upload;
+    my %uploads;
+    
+    for my $name (keys %{ $uploads }) {
+        my $files = $uploads->{$name};
+        $files = ref $files eq 'ARRAY' ? $files : [$files];
+
+        my @uploads;
+        for my $upload (@{ $files }) {
+            push(
+                @uploads,
+                Dancer::Request::Upload->new(
+                    headers  => $upload->{headers},
+                    tempname => $upload->{tempname},
+                    size     => $upload->{size},
+                    filename => $upload->{filename},
+                )
+            );
+        }
+        $uploads{$name} = @uploads > 1 ? \@uploads : $uploads[0];
+
+        # support access to the filename as a normal param
+        my @filenames = map { $_->{filename} } @uploads;
+        $self->{_body_params}{$name} =  @filenames > 1 ? \@filenames : $filenames[0];
+    }
+
+    $self->{uploads} = \%uploads;
+    $self->_build_params();
+}
+
 1;
 
 __END__
@@ -326,11 +405,11 @@ __END__
 
 =head1 NAME
 
-Dancer::Request 
+Dancer::Request
 
 =head1 DESCRIPTION
 
-This class implements a common interface for accessing incoming requests in 
+This class implements a common interface for accessing incoming requests in
 a Dancer application.
 
 In a route handler, the current request object can be accessed by the C<request>
@@ -370,7 +449,7 @@ would return C<http://localhost:5000/foo/bar?baz=baz>.
 =head2 params($source)
 
 If no source given, return a mixed hashref containing all the parameters that
-have been parsed. 
+have been parsed.
 Be aware it's a mixed structure, so if you use multiple
 variables with the same name in your route pattern, query string or request
 body, you can't know for sure which value you'll get there.
@@ -378,7 +457,7 @@ body, you can't know for sure which value you'll get there.
 If you need to use the same name for different sources of input, use the
 C<$source> option, like the following:
 
-If source equals C<route>, then only params parsed from route pattern 
+If source equals C<route>, then only params parsed from route pattern
 are returned.
 
 If source equals C<query>, then only params parsed from the query string are
@@ -405,9 +484,19 @@ If you need to access the body of the request, you have to use this accessor and
 should not try to read C<psgi.input> by hand. C<Dancer::Request> already did it for you
 and kept the raw body untouched in there.
 
+=head2 is_ajax()
+
+Return true if the value of the header C<X-Requested-With> is XMLHttpRequest.
+
 =head2 env()
 
 Return the current environement (C<%ENV>), as a hashref.
+
+=head2 uploads()
+
+Returns a reference to a hash containing uploads. Values can be either a
+L<Dancer::Request::Upload> object, or an arrayref of L<Dancer::Request::Upload>
+objects.
 
 =head2 HTTP environment variables
 
@@ -436,8 +525,8 @@ Dancer::Request object through specific accessors, here are those supported:
 
 =head1 AUTHORS
 
-This module has been written by Alexis Sukrieh and was mostly 
-inspired by L<Plack::Request>, written by Tatsuiko Miyagawa. 
+This module has been written by Alexis Sukrieh and was mostly
+inspired by L<Plack::Request>, written by Tatsuiko Miyagawa.
 
 Tatsuiko Miyagawa also gave a hand for the PSGI interface.
 

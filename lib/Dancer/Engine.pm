@@ -1,6 +1,6 @@
 package Dancer::Engine;
 
-# This is the mother class of every engine abstract class.
+# This is the base-class of every engine abstract class.
 # This allow us to put in that single place the engine creation
 # from a namespace and a name, to its configuration initialization.
 
@@ -45,7 +45,7 @@ sub build {
 
     die "unknown $type engine '$name', " .
         "perhaps you need to install $engine_class?"
-      unless Dancer::ModuleLoader->require($engine_class);
+      unless Dancer::ModuleLoader->load($engine_class);
 
     # creating the engine
     return $engine_class->new(

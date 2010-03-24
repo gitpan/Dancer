@@ -35,7 +35,7 @@ sub current {
 
 # helpers for the route handlers
 sub set          { $CURRENT                 = shift; }
-sub status       { $CURRENT->{status}       = shift }
+sub status       { $CURRENT->{status}       = Dancer::HTTP->status(shift) }
 sub content_type { $CURRENT->{content_type} = shift }
 sub pass         { $CURRENT->{pass}         = 1 }
 
@@ -59,6 +59,18 @@ sub sanitize_headers {
         push @sanitized, ($key => $value);
     }
     $self->{headers} = \@sanitized;
+}
+
+sub update_headers {
+    my ($self, %params) = @_;
+    my $headers = $self->{headers};
+    my @new_headers;
+
+    for (my $i = 0; $i < scalar(@$headers); $i += 2) {
+        my ($key, $value) = ($headers->[$i], $headers->[$i + 1]);
+        push @new_headers, ($key => $params{$key}) if exists($params{$key});
+    }
+    $self->{headers} = \@new_headers;
 }
 
 1;

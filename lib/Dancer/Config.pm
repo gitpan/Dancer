@@ -37,6 +37,11 @@ my $setters = {
         my ($setting, $value) = @_;
         Dancer::Route::Cache->reset();
     },
+    serializer => sub {
+        my ($setting, $value) = @_;
+        require Dancer::Serializer;
+        Dancer::Serializer->init($value);
+    },
 };
 
 # public accessor for get/set
@@ -223,6 +228,8 @@ catched. If set to false, Dancer will render the default error page, using
 $public/$error_code.html if it exists.
 
 =head2 auto_reload (boolean)
+
+Requires L<Module::Refresh>.
 
 If set to true, Dancer will reload the route handlers whenever the file where
 they are defined is changed. This is very useful in development environment but

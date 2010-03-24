@@ -21,10 +21,10 @@ sub get { $_cache };
 
 sub reset {
     $_cache = Dancer::Route::Cache->new();
-    $_cache->{size_limit} = setting('size_limit') 
-        if defined setting('size_limit');
-    $_cache->{path_limit} = setting('path_limit') 
-        if defined setting('path_limit');
+    $_cache->{size_limit} = setting('route_cache_size_limit')
+        if defined setting('route_cache_size_limit');
+    $_cache->{path_limit} = setting('route_cache_path_limit')
+        if defined setting('route_cache_path_limit');
 }
 
 # instance 
@@ -77,7 +77,7 @@ sub route_from_path {
     return $self->{'cache'}{$method}{$path} || undef;
 }
 
-sub store_route {
+sub store_path {
     my ( $self, $method, $path, $route ) = @_;
 
     $method && $path && $route
@@ -140,7 +140,14 @@ Dancer::Route::Cache - route caching mechanism for L<Dancer>
 
 =head1 SYNOPSIS
 
+    my $cache = Dancer::Route::Cache->new(
+        path_limit => 300, # optional
+    );
 
+    # storing a path
+    # /new/item/ is the path, $route is a compiled route
+    $cache->store_path( 'get', '/new/item/', $route );
+    my $cached_route = $cache->route_from_path('/new/item/');
 
 =head1 DESCRIPTION
 
@@ -173,9 +180,9 @@ C<new()>.
 
 Fetches the route from the path in the cache.
 
-=head2 store_route( $path => $store )
+=head2 store_path( $method, $path => $route )
 
-Stores the route in the cache according to the path.
+Stores the route in the cache according to the path and $method.
 
 For developers: the reason we're using an object for this and not directly using
 the registry hash is because we need to enforce the limits.
@@ -191,6 +198,15 @@ B<NOTICE:> handles bytes, not bits!
 
     # doesn't need an existing object
     $bytes = Dancer::Route::Cache->parse_size('300G'); # works this way too
+
+=head2 route_cache_size
+
+Returns a rough calculation the size of the cache. This is used to enforce the
+size limit.
+
+=head2 route_cache_paths
+
+Returns all the paths in the cache. This is used to enforce the path limit.
 
 =head1 ATTRIBUTES
 
