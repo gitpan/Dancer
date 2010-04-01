@@ -2,21 +2,24 @@ package Dancer::Serializer::YAML;
 
 use strict;
 use warnings;
-use YAML;
+use Dancer::ModuleLoader;
 use base 'Dancer::Serializer::Abstract';
+
+sub init {
+    die 'YAML is needed and is not installed'
+      unless Dancer::ModuleLoader->load('YAML');
+}
 
 sub serialize {
     my ($self, $entity) = @_;
-    Dump $entity;
+    YAML::Dump $entity;
 }
 
 sub deserialize {
     my ($self, $content) = @_;
-    Load $content;
+    YAML::Load $content;
 }
 
-sub content_type {
-    "text/x-yaml";
-}
+sub content_type { 'text/x-yaml' }
 
 1;
