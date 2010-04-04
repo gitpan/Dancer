@@ -21,7 +21,7 @@ use Dancer::Handler;
 use base 'Exporter';
 
 $AUTHORITY = 'SUKRIA';
-$VERSION   = '1.173';
+$VERSION   = '1.173_01';
 @EXPORT    = qw(
   any
   before
@@ -208,7 +208,8 @@ environments.
 
 As soon as Dancer is imported to a script, that script becomes a webapp.  All
 the script has to do is to declare a list of B<routes>.  A route handler is
-composed by an HTTP method, a path pattern and a code block.
+composed by an HTTP method, a path pattern and a code block. C<strict> and
+C<warnings> pragma are also imported with Dancer.
 
 The code block given to the route handler has to return a string which will be
 used as the content to render to the client.
@@ -481,7 +482,7 @@ In the example above, only 'name' and 'value' are mandatory.
 You can access their value with the B<cookies> helper, which returns a hashref
 of Cookie objects:
 
-    get '/some_action' => sub { 
+    get '/some_action' => sub {
         my $cookie = cookies->{name};
         return $cookie->value;
     };
@@ -765,13 +766,13 @@ This layout can be used like the following:
 
 Of course, if a layout is set, it can also be disabled for a specific action,
 like the following:
-    
+
     use Dancer;
     layout 'main';
 
     get '/nolayout' => sub {
-        template 'some_ajax_view', 
-            { tokens_var => "42" }, 
+        template 'some_ajax_view',
+            { tokens_var => "42" },
             { layout => 0 };
     };
 

@@ -1,4 +1,31 @@
-Dancer 1.73
+Dancer 1.173_01 (Developer release)
+    [ Franck Cuny ]
+    * Doc fixes.
+      (Thanks to poisonbit)
+
+	[ Alexis Sukrieh ]
+	* New serializer: Dumper for easily output dumped variable 
+	  in text/plain.
+	* Before filters can now access route params
+    * Support for '.' as a token separator in params parsing
+	* The standalone server respect the 'access_log' setting, 
+	  the starting banner is printed on STDERR only if the 
+	  setting is set to true.
+
+    [ Sawyer X ]
+    * Fixed Windows PSGI.URL_SCHEME bug, causing tests to fail
+      (Thanks to ADAMK for reporting)
+
+Dancer 1.173
+    [ Alexis Sukrieh ]
+    * Documenting set_cookie in Dancer.pm.
+
+    [ Franck Cuny ]
+    * Cleaning up serializer test.
+
+    [ François Charlier ]
+    * Documenting layout disabling.
+
     [ Sawyer X ]
     * Fix a few failing tests because of compilation errors.
     * Add init{} subs for all serializers.
@@ -8,7 +35,7 @@ Dancer 1.73
     * Fix issue 52 - creating invalid cookie expiration dates.
       Thanks to Juanjo (reidrac) for reporting!
 
-Dancer 1.72
+Dancer 1.172
     [ Alexis Sukrieh ]
     * Plugin support.
 

@@ -81,7 +81,7 @@ sub init_confdir {
 }
 
 sub load {
-    init_confdir(); 
+    init_confdir();
 
     # look for the conffile
     return 1 unless -f conffile;
@@ -128,7 +128,7 @@ sub load_default_settings {
       ||= $ENV{DANCER_ENVIRONMENT}
       || $ENV{PLACK_ENV}
       || 'development';
-    
+
     setting template => 'simple';
 }
 load_default_settings();
@@ -194,12 +194,12 @@ This is the path of the public directory, where static files are stored. Any
 existing file in that directory will be served as a static file, before
 mathcing any route.
 
-By default, it points to APPDIR/public where APPDIR is the directory that 
+By default, it points to APPDIR/public where APPDIR is the directory that
 contains your Dancer script.
 
 =head2 layout (string)
 
-name of the layout to use when rendering view. Dancer will look for 
+name of the layout to use when rendering view. Dancer will look for
 a matching template in the directory $appdir/views/layout.
 
 =head2 warnings (boolean)
