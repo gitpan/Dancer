@@ -47,6 +47,7 @@ lib/Dancer/Template.pm
 lib/Dancer/Template/Abstract.pm
 lib/Dancer/Template/Simple.pm
 lib/Dancer/Template/TemplateToolkit.pm
+LICENSE
 Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP
@@ -160,8 +161,8 @@ t/lib/EasyMocker.pm
 t/lib/LinkBlocker.pm
 t/lib/TestApp.pm
 t/lib/TestSerializer.pm
+t/lib/TestUtils.pm
 t/manifest.t
 t/pod.t
-t/TestUtils.pm
 TODO
 META.yml                                 Module meta-data (added by MakeMaker)

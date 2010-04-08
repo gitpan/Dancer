@@ -21,7 +21,7 @@ use Dancer::Handler;
 use base 'Exporter';
 
 $AUTHORITY = 'SUKRIA';
-$VERSION   = '1.173_01';
+$VERSION   = '1.174';
 @EXPORT    = qw(
   any
   before
@@ -873,7 +873,7 @@ Here is an example of a route handler that will return a HashRef
     use Dancer;
     set serializer => 'JSON';
 
-    get '/user/:id'/ => sub {
+    get '/user/:id/' => sub {
         { foo => 42,
           number => 100234,
           list => [qw(one two three)],
@@ -989,6 +989,8 @@ This module is free software and is published under the same
 terms as Perl itself.
 
 =head1 SEE ALSO
+
+Main Dancer web site: L<http://perldancer.org/>.
 
 The concept behind this module comes from the Sinatra ruby project,
 see L<http://www.sinatrarb.com/> for details.

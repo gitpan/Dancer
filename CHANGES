@@ -1,7 +1,23 @@
+Dancer 1.174
+    [ Gabor Szabo ]
+    * Docs fixes, typo in warning.
+    * TestUtils.pm is now in "t/lib".
+
+    [ David Precious ]
+    * Support semi-colons as name=value pair separators when parsing
+      querystring.  Satisfies feature request/issue 59.
+      Thanks to deepakg for requesting this feature.
+
+    [ Sawyer X ]
+    * RT #56381 reported by Jonathan Yu on behalf on Debian Perl team.
+      (Adding LICENSE file)
+
 Dancer 1.173_01 (Developer release)
     [ Franck Cuny ]
     * Doc fixes.
       (Thanks to poisonbit)
+    * Plugins configuration
+    * Cleaning up tests
 
 	[ Alexis Sukrieh ]
 	* New serializer: Dumper for easily output dumped variable 

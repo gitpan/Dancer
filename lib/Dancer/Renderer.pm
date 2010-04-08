@@ -79,8 +79,7 @@ sub html_page {
     );
 }
 
-sub get_action_response();
-sub get_action_response() {
+sub get_action_response {
     my $request = Dancer::SharedData->request;
     my $path    = $request->path_info;
     my $method  = $request->method;
@@ -171,7 +170,7 @@ sub templates {
 <p><% content %></p>
 </div>
 <div id="footer">
-Powered by <a href="http://dancer.sukria.net">Dancer</a> <% version %>
+Powered by <a href="http://perldancer.org/">Dancer</a> <% version %>
 </div>
 </body>
 </html>',
