@@ -1,3 +1,11 @@
+Dancer 1.175
+    [ Sawyer X ]
+    * RT #56395 reported by Jonathan Yu on behalf of Debian Perl team.
+    * Documentation for Dancer::Error
+
+    [ Alexis Sukrieh ]
+    * fixed t/15_plugins/02_config.t when YAML is not installed 
+
 Dancer 1.174
     [ Gabor Szabo ]
     * Docs fixes, typo in warning.
@@ -9,7 +17,7 @@ Dancer 1.174
       Thanks to deepakg for requesting this feature.
 
     [ Sawyer X ]
-    * RT #56381 reported by Jonathan Yu on behalf on Debian Perl team.
+    * RT #56381 reported by Jonathan Yu on behalf of Debian Perl team.
       (Adding LICENSE file)
 
 Dancer 1.173_01 (Developer release)
