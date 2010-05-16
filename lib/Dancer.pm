@@ -27,7 +27,7 @@ use Dancer::ModuleLoader;
 use base 'Exporter';
 
 $AUTHORITY = 'SUKRIA';
-$VERSION   = '1.178_01';
+$VERSION   = '1.1800';
 @EXPORT    = qw(
   ajax
   any
@@ -213,8 +213,7 @@ __END__
 
 =head1 NAME
 
-Dancer - Lightweight yet powerful web application framework
-
+Dancer - lightweight yet powerful web application framework
 
 =head1 SYNOPSIS
 

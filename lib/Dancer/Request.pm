@@ -416,7 +416,7 @@ __END__
 
 =head1 NAME
 
-Dancer::Request - Interface for accessing incoming requests
+Dancer::Request - interface for accessing incoming requests
 
 =head1 DESCRIPTION
 
@@ -433,7 +433,7 @@ method, like in the following example:
         # ...
     };
 
-A route handler should not read the environment by itslef, but should instead
+A route handler should not read the environment by itself, but should instead
 use the current request object.
 
 =head1 PUBLIC INTERFACE
