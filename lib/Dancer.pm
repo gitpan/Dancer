@@ -27,7 +27,7 @@ use Dancer::ModuleLoader;
 use base 'Exporter';
 
 $AUTHORITY = 'SUKRIA';
-$VERSION   = '1.1800';
+$VERSION   = '1.1801';
 @EXPORT    = qw(
   ajax
   any
@@ -256,7 +256,7 @@ environments.
 
 This documentation describes all the exported symbols of Dancer, if you want to have
 a quick start guide to discover the framework, you should look at
-L<Dancer::Tutorial>.
+L<Dancer::Introduction>.
 
 If you want to have specific examples of code for real-life problems, see the 
 L<Dancer::Cookbook>.
