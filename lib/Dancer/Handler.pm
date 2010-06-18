@@ -30,8 +30,13 @@ sub get_handler {
 # handle an incoming request, process it and return a response
 sub handle_request {
     my ($self, $request) = @_;
+    my $remote = $request->remote_address || '-';
+
     Dancer::SharedData->reset_timer;
-    Dancer::Logger->core("request: ".$request->method." ".$request->path);
+    Dancer::Logger->core(
+        "request: ".$request->method." ".$request->path 
+        . " from " . $remote
+    );
 
     # deserialize the request body if possible
     $request = Dancer::Serializer->process_request($request) if setting('serializer');
