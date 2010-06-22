@@ -12,6 +12,7 @@ use Dancer::GetOpt;
 use Dancer::Error;
 use Dancer::Helpers;
 use Dancer::Logger;
+use Dancer::Plugin;
 use Dancer::Renderer;
 use Dancer::Response;
 use Dancer::Route;
@@ -29,7 +30,7 @@ use File::Spec;
 use base 'Exporter';
 
 $AUTHORITY = 'SUKRIA';
-$VERSION   = '1.1804';
+$VERSION   = '1.1805';
 @EXPORT    = qw(
   ajax
   any
@@ -54,6 +55,7 @@ $VERSION   = '1.1804';
   layout
   load
   load_app
+  load_plugin
   logger
   mime_type
   options
@@ -96,9 +98,9 @@ sub cookies      { Dancer::Cookies->cookies }
 sub config       { Dancer::Config::settings() }
 sub content_type { Dancer::Response::content_type(@_) }
 sub dance        { Dancer::start(@_) }
-sub debug        { Dancer::Logger->debug(@_) }
+sub debug        { goto &Dancer::Logger::debug }
 sub dirname      { Dancer::FileUtils::dirname(@_) }
-sub error        { Dancer::Logger->error(@_) }
+sub error        { goto &Dancer::Logger::error }
 sub send_error   { Dancer::Helpers->error(@_) }
 sub false        {0}
 sub from_dumper  { Dancer::Serializer::Dumper::from_dumper(@_) }
@@ -154,11 +156,11 @@ sub upload   { Dancer::SharedData->request->upload(@_) }
 sub uri_for  { Dancer::SharedData->request->uri_for(@_) }
 sub var      { Dancer::SharedData->var(@_) }
 sub vars     { Dancer::SharedData->vars }
-sub warning  { Dancer::Logger->warning(@_) }
+sub warning  { goto &Dancer::Logger::warning }
 
 sub load_app {
     for my $app (@_) {
-        Dancer::Logger->core("loading application $app");
+        Dancer::Logger::core("loading application $app");
 
         use lib path( dirname( File::Spec->rel2abs($0) ), 'lib' );
 
@@ -168,7 +170,9 @@ sub load_app {
     }
 }
 
-
+sub load_plugin {
+    goto &Dancer::Plugin::load_plugin; 
+}
 
 # When importing the package, strict and warnings pragma are loaded,
 # and the appdir detection is performed.
@@ -458,6 +462,17 @@ C<./lib> directory.
 Note that a package loaded using load_app B<must> import Dancer with the
 C<:syntax> option, in order not to change the application directory
 (which has been previously set for the caller script).
+
+=head2 load_plugin
+
+Use this keyword to load plugin in the current namespace. As for
+load_app, the method takes care to set the libdir to the current
+C<./lib> directory.
+
+    package MyWebApp;
+    use Dancer;
+
+    load_plugin 'Dancer::Plugin::Database';
 
 =head2 mime_type
 
