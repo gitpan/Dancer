@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Dancer
-version:            1.1811
+version:            1.1812
 abstract:           A minimal-effort oriented web application framework
 author:  []
 license:            perl
@@ -15,6 +15,7 @@ requires:
     File::Spec:           0
     HTTP::Body:           1.07
     HTTP::Server::Simple::PSGI:  0.11
+    LWP:                  0
     MIME::Types:          0
     Test::More:           0.88
     Time::HiRes:          0

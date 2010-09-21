@@ -257,14 +257,18 @@ I\'m in <code>[%appdir%]/views/index.tt</code>
 "dispatch.cgi" =>
 "$PERL_INTERPRETER
 use Plack::Runner;
-Plack::Runner->run('[% appdir %]/$DANCER_SCRIPT.pl');
+use Dancer ':syntax';
+my \$psgi = path(dirname(__FILE__), '..', '$DANCER_SCRIPT.pl');
+Plack::Runner->run(\$psgi);
 ",
 
 "dispatch.fcgi" =>
 "$PERL_INTERPRETER
 use Plack::Handler::FCGI;
+use Dancer ':syntax';
 
-my \$app = do('[% appdir %]/$DANCER_SCRIPT.pl');
+my \$psgi = path(dirname(__FILE__), '..', '$DANCER_SCRIPT.pl');
+my \$app = do(\$psgi);
 my \$server = Plack::Handler::FCGI->new(nproc  => 5, detach => 1);
 \$server->run(\$app);
 ",
@@ -273,7 +277,7 @@ my \$server = Plack::Handler::FCGI->new(nproc  => 5, detach => 1);
 
 "$PERL_INTERPRETER
 use Dancer;
-use lib ('lib');
+use lib path(dirname(__FILE__), 'lib');
 load_app '$appname';
 dance;
 ",
@@ -426,10 +430,14 @@ appname: \"$name\"
 ",
 
 'development.yml' =>
-"log: \"debug\"
+"log: \"core\"
 warnings: 1
 show_errors: 1
-auto_reload: $AUTO_RELOAD
+
+# auto_reload is a development feature
+# you should enable it by yourself if you want it
+# Module::Refresh is needed
+auto_reload: 0
 ",
 
 'production.yml' =>
@@ -437,6 +445,7 @@ auto_reload: $AUTO_RELOAD
 warnings: 0
 show_errors: 0
 route_cache: 1
+# never enable auto_reload in production
 auto_reload: 0
 
 ',
