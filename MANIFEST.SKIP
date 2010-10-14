@@ -1,4 +1,5 @@
 ^\.git\/
+^tags$
 .last_cover_stats
 Makefile$
 ^blib
@@ -10,3 +11,4 @@ Makefile$
 ^.*\.log
 ^run_perltidy.sh$
 ^.*\.swp$
+lib/Dancer/Plugin/WebSocket.pm
