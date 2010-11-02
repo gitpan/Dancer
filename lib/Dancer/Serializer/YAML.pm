@@ -2,7 +2,6 @@ package Dancer::Serializer::YAML;
 
 use strict;
 use warnings;
-use Carp;
 use Dancer::ModuleLoader;
 use base 'Dancer::Serializer::Abstract';
 
@@ -26,7 +25,7 @@ sub loaded { Dancer::ModuleLoader->load('YAML') }
 
 sub init {
     my ($self) = @_;
-    croak 'YAML is needed and is not installed'
+    die 'YAML is needed and is not installed'
       unless $self->loaded;
 }
 

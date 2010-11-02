@@ -2,10 +2,10 @@ package Dancer::Handler::PSGI;
 
 use strict;
 use warnings;
-use Carp;
 use base 'Dancer::Handler';
 
 use Dancer::GetOpt;
+use Dancer::Headers;
 use Dancer::Config;
 use Dancer::ModuleLoader;
 use Dancer::SharedData;
@@ -14,7 +14,7 @@ use Dancer::Logger;
 sub new {
     my $class = shift;
 
-    croak "Plack::Request is needed by the PSGI handler"
+    die "Plack::Request is needed by the PSGI handler"
       unless Dancer::ModuleLoader->load('Plack::Request');
 
     my $self = {};
@@ -22,14 +22,19 @@ sub new {
     return $self;
 }
 
-sub start {
+sub dance {
     my $self = shift;
 
-    my $app = $self->psgi_app();
+    my $app = sub {
+        my $env     = shift;
+        my $request = Dancer::Request->new($env);
+        $self->init_request_headers($request);
+        $self->handle_request($request);
+    };
 
     if (Dancer::Config::setting('plack_middlewares')) {
         my $middlewares = Dancer::Config::setting('plack_middlewares');
-        croak "Plack::Builder is needed for middlewares support"
+        die "Plack::Builder is needed for middlewares support"
           unless Dancer::ModuleLoader->load('Plack::Builder');
 
         my $builder = Plack::Builder->new();
@@ -43,9 +48,12 @@ sub start {
 }
 
 sub init_request_headers {
-    my ($self, $env) = @_;
-    my $plack = Plack::Request->new($env);
-    Dancer::SharedData->headers($plack->headers);
+    my ($self, $request) = @_;
+
+    my $plack = Plack::Request->new($request->env);
+    my $headers = Dancer::Headers->new(headers => $plack->headers);
+    Dancer::SharedData->headers($headers);
+    $request->_build_headers();
 }
 
 1;

@@ -1,7 +1,6 @@
 package Dancer::Request::Upload;
 
 use File::Spec;
-use Carp;
 
 use strict;
 use warnings;
@@ -17,7 +16,7 @@ sub file_handle {
     my ($self) = @_;
     return $self->{_fh} if defined $self->{_fh};
     open my $fh, '<', $self->tempname
-      or croak "Can't open `" . $self->tempname . "' for reading: $!";
+      or die "Can't open `" . $self->tempname . "' for reading: $!";
     $self->{_fh} = $fh;
 }
 

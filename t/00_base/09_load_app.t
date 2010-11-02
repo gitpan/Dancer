@@ -1,11 +1,9 @@
 use Test::More tests => 5, import => ['!pass'];
+use Dancer::Test;
 use strict;
 use warnings;
 
-use Dancer ':syntax';
-
-# XXX appdir is set to the path of the current test
-use Dancer::Test appdir => path($0);
+use Dancer;
 
 eval { load_app 'UnexistentApp' };
 like $@, qr/unable to load application UnexistentApp : Can't locate/, 
@@ -20,4 +18,3 @@ is $@, '', "WorkingApp loaded";
 
 route_exists [ GET => '/app'];
 response_content_is [ GET => '/app'], "app";
-

@@ -11,8 +11,6 @@ BEGIN {
         unless Dancer::ModuleLoader->load('JSON');
 }
 
-plan tests => 14;
-
 ok(setting('serializer' => 'Mutable'), "serializer Mutable loaded");
 my $s = Dancer::Serializer->engine;
 
@@ -57,3 +55,5 @@ ok $@, 'died okay';
 
 $result = $s->serialize($data);
 is $s->content_type, 'text/x-yaml', 'correct content_type';
+
+done_testing;

@@ -2,7 +2,6 @@ package Dancer::Route;
 
 use strict;
 use warnings;
-use Carp;
 use base 'Dancer::Object';
 
 use Dancer::App;
@@ -35,7 +34,7 @@ sub init {
     $self->{'_compiled_regexp'} = undef;
 
     if (!$self->pattern) {
-        croak "cannot create Dancer::Route without a pattern";
+        die "cannot create Dancer::Route without a pattern";
     }
 
     $self->check_options();
@@ -71,7 +70,7 @@ sub match {
     my $path   = $request->path_info;
     my %params;
 
-    Dancer::Logger::core("trying to match `$path' "
+    Dancer::Logger::debug("trying to match `$path' "
           . "against /"
           . $self->{_compiled_regexp}
           . "/");
@@ -121,7 +120,7 @@ sub check_options {
     return 1 unless defined $self->options;
 
     for my $opt (keys %{$self->options}) {
-        croak "Not a valid option for route matching: `$opt'"
+        die "Not a valid option for route matching: `$opt'"
           if not(    (grep {/^$opt$/} @{$_supported_options[0]})
                   || (grep {/^$opt$/} keys(%_options_aliases)));
     }
@@ -152,7 +151,7 @@ sub run {
             return $next_route->run($request);
         }
         else {
-            croak "Last matching route passed";
+            die "Last matching route passed";
         }
     }
 
@@ -167,12 +166,7 @@ sub run {
     my $ct = $response->{content_type} || setting('content_type');
     my $st = $response->{status}       || 200;
     my $headers = [];
-    push @$headers, @{$response->headers_to_array};
-
-    # content type may have already be set earlier
-    # (eg: with send_error)
-    push(@$headers, 'Content-Type' => $ct)
-      unless grep {/Content-Type/} @$headers;
+    push @$headers, @{$response->{headers}}, 'Content-Type' => $ct;
 
     return $content if ref($content) eq 'Dancer::Response';
     return Dancer::Response->new(
@@ -194,7 +188,6 @@ sub find_next_matching_route {
 
 sub execute {
     my ($self) = @_;
-
     if (Dancer::Config::setting('warnings')) {
         my $warning;
         local $SIG{__WARN__} = sub { $warning = $_[0] };
@@ -221,16 +214,14 @@ sub _init_prefix {
         if ($regexp !~ /^$prefix/) {
             $self->{pattern} = qr{${prefix}${regexp}};
         }
-    }
-    elsif ($self->pattern eq '/') {
-
+    }elsif($self->pattern eq '/') {
         # if pattern is '/', we should match:
         # - /prefix/
         # - /prefix
         # this is done by creating a regex for this case
         my $pattern = $self->pattern;
-        my $regex   = qr/$prefix(?:$pattern)?$/;
-        $self->{regexp}  = $regex;
+        my $regex = qr/$prefix(?:$pattern)?$/;
+        $self->{regexp} = $regex;
         $self->{pattern} = $regex;
     }
     else {

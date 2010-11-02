@@ -2,7 +2,6 @@ package Dancer::Serializer::JSON;
 
 use strict;
 use warnings;
-use Carp;
 use Dancer::ModuleLoader;
 use Dancer::Config 'setting';
 use base 'Dancer::Serializer::Abstract';
@@ -26,7 +25,7 @@ sub loaded { Dancer::ModuleLoader->load('JSON') }
 
 sub init {
     my ($self) = @_;
-    croak 'JSON is needed and is not installed'
+    die 'JSON is needed and is not installed'
       unless $self->loaded;
 }
 

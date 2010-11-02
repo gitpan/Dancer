@@ -11,5 +11,3 @@ t/*/logs
 t/*/sessions
 logs
 TestApp
-t/sessions/
-tags

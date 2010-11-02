@@ -2,7 +2,6 @@ package Dancer::App;
 
 use strict;
 use warnings;
-use Carp;
 use base 'Dancer::Object';
 
 use Dancer::Config;
@@ -30,7 +29,7 @@ sub set_running_app {
 
 sub set_prefix {
     my ($self, $prefix) = @_;
-    croak "not a valid prefix: `$prefix', must start with a /"
+    die "not a valid prefix: `$prefix', must start with a /"
       if defined($prefix) && $prefix !~ /^\//;
     Dancer::App->current->prefix($prefix);
     return 1;    # prefix may have been set to undef
@@ -67,7 +66,7 @@ sub reload_apps {
 
     }
     else {
-        carp "Modules required for auto_reload are missing. Install modules"
+        warn "Modules required for auto_reload are missing. Install modules"
             . " [@missing_modules] or unset 'auto_reload' in your config file.";
     }
 }
@@ -123,7 +122,7 @@ sub init {
     my ($self) = @_;
     $self->name('main') unless defined $self->name;
 
-    croak "an app named '" . $self->name . "' already exists"
+    die "an app named '" . $self->name . "' already exists"
       if exists $_apps->{$self->name};
 
     # default values for properties
@@ -169,7 +168,7 @@ sub setting {
 
     return
       (@_ == 3) ? $self->settings->{$name} =
-      Dancer::Config->normalize_setting($name => $value)
+      $value
       : (
         exists($self->settings->{$name}) ? $self->settings->{$name}
         : Dancer::Config::setting($name)

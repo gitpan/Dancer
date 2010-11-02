@@ -2,14 +2,13 @@ package Dancer::Template::Abstract;
 
 use strict;
 use warnings;
-use Carp;
 use Dancer::FileUtils 'path';
 use base 'Dancer::Engine';
 
 # Overloads this method to implement the rendering
 # args:   $self, $template, $tokens
 # return: a string of $template's content processed with $tokens
-sub render { confess "render not implemented" }
+sub render { die "render not implemented" }
 
 sub default_tmpl_ext { "tt" };
 
@@ -61,18 +60,6 @@ The template engine can overload this method if some initialization stuff has to
 be done before the template engine is used.
 
 The base class provides a plain init() method that only returns true.
-
-=item B<default_tmpl_ext()>
-
-Template class that inherits this class should override this method to return a default template
-extension, example: for Template::Toolkit it returns "tt" and for HTML::Mason it returns "mason". 
-So when you call C<template 'index';> in your dispatch code, Dancer will look for a file 'index.tt'
-or 'index.mason' based on the template you use.
-
-Note 1: when returning the extension string, please do not add a dot in front of the extension 
-as Dancer will do that. 
-Note 2: for backwords compatibility abstract class returns "tt" instead of throwing
-an exception 'method not implemented'.
 
 =item B<view($view)>
 

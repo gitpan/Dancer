@@ -3,8 +3,6 @@ use strict;
 use warnings;
 use Dancer;
 
-plan tests => 10;
-
 ok(setting('serializer' => 'Dumper'), "serializer Dumper loaded");
 my $s = Dancer::Serializer->engine;
 
@@ -29,3 +27,4 @@ is_deeply Dancer::from_dumper($dumper), $data,
 is $s->content_type, 'text/x-data-dumper',
     "content_type is text/x-data-dumper";
 
+done_testing;

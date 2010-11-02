@@ -1,7 +1,6 @@
 package Dancer::Template::Simple;
 use strict;
 use warnings;
-use Carp;
 
 use base 'Dancer::Template::Abstract';
 Dancer::Template::Simple->attributes('start_tag', 'stop_tag');
@@ -106,10 +105,10 @@ sub _read_content_from_template {
         $content = $$template;
     }
     else {
-        croak "'$template' is not a regular file"
+        die "'$template' is not a regular file"
           unless -f $template;
         $content = read_file_content($template);
-        croak "unable to read content for file $template"
+        die "unable to read content for file $template"
           if not defined $content;
     }
     return $content;

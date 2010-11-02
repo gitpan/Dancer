@@ -10,7 +10,7 @@ use Dancer::Test;
 {
     before sub { 
         unless (params->{'requested'}) {
-            return halt("stopped");
+            return halt("stoped");
         }
     };
 
@@ -25,7 +25,5 @@ use Dancer::Test;
     };
 }
 
-response_content_is [GET => '/'], "stopped";
-response_content_is [GET => '/', { params => {requested => 1} }], "route";
-#my $res = dancer_response GET => '/', { params => {requested => 1} };
-#is $res->{content}, "route", "good";
+response_content_is [GET => '/'], "stoped";
+response_content_is [GET => '/', {requested => 1}], "route";

@@ -2,12 +2,9 @@ package Dancer::Request;
 
 use strict;
 use warnings;
-use Carp;
-
 use Dancer::Object;
 use Dancer::Request::Upload;
 use Dancer::SharedData;
-use Encode;
 use HTTP::Body;
 use URI;
 use URI::Escape;
@@ -40,7 +37,7 @@ sub is_post               { $_[0]->{method} eq 'POST' }
 sub is_get                { $_[0]->{method} eq 'GET' }
 sub is_put                { $_[0]->{method} eq 'PUT' }
 sub is_delete             { $_[0]->{method} eq 'DELETE' }
-sub header                { $_[0]->{headers}->header($_[1]) }
+sub header                { $_[0]->{headers}->get($_[1]) }
 
 # public interface compat with CGI.pm objects
 sub request_method { method(@_) }
@@ -80,9 +77,9 @@ sub to_string {
 }
 
 # helper for building a request object by hand
-# with the given method, path, params, body and headers.
+# with forced method, path, params and body.
 sub new_for_request {
-    my ($class, $method, $path, $params, $body, $headers) = @_;
+    my ($class, $method, $path, $params, $body) = @_;
     $params ||= {};
     $method = uc($method);
 
@@ -90,7 +87,6 @@ sub new_for_request {
       $class->new({%ENV, PATH_INFO => $path, REQUEST_METHOD => $method});
     $req->{params} = {%{$req->{params}}, %{$params}};
     $req->{body} = $body if defined $body;
-    $req->{headers} = $headers if $headers;
 
     return $req;
 }
@@ -148,7 +144,7 @@ sub params {
         return $self->{_route_params};
     }
     else {
-        croak "Unknown source params \"$source\".";
+        die "Unknown source params \"$source\".";
     }
 }
 
@@ -195,35 +191,20 @@ sub _init {
 # for this purpose
 sub _set_route_params {
     my ($self, $params) = @_;
-    $params = _decode_params($params);
     $self->{_route_params} = $params;
     $self->_build_params();
 }
 
 sub _set_body_params {
     my ($self, $params) = @_;
-    $params = _decode_params($params);
     $self->{_body_params} = $params;
     $self->_build_params();
 }
 
 sub _set_query_params {
     my ($self, $params) = @_;
-    $params = _decode_params($params);
     $self->{_query_params} = $params;
     $self->_build_params();
-}
-
-sub _decode_params {
-    my ($params) = @_;
-    require Dancer::Config;
-    my $cs = Dancer::Config::setting('charset');
-    if ($cs eq 'UTF-8') {
-        for my $p (keys %{$params}) {
-            $params->{$p} = decode('UTF-8', $params->{$p});
-        }
-    }
-    return $params;
 }
 
 sub _build_request_env {
@@ -266,7 +247,6 @@ sub _build_params {
         %$previous,                %{$self->{_query_params}},
         %{$self->{_route_params}}, %{$self->{_body_params}},
     };
-
 }
 
 # Written from PSGI specs:
@@ -287,7 +267,7 @@ sub _build_path {
         $path ||= $self->_url_decode($self->{request_uri});
     }
 
-    croak "Cannot resolve path" if not $path;
+    die "Cannot resolve path" if not $path;
     $self->{path} = $path;
 }
 
@@ -399,7 +379,7 @@ sub _read {
         return $buffer;
     }
     else {
-        croak "Unknown error reading input: $!";
+        die "Unknown error reading input: $!";
     }
 }
 

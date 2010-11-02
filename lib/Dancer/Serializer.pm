@@ -52,8 +52,9 @@ sub process_response {
 
         # the serializer succeeded, alter the response object accordingly
         else {
-            $response->header('Content-Type' => engine->content_type);
-            $response->{content} = $content;
+            $response->update_headers('Content-Type' => engine->content_type);
+            $response->{content_type} = engine->content_type;
+            $response->{content}      = $content;
         }
     }
 

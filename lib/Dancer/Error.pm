@@ -2,7 +2,6 @@ package Dancer::Error;
 
 use strict;
 use warnings;
-use Carp;
 
 use Dancer::Response;
 use Dancer::Renderer;
@@ -25,8 +24,6 @@ sub new {
 
         $self->{message} = $html_output;
     }
-
-    Dancer::Logger::core("new Error object: [".$self->code."] ".$self->message);
     return $self;
 }
 
@@ -128,7 +125,7 @@ sub dumper {
 sub _censor {
     my $hash = shift;
     if (!$hash || ref $hash ne 'HASH') {
-        carp "_censor given incorrect input: $hash";
+        warn "_censor given incorrect input: $hash";
         return;
     }
 
@@ -173,23 +170,11 @@ sub _render_serialized {
     my $message =
       !ref $self->message ? {error => $self->message} : $self->message;
 
-    if (setting('show_errors')) {
-        Dancer::Response->new(
-            status  => $self->code,
-            content => Dancer::Serializer->engine->serialize($message),
-            headers => ['Content-Type' => Dancer::Serializer->engine->content_type]
-            );
-    }
-    
-    # if show_errors is disabled, we don't expose the real error message to the
-    # outside world
-    else {
-        Dancer::Response->new(
-            status => $self->code,
-            content => "An internal error occured",
-        );
-    }
-
+    Dancer::Response->new(
+        status  => $self->code,
+        content => Dancer::Serializer->engine->serialize($message),
+        headers => ['Content-Type' => Dancer::Serializer->engine->content_type]
+    );
 }
 
 sub _render_html {

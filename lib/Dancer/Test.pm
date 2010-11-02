@@ -6,14 +6,11 @@ use strict;
 use warnings;
 use Test::More import => ['!pass'];
 
-use Carp;
-use HTTP::Headers;
 use Dancer ':syntax';
 use Dancer::App;
 use Dancer::Request;
 use Dancer::SharedData;
 use Dancer::Renderer;
-use Dancer::Config;
 
 use base 'Exporter';
 use vars '@EXPORT';
@@ -34,15 +31,13 @@ use vars '@EXPORT';
   response_content_like
   response_content_unlike
   response_is_file
-  response_headers_are_deeply
 
-  dancer_response
+  response_headers_are_deeply
   get_response
 );
 
 sub import {
     my ($class, %options) = @_;
-    $options{appdir} ||= '..';
 
     # mimic PSGI env
     $ENV{SERVERNAME}        = 'localhost';
@@ -53,10 +48,8 @@ sub import {
     my ($package, $script) = caller;
     $class->export_to_level(1, $class, @EXPORT);
 
-    # set a default session engine for tests
-    setting 'session' => 'simple';
+    $options{appdir} ||= '..';
     Dancer::_init($options{appdir});
-    Dancer::Config->load;
 }
 
 # Route Registry
@@ -87,7 +80,7 @@ sub response_exists {
     my ($req, $test_name) = @_;
     $test_name ||= "a response is found for @$req";
 
-    my $response = dancer_response(@$req);
+    my $response = get_response($req);
     ok(defined($response), $test_name);
 }
 
@@ -95,7 +88,7 @@ sub response_doesnt_exist {
     my ($req, $test_name) = @_;
     $test_name ||= "no response found for @$req";
 
-    my $response = dancer_response(@$req);
+    my $response = get_response($req);
     ok(!defined($response), $test_name);
 }
 
@@ -103,7 +96,7 @@ sub response_status_is {
     my ($req, $status, $test_name) = @_;
     $test_name ||= "response status is $status for @$req";
 
-    my $response = dancer_response(@$req);
+    my $response = get_response($req);
     is $response->{status}, $status, $test_name;
 }
 
@@ -111,7 +104,7 @@ sub response_status_isnt {
     my ($req, $status, $test_name) = @_;
     $test_name ||= "response status is not $status for @$req";
 
-    my $response = dancer_response(@$req);
+    my $response = get_response($req);
     isnt $response->{status}, $status, $test_name;
 }
 
@@ -121,7 +114,7 @@ sub response_content_is {
     my ($req, $matcher, $test_name) = @_;
     $test_name ||= "response content looks good for @$req";
 
-    my $response = dancer_response(@$req);
+    my $response = get_response($req);
     is $response->{content}, $matcher, $test_name;
 }
 
@@ -129,7 +122,7 @@ sub response_content_isnt {
     my ($req, $matcher, $test_name) = @_;
     $test_name ||= "response content looks good for @$req";
 
-    my $response = dancer_response(@$req);
+    my $response = get_response($req);
     isnt $response->{content}, $matcher, $test_name;
 }
 
@@ -137,7 +130,7 @@ sub response_content_like {
     my ($req, $matcher, $test_name) = @_;
     $test_name ||= "response content looks good for @$req";
 
-    my $response = dancer_response(@$req);
+    my $response = get_response($req);
     like $response->{content}, $matcher, $test_name;
 }
 
@@ -145,7 +138,7 @@ sub response_content_unlike {
     my ($req, $matcher, $test_name) = @_;
     $test_name ||= "response content looks good for @$req";
 
-    my $response = dancer_response(@$req);
+    my $response = get_response($req);
     unlike $response->{content}, $matcher, $test_name;
 }
 
@@ -153,7 +146,7 @@ sub response_content_is_deeply {
     my ($req, $matcher, $test_name) = @_;
     $test_name ||= "response content looks good for @$req";
 
-    my $response = dancer_response(@$req);
+    my $response = get_response($req);
     is_deeply $response->{content}, $matcher, $test_name;
 }
 
@@ -169,44 +162,20 @@ sub response_headers_are_deeply {
     my ($req, $expected, $test_name) = @_;
     $test_name ||= "headers are as expected for @$req";
 
-    my $response = dancer_response(@$req);
-    is_deeply($response->headers_to_array, $expected, $test_name);
-}
-
-sub dancer_response {
-    my ($method, $path, $args) = @_;
-    $args ||= {};
-
-    if ($method =~ /^(?:PUT|POST)$/ && $args->{body}) {
-        my $body = $args->{body};
-        my $l    = length $body;
-        open my $in, '<', \$body;
-        $ENV{'CONTENT_LENGTH'} = $l;
-        $ENV{'psgi.input'}     = $in;
-    }
-
-    my ($params, $body, $headers) = @$args{qw(params body headers)};
-
-    if ($headers and (my @headers = @$headers)) {
-        while (my $h = shift @headers) {
-            if ($h =~ /content-type/i) {
-                $ENV{'CONTENT_TYPE'} = shift @headers;
-            }
-        }
-    }
-
-    my $request = Dancer::Request->new_for_request(
-        $method => $path,
-        $params, $body, HTTP::Headers->new(@$headers)
-    );
-
-    Dancer::SharedData->request($request);
-    return Dancer::Renderer::get_action_response();
+    my $response = get_response($req);
+    is_deeply($response->{headers}, $expected, $test_name);
 }
 
 sub get_response {
-    carp "get_response() is DEPRECATED. Use dancer_response() instead.";
-    return dancer_response(@{$_[0]});
+    my ($req) = @_;
+    my ($method, $path, $params, $body, $headers) = @$req;
+    my $request =
+      Dancer::Request->new_for_request($method => $path, $params, $body);
+
+    Dancer::SharedData->headers($headers) if $headers;
+    Dancer::SharedData->request($request);
+
+    return Dancer::Renderer::get_action_response();
 }
 
 # private
@@ -365,32 +334,25 @@ Asserts that the response headers data structure equals the one given.
 
     response_headers_are_deeply [GET => '/'], [ 'X-Powered-By' => 'Dancer 1.150' ];
 
-=head2 dancer_response($method, $path, { params => $params, body => $body, headers => $headers })
+=head2 get_response([$method, $path])
 
-Returns a Dancer::Response object for the given request.
-Only $method and $path are required.
-$params is a hashref, $body is a string and $headers can be an arrayref or
-a HTTP::Headers object.
-A good reason to use this function is for
+Returns a Dancer::Response object for the given request. The status and content
+can both be accessed with this object. A good reason to use this function is for
 testing POST requests. Since POST requests may not be idempotent, it is
 necessary to capture the content and status in one shot. Calling the
 response_status_is and response_content_is functions in succession would make
 two requests, each of which could alter the state of the application and cause
 Schrodinger's cat to die.
 
-    my $response = dancer_response POST => '/widgets';
+    my $response = get_response [POST => '/widgets'];
     is $response->{status}, 202, "response for POST /widgets is 202";
     is $response->{content}, "Widget #1 has been scheduled for creation",
         "response content looks good for first POST /widgets";
 
-    $response = dancer_response POST => '/widgets';
+    $response = get_response [POST => '/widgets'];
     is $response->{status}, 202, "response for POST /widgets is 202";
     is $response->{content}, "Widget #2 has been scheduled for creation",
         "response content looks good for second POST /widgets";
-
-=head2 get_response([$method, $path])
-
-This method is B<DEPRECATED>.  Use dancer_response() instead.
 
 =head1 LICENSE
 

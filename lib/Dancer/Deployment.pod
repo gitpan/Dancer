@@ -15,7 +15,7 @@ be run as a simple cgi-script out-of-the-box. No additional web-server
 configuration needed.  Your web server should recognize .cgi files and be able
 to serve Perl scripts.  The Perl module Plack::Runner is required.
 
-Start by adding the following to your apache configuration (httpd.conf or sites-available/*site*):
+Start by adding the following to your apache configuration:
 
     <VirtualHost *:80>
         ServerName your.server.domain
@@ -24,21 +24,24 @@ Start by adding the following to your apache configuration (httpd.conf or sites-
         DocumentRoot "/path/to/dancer/public"
 
         <Directory "/path/to/dancer/public">
-                AddHandler cgi-script .cgi .pl
-                Options ExecCGI FollowSymLinks MultiViews
-                AllowOverride All
-                Order allow,deny
-                Allow from all
+            AllowOverride None
+
+            # +Indexes is important, if you don't enable it, Apache will silently try to get /index.html
+            Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch +Indexes
+            
+			Order allow,deny
+            Allow from all
+            AddHandler cgi-script .cgi
         </Directory>
+
     </VirtualHost>
 
 Enable Pretty-URLs if your web server supports .htaccess files and mod_rewrite.
-To check if your server supports mod_rewrite type C<apache2 -l> to list modules. 
-To enable mod_rewrite (Debian), run C<a2enmod rewrite>. Place following code in 
-a file called .htaccess (or directly in your VirtualHost configuration) in 
-your application's root folder:
+Place this code in a file called .htaccess (or directly in your VirtualHost
+configuration) in your application's root folder:
 
     # BEGIN dancer application htaccess
+    DirectoryIndex dispatch.cgi/
     RewriteEngine On
     RewriteCond %{SCRIPT_FILENAME} !-d
     RewriteCond %{SCRIPT_FILENAME} !-f
@@ -60,7 +63,7 @@ webserver using HTTP::Simple::PSGI.
 
 Simply fire up your app:
 
-    $ perl bin/app.pl
+    $ perl ./mysuperwebapp.pl
     >> Listening on 0.0.0.0:3000
     == Entering the dance floor ...
 
@@ -89,50 +92,13 @@ C<Corona> is a C<Coro> based web server.
 
 =back
 
-To start your application, just run plackup (see L<Plack> and specific servers
-above for all available options):
+To start your application, just run plackup
 
-   $ plackup bin/app.pl
-   $ plackup -E deployment -s Starman --workers=10 -p 5001 -a bin/app.pl
+   $ plackup -s Twiggy -p 5000 <YOURAPP>.pl
 
 As you can see, the scaffolded Perl script for your app can be used as a PSGI
 startup file.
 
-=head4 Enabling content compression
-
-Content compression (gzip, deflate) can be easily enabled via a Plack
-middleware (see L<Plack#Plack::Middleware>): L<Plack::Middleware::Deflater>.
-It's a middleware to encode the response body in gzip or deflate, based on
-Accept-Encoding HTTP request header.
-
-Enable it as you would enable any Plack middleware. First you need to install
-L<Plack::Middleware::Deflater>, then in the configuration file (usually
-F<environments/development.yml>), add these lines:
-
-  plack_middlewares:
-    Plack::Middleware::Deflater: [  ]
-
-These lines tell Dancer to add L<Plack::Middleware::Deflater> to the list of
-middlewares to pass to L<Plack::Builder>, when wrapping the Dancer app. The
-syntax is :
-
-=over
-
-=item *
-
-as key: the name of the Plack middleware to use
-
-=item *
-
-as value: the options to pass it as a list. In our case, there is no option to
-specify to L<Plack::Middleware::Deflater>, so we use an empty YAML list.
-
-=back
-
-To test if content compression works, trace the HTTP request and response
-before and after enabling this middleware. Among other things, you should
-notice that the response is gzip or deflate encoded, and contains a header
-C<Content-Encoding> set to C<gzip> or C<deflate>
 
 =head3 Running multiple apps with Plack::Builder
 
@@ -470,7 +436,7 @@ Your lighttpd configuration:
 
 Launch your application
 
-    plackup -s FCGI --port 8080 bin/app.pl
+    plackup -s FCGI --port 8080 app.pl
 
 =head4 Unix socket
 
@@ -491,4 +457,4 @@ Your lighttpd configuration:
 
 Launch your application:
 
-    plackup -s FCGI --listen /tmp/fcgi.sock bin/app.pl
+    plackup -s FCGI --listen /tmp/fcgi.sock app.pl

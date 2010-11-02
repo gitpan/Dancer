@@ -2,7 +2,6 @@ package Dancer::Serializer::XML;
 
 use strict;
 use warnings;
-use Carp;
 use Dancer::ModuleLoader;
 use base 'Dancer::Serializer::Abstract';
 
@@ -27,7 +26,7 @@ sub loaded { Dancer::ModuleLoader->load('XML::Simple') }
 
 sub init {
     my ($self) = @_;
-    croak 'XML::Simple is needed and is not installed'
+    die 'XML::Simple is needed and is not installed'
       unless $self->loaded;
     $_xs = XML::Simple->new();
 }
