@@ -2,6 +2,7 @@ package Dancer::Serializer::XML;
 
 use strict;
 use warnings;
+use Carp;
 use Dancer::ModuleLoader;
 use base 'Dancer::Serializer::Abstract';
 
