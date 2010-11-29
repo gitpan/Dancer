@@ -23,6 +23,12 @@ my @tests = (
       expected => "view\n" },
     { path => '/layoutchanged',
       expected => "customstart\nview\ncustomstop\n" },
+    { path => '/apply_layout/default_layout',
+      expected => "start\ncontent\nstop\n" },
+    { path => '/apply_layout/no_layout',
+      expected => "content\n" },
+    { path => '/apply_layout/custom_layout',
+      expected => "customstart\ncontent\ncustomstop\n" },
 );
 
 plan tests => scalar(@tests);
@@ -46,6 +52,20 @@ SKIP: {
 
     get '/layoutchanged' => sub {
         template 't03', {}, { layout => 'custom' };
+    };
+
+    get '/apply_layout/default_layout' => sub {
+        apply_layout("content\n");
+    };
+
+    # Yes, apply_layout without a layout is kind of pointless, but let's
+    # be thorough :)
+    get '/apply_layout/no_layout' => sub {
+        apply_layout("content\n", {}, { layout => undef });
+    };
+
+    get '/apply_layout/custom_layout' => sub {
+        apply_layout("content\n", {}, { layout => 'custom' });
     };
 
     foreach my $test (@tests) {

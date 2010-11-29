@@ -6,6 +6,7 @@ package Dancer::Helpers;
 
 use strict;
 use warnings;
+use Carp;
 
 use Dancer::Response;
 use Dancer::Config 'setting';
@@ -32,45 +33,109 @@ sub send_file {
 sub template {
     my ($view, $tokens, $options) = @_;
 
-    my $app = Dancer::App->current;
+    ($tokens, $options, my $app) = _prepare_tokens_options($tokens, $options);
 
-    # If 'layout' was given in the options hashref, use it if it's a true value,
-    # or don't use a layout if it was false (0, or undef); if layout wasn't
-    # given in the options hashref, go with whatever the current layout setting
-    # is.
-    my $layout = exists $options->{layout} ?
-        ($options->{layout} ? $options->{layout} : undef) : $app->setting('layout');
-
-
-    # these are the default tokens provided for template processing
-    $tokens ||= {};
-    $tokens->{dancer_version} = $Dancer::VERSION;
-    $tokens->{settings} = Dancer::Config->settings;
-    $tokens->{request} = Dancer::SharedData->request;
-    $tokens->{params}  = Dancer::SharedData->request->params;
-
-    if (setting('session')) {
-        $tokens->{session} = Dancer::Session->get;
+    my $content;
+    if ($view) {
+        $content = _apply_renderer($view, $tokens, $options, $app);
+        if (! defined $content) {
+            my $error = Dancer::Error->new(
+                code    => 404,
+                message => "Page not found",
+            );
+            return Dancer::Response::set($error->render);
+        }
+    } else {
+        $content = delete $options->{content};
     }
 
-    $view = Dancer::Template->engine->view($view);
+    my $full_content = _apply_layout($content, $tokens, $options, $app);
+    defined $full_content
+      and return $full_content;
 
-    if (!-r $view) {
+    my $error = Dancer::Error->new(
+        code    => 404,
+        message => "Page not found",
+    );
+    return Dancer::Response::set($error->render);
+
+}
+
+sub apply_renderer {
+    my ($view, $tokens, $options) = @_;
+    return _apply_renderer($view, _prepare_tokens_options($tokens, $options));
+}
+
+sub _apply_renderer {
+    my ($view, $tokens, $options, $app) = @_;
+
+    $view = Dancer::Template->engine->view($view);
+    -r $view or return;
+
+    $_->($tokens) for (@{$app->registry->hooks->{before_template}});
+
+    my $content = Dancer::Template->engine->render($view, $tokens);
+    return $content;
+}
+
+# new name :
+sub apply_layout {
+    my ($content, $tokens, $options) = @_;
+    return _apply_layout($content, _prepare_tokens_options($tokens, $options));
+}
+
+sub render_with_layout {
+    carp "'render_with_layout' is DEPRECATED, use 'apply_layout' instead";
+    my $content = Dancer::Helpers::apply_layout(@_);
+    if (! defined $content) {
         my $error = Dancer::Error->new(
             code    => 404,
             message => "Page not found",
         );
         return Dancer::Response::set($error->render);
     }
+    return $content;
+}
 
-    $_->($tokens) for (@{$app->registry->hooks->{before_template}});
+sub _apply_layout {
+    my ($content, $tokens, $options, $app) = @_;
 
-    my $content = Dancer::Template->engine->render($view, $tokens);
-    return $content if not defined $layout;
+   # If 'layout' was given in the options hashref, use it if it's a true value,
+   # or don't use a layout if it was false (0, or undef); if layout wasn't
+   # given in the options hashref, go with whatever the current layout setting
+   # is.
+    my $layout =
+      exists $options->{layout}
+      ? ($options->{layout} ? $options->{layout} : undef)
+      : $app->setting('layout');
+
+    defined $content or return;
+
+    defined $layout or return $content;
 
     my $full_content =
       Dancer::Template->engine->layout($layout, $tokens, $content);
     return $full_content;
+}
+
+sub _prepare_tokens_options {
+    my ($tokens, $options) = @_;
+
+    $options ||= {};
+
+    # these are the default tokens provided for template processing
+    $tokens ||= {};
+    $tokens->{dancer_version} = $Dancer::VERSION;
+    $tokens->{settings}       = Dancer::Config->settings;
+    $tokens->{request}        = Dancer::SharedData->request;
+    $tokens->{params}         = Dancer::SharedData->request->params;
+
+    setting('session')
+      and $tokens->{session} = Dancer::Session->get;
+
+    my $app = Dancer::App->current;
+
+    return ($tokens, $options, $app);
 }
 
 sub error {
