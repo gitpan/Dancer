@@ -8,19 +8,16 @@ use vars '@EXPORT_OK';
 use Dancer::Template;
 use Dancer::ModuleLoader;
 use Dancer::FileUtils 'path';
-use Carp 'confess';
+use Carp;
+
+use Encode;
 
 @EXPORT_OK = qw(setting mime_types);
 
+my $SETTINGS = {};
+
 # mergeable settings
 my %MERGEABLE = map { ($_ => 1) } qw( plugins handlers );
-
-# singleton for storing settings
-my $SETTINGS = {
-
-    # user defined mime types
-    mime_types => {},
-};
 
 sub settings {$SETTINGS}
 
@@ -73,10 +70,27 @@ my $setters = {
 my $normalizers = {
     charset => sub {
         my ($setting, $charset) = @_;
-        $charset = 'UTF-8' if $charset =~ /utf8/i;
-        return $charset;
+        length($charset || '')
+          or return $charset;
+        my $encoding = Encode::find_encoding($charset);
+        defined $encoding
+          or croak "Charset defined in configuration is wrong : couldn't identify '$charset'";
+        my $name = $encoding->name;
+        # Perl makes a distinction between the usual perl utf8, and the strict
+        # utf8 charset. But we don't want to make this distinction
+        $name eq 'utf-8-strict'
+          and $name = 'utf-8';
+        return $name;
     },
 };
+
+sub mime_types {
+    carp "DEPRECATED: use 'mime_type' from Dancer.pm";
+    my $mime = Dancer::MIME->instance();
+    if    (scalar(@_)==2) { $mime->add_mime_type(@_) }
+    elsif (scalar(@_)==1) { $mime->mime_type_for(@_) }
+    else                  { $mime->aliases           }
+}
 
 sub normalize_setting {
     my ($class, $setting, $value) = @_;
@@ -122,16 +136,6 @@ sub _get_setting {
     my $setting = shift;
 
     return $SETTINGS->{$setting};
-}
-
-sub mime_types {
-    my ($ext, $content_type) = @_;
-    $SETTINGS->{mime_types} ||= {};
-    return $SETTINGS->{mime_types} if @_ == 0;
-
-    return (@_ == 2)
-      ? $SETTINGS->{mime_types}{$ext} = $content_type
-      : $SETTINGS->{mime_types}{$ext};
 }
 
 sub conffile { path(setting('confdir') || setting('appdir'), 'config.yml') }
@@ -271,9 +275,26 @@ Default value is 'text/html'.
 
 =head2 charset (string)
 
-The default charset of outgoing content. Unicode bodies in HTTP
-responses of C<text/*> types will be encoded to this charset. Also,
-C<charset=> item will be added to Content-Type response header.
+This setting does 3 things:
+
+=over
+
+=item *
+
+It sets the default charset of outgoing content. C<charset=> item will be
+added to Content-Type response header.
+
+=item *
+
+It makes Unicode bodies in HTTP responses of C<text/*> types to be encoded to
+this charset.
+
+=item *
+
+It also indicates to Dancer in which charset the static files and templates are
+encoded.
+
+=back
 
 Default value is empty which means don't do anything. HTTP responses
 without charset will be interpreted as ISO-8859-1 by most clients.

@@ -8,7 +8,8 @@ use base 'Dancer::Session::Abstract';
 use Dancer::Logger;
 use Dancer::ModuleLoader;
 use Dancer::Config 'setting';
-use Dancer::FileUtils 'path';
+use Dancer::FileUtils qw(path open_file);
+use File::Copy;
 
 # static
 
@@ -56,6 +57,11 @@ sub yaml_file {
     return path(setting('session_dir'), "$id.yml");
 }
 
+sub tmp_yaml_file {
+    my ($id) = @_;
+    return path(setting('session_dir'), "$id.tmp");
+}
+
 sub destroy {
     my ($self) = @_;
     use Dancer::Logger;
@@ -66,9 +72,10 @@ sub destroy {
 
 sub flush {
     my $self = shift;
-    open(my $sessionfh, '>', yaml_file($self->id)) or croak $!;
+    my $sessionfh = open_file('>', tmp_yaml_file($self->id));
     print {$sessionfh} YAML::Dump($self);
     close $sessionfh;
+    move(tmp_yaml_file($self->id), yaml_file($self->id));
     return $self;
 }
 

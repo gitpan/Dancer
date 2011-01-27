@@ -28,7 +28,50 @@ sub init {1}
 
 # meta information about classes
 my $_attrs_per_class = {};
-sub get_attributes { $_attrs_per_class->{$_[0]} }
+sub get_attributes {
+    my ($class, $visited_parents) = @_;
+    # $visited_parents keeps track of parent classes we already handled, to
+    # avoid infinite recursion (in case of dependancies loop). It's not stored as class singleton, otherwise
+    # get_attributes wouldn't be re-entrant.
+    $visited_parents ||= {};
+    my @attributes = @{$_attrs_per_class->{$class} || [] };
+    my @parents;
+    { no strict 'refs';
+      @parents = @{"$class\::ISA"}; }
+    foreach my $parent (@parents) {
+        # cleanup $parent
+        $parent =~ s/'/::/g;
+        $parent =~ /^::/
+          and $parent = 'main' . $parent;
+
+        # check we didn't visited it already
+        $visited_parents->{$parent}++
+          and next;
+
+        # check it's a Dancer::Object
+        $parent->isa(__PACKAGE__)
+          or next;
+
+        # merge parents attributes
+        push @attributes, @{$parent->get_attributes($visited_parents)};
+    }
+    return \@attributes;
+}
+
+# accessor code for normal objects
+# (overloaded in D::O::Singleton for instance)
+sub _setter_code {
+    my ($class, $attr) = @_;
+    sub {
+        my ($self, $value) = @_;
+        if (@_ == 1) {
+            return $self->{$attr};
+        }
+        else {
+            return $self->{$attr} = $value;
+        }
+    };
+}
 
 # accessors builder
 sub attributes {
@@ -39,15 +82,7 @@ sub attributes {
 
     # define setters and getters for each attribute
     foreach my $attr (@attributes) {
-        my $code = sub {
-            my ($self, $value) = @_;
-            if (@_ == 1) {
-                return $self->{$attr};
-            }
-            else {
-                return $self->{$attr} = $value;
-            }
-        };
+        my $code = $class->_setter_code($attr);
         my $method = "${class}::${attr}";
         { no strict 'refs'; *$method = $code; }
     }
