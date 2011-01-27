@@ -31,7 +31,7 @@ use File::Basename 'basename';
 use base 'Exporter';
 
 $AUTHORITY = 'SUKRIA';
-$VERSION   = '1.3000_02';
+$VERSION   = '1.2004';
 @EXPORT    = qw(
   after
   any
@@ -45,9 +45,7 @@ $VERSION   = '1.3000_02';
   del
   dirname
   error
-  engine
   false
-  forward
   from_dumper
   from_json
   from_yaml
@@ -105,15 +103,13 @@ sub before_template { Dancer::Route::Registry->hook('before_template', @_) }
 sub captures        { Dancer::SharedData->request->params->{captures} }
 sub cookies         { Dancer::Cookies->cookies }
 sub config          { Dancer::Config::settings() }
-sub content_type    { Dancer::Response->content_type(@_) }
+sub content_type    { Dancer::Response::content_type(@_) }
 sub dance           { Dancer::start(@_) }
 sub debug           { goto &Dancer::Logger::debug }
 sub dirname         { Dancer::FileUtils::dirname(@_) }
-sub engine          { Dancer::Engine->engine(@_) }
 sub error           { goto &Dancer::Logger::error }
 sub send_error      { Dancer::Helpers->error(@_) }
 sub false           {0}
-sub forward         { Dancer::Response->forward(shift) }
 sub from_dumper     { Dancer::Serializer::Dumper::from_dumper(@_) }
 sub from_json       { Dancer::Serializer::JSON::from_json(@_) }
 sub from_yaml       { Dancer::Serializer::YAML::from_yaml(@_) }
@@ -124,7 +120,7 @@ sub get {
     Dancer::App->current->registry->universal_add('get',  @_);
 }
 sub halt      { Dancer::Response->halt(@_) }
-sub headers   { Dancer::Response->headers(@_); }
+sub headers   { Dancer::Response::headers(@_); }
 sub header    { goto &headers; }                            # goto ftw!
 sub layout    { set(layout => shift) }
 sub load      { require $_ for @_ }
@@ -168,7 +164,7 @@ sub session {
     }
 }
 sub splat     { @{Dancer::SharedData->request->params->{splat}} }
-sub status    { Dancer::Response->status(@_) }
+sub status    { Dancer::Response::status(@_) }
 sub template  { Dancer::Helpers::template(@_) }
 sub true      {1}
 sub to_dumper { Dancer::Serializer::Dumper::to_dumper(@_) }
@@ -449,14 +445,6 @@ Returns the dirname of the path given:
 
     my $dir = dirname($some_path);
 
-=head2 engine
-
-Given an namespace, returns the current engine object
-
-    my $template_engine = engine 'template';
-    my $html = $template_engine->apply_renderer(...);
-    $template_engine->apply_layout($html);
-
 =head2 error
 
 Logs a message of error level:
@@ -466,35 +454,6 @@ Logs a message of error level:
 =head2 false
 
 Constant that returns a false value (0).
-
-=head2 forward
-
-Runs an internal redirect of the current request to another request. This helps
-you avoid having to redirect the user using HTTP and set another request to your
-application.
-
-It effectively lets you chain routes together in a clean manner.
-
-    get qr{ /demo/articles/(.+) }x => sub {
-        my ($article_id) = splat;
-
-        # you'll have to implement this next sub yourself :)
-        change_the_main_database_to_demo();
-
-        forward '/articles/$article_id';
-    };
-
-In the above example, the users that reach I</demo/articles/30> will actually
-reach I</articles/30> but we've changed the database to demo before.
-
-This is pretty cool because it lets us retain our paths and offer a demo
-database by merely going to I</demo/...>.
-
-You'll notice that in the example we didn't indicate whether it was B<GET> or
-B<POST>. That is because C<forward> chains the same type of route the user
-reached. If it was a B<GET>, it will remain a B<GET>.
-
-Broader functionality might be added in the future.
 
 =head2 from_dumper ($structure)
 
@@ -525,7 +484,7 @@ Defines a route for HTTP B<GET> requests to the given path:
 Sets a response object with the content given.
 
 When used as a return value from a filter, this breaks the execution flow and
-renders the response immediately:
+renders the response immediatly:
 
     before sub {
         if ($some_condition) {
@@ -723,19 +682,13 @@ function, e.g.
 Allows a handler to provide plain HTML (or other content), but have it rendered
 within the layout still.
 
-This method is B<DEPRECATED>, and will be removed soon. Instead, you should be
-using the C<engine> keyword:
+For example:
 
     get '/foo' => sub {
         # Do something which generates HTML directly (maybe using
         # HTML::Table::FromDatabase or something)
         my $content = ...;
-
-        # get the template engine
-        my $template_engine = engine 'template';
-
-        # apply the layout (not the renderer), and return the result
-        $template_engine->apply_layout($content)
+        render_with_layout $content;
     };
 
 It works very similarly to C<template> in that you can pass tokens to be used in

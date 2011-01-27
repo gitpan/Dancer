@@ -7,7 +7,7 @@ use Dancer::ModuleLoader;
 
 use Encode;
 
-plan tests => 16;
+plan tests => 9;
 
 my $res = Dancer::Response->new(headers => [ 'Content-Type' => 'text/html' ], content_type => 'text/html');
 my $psgi_res = Dancer::Handler->render_response($res);
@@ -16,8 +16,9 @@ is($psgi_res->[0], 200, 'default status');
 is_deeply($psgi_res->[1], [ 'Content-Type' => 'text/html' ], 'default headers');
 is_deeply($psgi_res->[2], [''], 'default content');
 
-ok $res->content_type('text/plain');
-ok $res->content('123');
+$res->{content_type} = 'text/plain';
+$res->header('Content-Type' => $res->{content_type});
+$res->{content} = '123';
 
 is_deeply(Dancer::Handler->render_response($res),
     [
@@ -37,7 +38,7 @@ is_deeply(Dancer::Handler->render_response($res),
     ],
 );
 
-ok $res->content("\x{0429}");   # cyrillic shcha -- way beyond latin1
+$res->{content} = "\x{0429}";   # cyrillic shcha -- way beyond latin1
 
 is_deeply(Dancer::Handler->render_response(Dancer::Serializer->process_response($res)),
     [
@@ -48,12 +49,13 @@ is_deeply(Dancer::Handler->render_response(Dancer::Serializer->process_response(
 );
 
 SKIP: {
-    skip "JSON is needed for this test" , 3
+    skip "JSON is needed for this test" , 1
         unless Dancer::ModuleLoader->load('JSON');
 
     setting serializer => 'JSON';
-    ok $res->content_type('application/json');
-    ok $res->content({ key => 'value'});
+    $res->{content_type} = 'application/json';
+    $res->{content} = { key => 'value' };
+    $res->header('Content-Type' => $res->{content_type});
 
     is_deeply(Dancer::Handler->render_response(Dancer::Serializer->process_response($res)),
         [
@@ -65,16 +67,17 @@ SKIP: {
 }
 
 SKIP: {
-    skip "XML::Simple is needed for this test" , 3
+    skip "XML::Simple is needed for this test" , 1
         unless Dancer::ModuleLoader->load('XML::Simple');
 
-    skip "XML::Parser or XML::SAX are needed to run this test", 3
+    skip "XML::Parser or XML::SAX are needed to run this test", 1
         unless Dancer::ModuleLoader->load('XML::Parser') or
                Dancer::ModuleLoader->load('XML::SAX');
 
     setting serializer => 'XML';
-    ok $res->content_type('text/xml');
-    ok $res->content({ key => "\x{0429}" });
+    $res->{content_type} = 'text/xml';
+    $res->{content} = { key => "\x{0429}" };
+    $res->header('Content-Type' => $res->{content_type}."; charset=utf-8");
 
     is_deeply(Dancer::Handler->render_response(Dancer::Serializer->process_response($res)),
         [

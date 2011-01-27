@@ -9,7 +9,7 @@ plan skip_all => 'Test::TCP is needed to run this test'
 
 use LWP::UserAgent;
 
-plan tests => 32;
+plan tests => 29;
 
 ok(Dancer::App->current->registry->is_empty,
     "registry is empty");
@@ -50,13 +50,6 @@ Test::TCP::test_tcp(
                 ok !$res->is_success;
             }
         }
-
-        # test ajax with content_type to json
-        ok my $request =
-          HTTP::Request->new( GET => "http://127.0.0.1:$port/ajax.json" );
-        $request->header( 'X-Requested-With' => 'XMLHttpRequest' );
-        ok my $res = $ua->request($request);
-        like $res->header('Content-Type'), qr/json/;
     },
     server => sub {
         my $port = shift;
@@ -81,10 +74,6 @@ Test::TCP::test_tcp(
         };
         get '/bar', {ajax => 1} => sub {
             return 'ajax';
-        };
-        get '/ajax.json' => sub {
-            content_type('application/json');
-            return '{"foo":"bar"}';
         };
         start();
     },

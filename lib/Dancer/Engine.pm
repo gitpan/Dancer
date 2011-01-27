@@ -33,7 +33,8 @@ sub build {
     croak "cannot build engine without type and name "
       unless $name and $type;
 
-    my $class_name = $class->_engine_class($type);
+    my $class_name = ucfirst($type);
+    my $namespace  = "Dancer::${class_name}";
 
     $config ||= {};
     $config->{engines} ||= {};
@@ -41,7 +42,7 @@ sub build {
 
     # trying to load the engine
     my $engine_class =
-      Dancer::ModuleLoader->class_from_setting($class_name => $name);
+      Dancer::ModuleLoader->class_from_setting($namespace => $name);
 
     croak "unknown $type engine '$name', "
       . "perhaps you need to install $engine_class?"
@@ -54,18 +55,6 @@ sub build {
         config => $settings,
     );
 }
-
-sub _engine_class {
-    my ($class, $type) = @_;
-    $type = ucfirst($type);
-    return "Dancer::${type}";
-}
-
-sub engine {
-    my ($class, $type) = @_;
-    return $class->_engine_class($type)->engine();
-}
-
 
 1;
 
