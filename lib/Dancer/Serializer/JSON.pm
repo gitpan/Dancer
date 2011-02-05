@@ -31,52 +31,25 @@ sub init {
 }
 
 sub serialize {
-    my $self   = shift;
-    my $entity = shift;
-
-    my $options = $self->_options_as_hashref(@_) || {};
+    my ($self, $entity, %options) = @_;
 
     # Why doesn't $self->config have this?
     my $config = setting('engines') || {};
     $config = $config->{JSON} || {};
 
-    if ( $config->{allow_blessed} && !defined $options->{allow_blessed} ) {
-        $options->{allow_blessed} = $config->{allow_blessed};
+    if ($config->{allow_blessed} && !defined $options{allow_blessed}) {
+        $options{allow_blessed} = $config->{allow_blessed};
     }
-    if ( $config->{convert_blessed} ) {
-        $options->{convert_blessed} = $config->{convert_blessed};
-    }
-
-    if (setting('environment') eq 'development' and not defined $options->{pretty}) {
-        $options->{pretty} = 1;
+    if ($config->{convert_blessed}) {
+        $options{convert_blessed} = $config->{convert_blessed};
     }
 
-    JSON::to_json( $entity, $options );
+    JSON::to_json($entity, \%options);
 }
 
 sub deserialize {
-    my $self   = shift;
-    my $entity = shift;
-
-    my $options = $self->_options_as_hashref(@_);
-    JSON::from_json( $entity, $options );
-}
-
-sub _options_as_hashref {
-    my $self = shift;
-
-    return if scalar @_ == 0;
-
-    if ( scalar @_ == 1 ) {
-        return shift;
-    }
-    elsif ( scalar @_ % 2 ) {
-        carp "options for to_json/from_json must be key value pairs (as a hashref)";
-    }
-    else {
-        carp "options as hash for to_json/from_json is DEPRECATED. please pass a hashref.";
-        return { @_ };
-    }
+    my ($self, $entity, %options) = @_;
+    JSON::from_json($entity, \%options);
 }
 
 sub content_type {'application/json'}

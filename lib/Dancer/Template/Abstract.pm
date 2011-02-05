@@ -11,94 +11,30 @@ use base 'Dancer::Engine';
 # return: a string of $template's content processed with $tokens
 sub render { confess "render not implemented" }
 
-sub default_tmpl_ext { "tt" }
-
-sub _template_name {
-    my ( $self, $view ) = @_;
-    my $def_tmpl_ext = $self->config->{extension} || $self->default_tmpl_ext();
-    $view .= ".$def_tmpl_ext" if $view !~ /\.${def_tmpl_ext}$/;
-}
+sub default_tmpl_ext {"tt"}
 
 sub view {
     my ($self, $view) = @_;
 
-    $view = $self->_template_name($view);
+    my $def_tmpl_ext = $self->default_tmpl_ext();
+    $view .= ".$def_tmpl_ext" if $view !~ /\.${def_tmpl_ext}$/;
 
-    return path(Dancer::App->current->setting('views'), $view);
+    my $app = Dancer::App->current;
+    return path($app->setting('views'), $view);
 }
 
 sub layout {
     my ($self, $layout, $tokens, $content) = @_;
 
-    my $layout_name = $self->_template_name($layout);
-    my $layout_path = path(Dancer::App->current->setting('views'), 'layouts', $layout_name);
+    my $app          = Dancer::App->current;
+    my $def_tmpl_ext = $self->default_tmpl_ext();
+    $layout .= ".$def_tmpl_ext" if $layout !~ /\.${def_tmpl_ext}$/;
+    $layout = path($app->setting('views'), 'layouts', $layout);
 
     my $full_content =
-      Dancer::Template->engine->render($layout_path,
+      Dancer::Template->engine->render($layout,
         {%$tokens, content => $content});
     $full_content;
-}
-
-sub apply_renderer {
-    my ($self, $view, $tokens) = @_;
-
-    ($tokens, undef) = _prepare_tokens_options($tokens);
-
-    $view = $self->view($view);
-    -r $view or return;
-
-    $_->($tokens) for (@{Dancer::App->current->registry->hooks->{before_template}});
-
-    my $content = $self->render($view, $tokens);
-
-    # make sure to avoid ( undef ) in list context return
-    defined $content
-      and return $content;
-    return;
-}
-
-sub apply_layout {
-    my ($self, $content, $tokens, $options) = @_;
-
-    ($tokens, $options) = _prepare_tokens_options($tokens, $options);
-
-    # If 'layout' was given in the options hashref, use it if it's a true value,
-    # or don't use a layout if it was false (0, or undef); if layout wasn't
-    # given in the options hashref, go with whatever the current layout setting
-    # is.
-    my $layout =
-      exists $options->{layout}
-      ? ($options->{layout} ? $options->{layout} : undef)
-      : Dancer::App->current->setting('layout');
-
-    defined $content or return;
-
-    defined $layout or return $content;
-
-    my $full_content =
-      $self->layout($layout, $tokens, $content);
-    # make sure to avoid ( undef ) in list context return
-    defined $full_content
-      and return $full_content;
-    return;
-}
-
-sub _prepare_tokens_options {
-    my ($tokens, $options) = @_;
-
-    $options ||= {};
-
-    # these are the default tokens provided for template processing
-    $tokens ||= {};
-    $tokens->{dancer_version} = $Dancer::VERSION;
-    $tokens->{settings}       = Dancer::Config->settings;
-    $tokens->{request}        = Dancer::SharedData->request;
-    $tokens->{params}         = Dancer::SharedData->request->params;
-
-    Dancer::App->current->setting('session')
-      and $tokens->{session} = Dancer::Session->get;
-
-    return ($tokens, $options);
 }
 
 1;
@@ -137,15 +73,6 @@ Note 1: when returning the extension string, please do not add a dot in front of
 as Dancer will do that. 
 Note 2: for backwords compatibility abstract class returns "tt" instead of throwing
 an exception 'method not implemented'.
-
-User would be able to change the default extension using the
-C<<extension>> configuration variable on the template
-configuration. For example, for the default (C<Simple>) engine:
-
-     template: "simple"
-     engines:
-       simple:
-         extension: 'tmpl'
 
 =item B<view($view)>
 

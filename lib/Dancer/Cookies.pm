@@ -5,8 +5,6 @@ use warnings;
 use Dancer::Cookie;
 use Dancer::SharedData;
 
-use URI::Escape;
-
 # all cookies defined by the application are store in that singleton
 # this is a hashref the represent all key/value pairs to store as cookies
 my $COOKIES = {};
@@ -23,16 +21,11 @@ sub parse_cookie_from_env {
     return {} unless defined $env_str;
 
     my $cookies = {};
-    foreach my $cookie ( split( '; ', $env_str ) ) {
-        my ( $name, $value ) = split( '=', $cookie );
-        my @values;
-        if ( $value ne '' ) {
-            @values = map { uri_unescape($_) } split( /[&;]/, $value );
-        }
+    foreach my $cookie (split('; ', $env_str)) {
+        my ($name, $value) = split('=', $cookie);
         $cookies->{$name} =
-          Dancer::Cookie->new( name => $name, value => \@values );
+          Dancer::Cookie->new(name => $name, value => $value);
     }
-
     return $cookies;
 }
 

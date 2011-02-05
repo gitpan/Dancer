@@ -13,7 +13,7 @@ that type of traffic to that specific URL.
   use Dancer;
 
   get '/' => sub {
-	return 'Hello World!';
+	return 'Hello World!";
   };
 
   start;
@@ -76,11 +76,6 @@ in that file:
   
 Nothing too fancy in here, I hope. Standard DBI except for the C<setting('database')> thing - more on that in a bit. 
 For now, just assume that the expression evaluates to file location for the database file.
-
-(Note that you may want to look at the L<Dancer::Plugin::Database> module for an
-easy way to configure and manage database connections for your Dancer apps, but
-the above will suffice for this tutorial.)
-
 
 =head1 Our first route handler
 
@@ -438,7 +433,7 @@ Here's the complete dancr.pl script from start to finish.
  use File::Slurp;
  use Template;
  
- set 'database' => File::Spec->catfile(File::Spec->tmpdir(), 'dancr.db');
+ set 'database' => File::Spec->tmpdir() . 'dancr.db';
  set 'session' => 'Simple';
  set 'template' => 'template_toolkit';
  set 'logger' => 'console';

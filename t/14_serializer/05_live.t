@@ -2,9 +2,6 @@ use strict;
 use warnings;
 use Test::More import => ['!pass'];
 
-use Carp;
-$Carp::Verbose = 1;
-
 BEGIN {
     use Dancer::ModuleLoader;
 
@@ -21,7 +18,6 @@ use LWP::UserAgent;
 use HTTP::Request;
 
 plan tests => 30;
-set environment => 'production';
 
 test_json();
 test_yaml();

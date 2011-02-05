@@ -14,7 +14,6 @@ use Dancer::Request;
 use Dancer::SharedData;
 use Dancer::Renderer;
 use Dancer::Config;
-use Dancer::FileUtils qw(open_file);
 
 use base 'Exporter';
 use vars '@EXPORT';
@@ -206,7 +205,8 @@ sub dancer_response {
 }
 
 sub get_response {
-    croak "get_response() is DEPRECATED. Use dancer_response() instead.";
+    carp "get_response() is DEPRECATED. Use dancer_response() instead.";
+    return dancer_response(@{$_[0]});
 }
 
 # private
@@ -250,7 +250,7 @@ Dancer::Test - Test helpers to test a Dancer application
 
 =head1 DESCRIPTION
 
-This module provides test helpers for testing Dancer apps.
+This module provides test heplers for testing Dancer apps.
 
 =head1 CONFIGURATON
 

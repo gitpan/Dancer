@@ -15,7 +15,6 @@ my $json = JSON::encode_json($data);
     use Dancer ':syntax';
 
     set serializer => 'JSON';
-    set environment => 'production';
 
     get '/data' => sub {
         $data;

@@ -4,11 +4,7 @@ use strict;
 use warnings;
 use Carp;
 use Cwd 'abs_path', 'realpath';
-
 use vars qw($VERSION $AUTHORITY @EXPORT);
-
-$VERSION   = '1.3002';
-$AUTHORITY = 'SUKRIA';
 
 use Dancer::Config;
 use Dancer::FileUtils;
@@ -28,12 +24,14 @@ use Dancer::Session;
 use Dancer::SharedData;
 use Dancer::Handler;
 use Dancer::ModuleLoader;
-use Dancer::MIME;
+
 use File::Spec;
 use File::Basename 'basename';
 
 use base 'Exporter';
 
+$AUTHORITY = 'SUKRIA';
+$VERSION   = '1.2005';
 @EXPORT    = qw(
   after
   any
@@ -47,9 +45,7 @@ use base 'Exporter';
   del
   dirname
   error
-  engine
   false
-  forward
   from_dumper
   from_json
   from_yaml
@@ -107,15 +103,13 @@ sub before_template { Dancer::Route::Registry->hook('before_template', @_) }
 sub captures        { Dancer::SharedData->request->params->{captures} }
 sub cookies         { Dancer::Cookies->cookies }
 sub config          { Dancer::Config::settings() }
-sub content_type    { Dancer::Response->content_type(@_) }
+sub content_type    { Dancer::Response::content_type(@_) }
 sub dance           { Dancer::start(@_) }
 sub debug           { goto &Dancer::Logger::debug }
 sub dirname         { Dancer::FileUtils::dirname(@_) }
-sub engine          { Dancer::Engine->engine(@_) }
 sub error           { goto &Dancer::Logger::error }
 sub send_error      { Dancer::Helpers->error(@_) }
 sub false           {0}
-sub forward         { Dancer::Response->forward(shift) }
 sub from_dumper     { Dancer::Serializer::Dumper::from_dumper(@_) }
 sub from_json       { Dancer::Serializer::JSON::from_json(@_) }
 sub from_yaml       { Dancer::Serializer::YAML::from_yaml(@_) }
@@ -126,17 +120,12 @@ sub get {
     Dancer::App->current->registry->universal_add('get',  @_);
 }
 sub halt      { Dancer::Response->halt(@_) }
-sub headers   { Dancer::Response->headers(@_); }
+sub headers   { Dancer::Response::headers(@_); }
 sub header    { goto &headers; }                            # goto ftw!
 sub layout    { set(layout => shift) }
 sub load      { require $_ for @_ }
 sub logger    { set(logger => @_) }
-sub mime_type {
-    my $mime = Dancer::MIME->instance();
-    if    (scalar(@_)==2) { $mime->add_mime_type(@_) }
-    elsif (scalar(@_)==1) { $mime->mime_type_for(@_) }
-    else                  { $mime->aliases           }
-}
+sub mime_type { Dancer::Config::mime_types(@_) }
 sub params    { Dancer::SharedData->request->params(@_) }
 sub pass      { Dancer::Response->pass }
 sub path      { realpath(Dancer::FileUtils::path(@_)) }
@@ -145,7 +134,7 @@ sub prefix { Dancer::App->current->set_prefix(@_) }
 sub del     { Dancer::App->current->registry->universal_add('delete',  @_) }
 sub options { Dancer::App->current->registry->universal_add('options', @_) }
 sub put     { Dancer::App->current->registry->universal_add('put',     @_) }
-sub r { croak "'r' is DEPRECATED use qr{} instead"; }
+sub r { carp "'r' is DEPRECATED use qr{} instead"; return {regexp => $_[0]} }
 sub redirect  { Dancer::Helpers::redirect(@_) }
 sub render_with_layout { Dancer::Helpers::render_with_layout(@_); }
 sub request   { Dancer::SharedData->request }
@@ -174,8 +163,11 @@ sub session {
           : Dancer::Session->write(@_);
     }
 }
-sub splat     { @{Dancer::SharedData->request->params->{splat}} }
-sub status    { Dancer::Response->status(@_) }
+sub status    { Dancer::Response::status(@_) }
+sub splat     {
+    my $splat = Dancer::SharedData->request->params->{splat};
+    return ref $splat ? @$splat : (); 
+}
 sub template  { Dancer::Helpers::template(@_) }
 sub true      {1}
 sub to_dumper { Dancer::Serializer::Dumper::to_dumper(@_) }
@@ -336,20 +328,17 @@ Dancer apps can be used with a an embedded web server (great for easy testing),
 and can run under PSGI/Plack for easy deployment in a variety of webserver
 environments.
 
-=head1 MORE DOCUMENTATION
+=head1 DISCLAIMER
 
 This documentation describes all the exported symbols of Dancer. If you want
 a quick start guide to discover the framework, you should look at
-L<Dancer::Introduction>, or L<Dancer::Tutorial> to learn by example.
+L<Dancer::Introduction>.
 
 If you want to have specific examples of code for real-life problems, see the
 L<Dancer::Cookbook>.
 
 If you want to see configuration examples of different deployment solutions
 involving Dancer and Plack, see L<Dancer::Deployment>.
-
-You can find out more about the many useful plugins available for Dancer in
-L<Dancer::Plugins>.
 
 =head1 METHODS
 
@@ -422,14 +411,6 @@ Accesses cookies values, which returns a hashref of L<Dancer::Cookie> objects:
         return $cookie->value;
     };
 
-In the case you have stored something else than a scalar in your cookie:
-
-    get '/some_action' => sub {
-        my $cookie = cookies->{oauth};
-        my %values = $cookie->value;
-        return ($values{token}, $values{token_secret});
-    };
-
 =head2 config
 
 Accesses the configuration of the application:
@@ -446,14 +427,6 @@ Sets the B<content-type> rendered, for the current route handler:
         content_type 'text/plain';
 
         # here we can dump the contents of params->{txtfile}
-    };
-
-You can use abbreviations for content types. For instance:
-
-    get '/svg/:id' => sub {
-        content_type 'svg';
-
-        # here we can dump the image with id params->{id}
     };
 
 Note that if you want to change the default content-type for every route, you
@@ -475,14 +448,6 @@ Returns the dirname of the path given:
 
     my $dir = dirname($some_path);
 
-=head2 engine
-
-Given an namespace, returns the current engine object
-
-    my $template_engine = engine 'template';
-    my $html = $template_engine->apply_renderer(...);
-    $template_engine->apply_layout($html);
-
 =head2 error
 
 Logs a message of error level:
@@ -492,35 +457,6 @@ Logs a message of error level:
 =head2 false
 
 Constant that returns a false value (0).
-
-=head2 forward
-
-Runs an internal redirect of the current request to another request. This helps
-you avoid having to redirect the user using HTTP and set another request to your
-application.
-
-It effectively lets you chain routes together in a clean manner.
-
-    get qr{ /demo/articles/(.+) }x => sub {
-        my ($article_id) = splat;
-
-        # you'll have to implement this next sub yourself :)
-        change_the_main_database_to_demo();
-
-        forward '/articles/$article_id';
-    };
-
-In the above example, the users that reach I</demo/articles/30> will actually
-reach I</articles/30> but we've changed the database to demo before.
-
-This is pretty cool because it lets us retain our paths and offer a demo
-database by merely going to I</demo/...>.
-
-You'll notice that in the example we didn't indicate whether it was B<GET> or
-B<POST>. That is because C<forward> chains the same type of route the user
-reached. If it was a B<GET>, it will remain a B<GET>.
-
-Broader functionality might be added in the future.
 
 =head2 from_dumper ($structure)
 
@@ -551,7 +487,7 @@ Defines a route for HTTP B<GET> requests to the given path:
 Sets a response object with the content given.
 
 When used as a return value from a filter, this breaks the execution flow and
-renders the response immediately:
+renders the response immediatly:
 
     before sub {
         if ($some_condition) {
@@ -749,19 +685,13 @@ function, e.g.
 Allows a handler to provide plain HTML (or other content), but have it rendered
 within the layout still.
 
-This method is B<DEPRECATED>, and will be removed soon. Instead, you should be
-using the C<engine> keyword:
+For example:
 
     get '/foo' => sub {
         # Do something which generates HTML directly (maybe using
         # HTML::Table::FromDatabase or something)
         my $content = ...;
-
-        # get the template engine
-        my $template_engine = engine 'template';
-
-        # apply the layout (not the renderer), and return the result
-        $template_engine->apply_layout($content)
+        render_with_layout $content;
     };
 
 It works very similarly to C<template> in that you can pass tokens to be used in
@@ -803,8 +733,6 @@ Lets the current route handler send a file to the client.
 The content-type will be set depending on the current mime-types definition
 (see C<mime_type> if you want to define your own).
 
-The path of the file must be relative to the B<public> directory.
-
 =head2 set
 
 Defines a setting:
@@ -828,18 +756,6 @@ Creates or updates cookie values:
     };
 
 In the example above, only 'name' and 'value' are mandatory.
-
-You can also store more complex structure in your cookies:
-
-    get '/some_auth' => sub {
-        set_cookie oauth => {
-            token        => $twitter->request_token,
-            token_secret => $twitter->secret_token,
-            ...
-        };
-    };
-
-You can't store more complex structure than this. All your keys in your hash should be scalar.
 
 =head2 session
 
@@ -1054,9 +970,6 @@ L<http://github.com/sukria/Dancer>
 
 The Dancer development team can be found on #dancer on irc.perl.org:
 L<irc://irc.perl.org/dancer>
-
-If you don't have an IRC client installed/configured, there is a simple web chat
-client at L<http://www.perldancer.org/irc> for you.
 
 There is also a Dancer users mailing list available - subscribe at:
 

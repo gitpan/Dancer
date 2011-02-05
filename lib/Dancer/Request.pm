@@ -27,7 +27,7 @@ Dancer::Request->attributes(
     'content_type', 'content_length',
     'body',         'id',      'request_uri',
     'uploads',      'headers', 'path_info',
-    'ajax', 
+    'ajax',
     @http_env_keys,
 );
 
@@ -426,7 +426,7 @@ sub _read {
 sub _build_uploads {
     my ($self) = @_;
 
-    my $uploads = _decode($self->{_http_body}->upload);
+    my $uploads = $self->{_http_body}->upload;
     my %uploads;
 
     for my $name (keys %{$uploads}) {

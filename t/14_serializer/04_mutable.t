@@ -13,8 +13,6 @@ BEGIN {
 
 plan tests => 17;
 
-set environment => 'production';
-
 ok(setting('serializer' => 'Mutable'), "serializer Mutable loaded");
 my $s = Dancer::Serializer->engine;
 

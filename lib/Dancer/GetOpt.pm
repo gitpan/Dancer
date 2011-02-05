@@ -5,8 +5,6 @@ use warnings;
 
 use Dancer::Config 'setting';
 use Getopt::Long;
-use FindBin;
-use File::Spec;
 
 my $options = {
     port        => setting('port'),
@@ -37,9 +35,8 @@ sub process_args {
 sub usage_and_exit { print_usage() && exit(0) }
 
 sub print_usage {
-    my $app = File::Spec->catfile( $FindBin::RealBin, $FindBin::RealScript );
     print <<EOF
-\$ $app [options]
+\$ ./yourdancerapp.pl [options]
 
  Options:
    --daemon             Run in background (false)
@@ -79,7 +76,7 @@ Which environment to use. By default this value is set to development.
 
 --restart
 
-Set the value of the B<auto_reload> setting. Useful when you want to switch
+Set the value of the B<auto_reload> setting. Usefull when you want to switch
 this setting for a test without changing the value in your configurations
 file.
 

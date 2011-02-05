@@ -5,7 +5,7 @@ use Test::More import => ['!pass'];
 
 plan skip_all => "YAML is needed for this test"
     unless Dancer::ModuleLoader->load('YAML');
-plan tests => 9;
+plan tests => 5;
 
 use Dancer ':syntax';
 use Dancer::Config;
@@ -57,28 +57,12 @@ ok( Dancer::Config->load, 'Config load works with a conffile' );
         plugin_setting;
     }
 }
-{
-
-    package Yet::Another::Plugin;
-    use Dancer::Plugin;
-
-    sub conf {
-        plugin_setting;
-    }
-}
 
 ok my $plugin_conf = Dancer::Plugin::Test::conf(), 'got config for plugin';
 is_deeply $plugin_conf, { foo => 'baz' }, 'config is valid';
 
 ok $plugin_conf = My::Other::Plugin::conf(), 'got config for plugin';
 is_deeply $plugin_conf, { path => '/' }, 'config is valid';
-
-ok $plugin_conf = Yet::Another::Plugin::conf(), 'got config for plugin';
-is_deeply $plugin_conf, { }, 'config is valid';
-
-$plugin_conf->{zlonk} = 'bam';
-ok $plugin_conf = Yet::Another::Plugin::conf(), 'got config for plugin';
-is_deeply $plugin_conf, { zlonk => 'bam' }, 'config is valid (modified)';
 
 unlink $conffile;
 File::Temp::cleanup();

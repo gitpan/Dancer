@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 13;
+use Test::More tests => 12;
 use Dancer::Cookie;
 
 my $c = Dancer::Cookie->new(
@@ -57,14 +57,4 @@ is(
     $c->to_header,
     'dancer.slot=42; path=/; expires=test; HttpOnly',
     "header with invalid expires looks good",
-);
-
-$c = Dancer::Cookie->new(
-    name => 'msg',
-    value => 'hello; world',
-);
-is(
-    $c->to_header,
-    'msg=hello%3B%20world; path=/; HttpOnly',
-    "headers are uri encoded"
 );
