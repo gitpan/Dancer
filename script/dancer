@@ -14,6 +14,7 @@ use constant FILE => 1;
 
 # options
 my $help = 0;
+my $do_check_dancer_version = 1;
 my $name = undef;
 my $path = '.';
 
@@ -25,11 +26,9 @@ GetOptions(
     "h|help"          => \$help,
     "a|application=s" => \$name,
     "p|path=s"        => \$path,
+    "x|no-check"      => sub { $do_check_dancer_version = 0 },
     "v|version"       => \&version,
 ) or pod2usage( -verbose => 1 );
-
-# simple on-line help
-pod2usage( -verbose => 1 ) if $help;
 
 # main
 my $PERL_INTERPRETER = -r '/usr/bin/env' ? '#!/usr/bin/env perl' : "#!$^X";
@@ -50,7 +49,7 @@ my $AUTO_RELOAD = eval "require Module::Refresh and require Clone" ? 1 : 0;
 require Dancer;
 my $DANCER_VERSION   = $Dancer::VERSION;
 
-version_check();
+version_check() if $do_check_dancer_version;
 safe_mkdir($DANCER_APP_DIR);
 create_node( app_tree($name), $DANCER_APP_DIR );
 
@@ -235,9 +234,14 @@ sub version_check {
     my $latest_version = 0;
     require Dancer;
 
-    my $resp = send_http_request('http://cpansearch.perl.org/src/SUKRIA/?C=N;O=D');
-    if ($resp && $resp =~ m/Dancer-(\d\.\d+)\//) {
-        $latest_version = $1;
+    my $resp = send_http_request('http://search.cpan.org/api/module/Dancer');
+
+    if ($resp) {
+        my $data;
+        eval { $data = Dancer::from_json($resp) };
+        $data or die "Can't understand search.cpan.org's reply.\n";
+
+        $latest_version = $data->{'version'};
     }
 
     return if $DANCER_VERSION =~  m/_/;
@@ -862,7 +866,7 @@ logger: \"console\"
 # (debug, warning and error)
 log: \"core\"
 
-# shoud Dancer consider warnings as critical errors?
+# should Dancer consider warnings as critical errors?
 warnings: 1
 
 # should Dancer show a stacktrace when an error is caught?
@@ -1376,6 +1380,8 @@ dancer [options] -a <appname>
     -a, --application     : the name of your application
     -p, --path            : the path where to create your application
                               (current directory if not specified)
+    -x, --no-check        : don't check for the latest version of Dancer
+                              (checking version implies internet connection)
     -v, --version         : print the version of dancer being used
 
 =head1 DESCRIPTION

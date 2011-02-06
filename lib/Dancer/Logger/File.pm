@@ -6,13 +6,14 @@ use base 'Dancer::Logger::Abstract';
 
 use File::Spec;
 use Dancer::Config 'setting';
-use Dancer::FileUtils 'path';
+use Dancer::FileUtils qw(path open_file);
 use IO::File;
 
 sub logdir {
     my $appdir = setting('appdir');
+    my $altpath = setting('log_path');
     my $logroot = $appdir || File::Spec->tmpdir();
-    return path($logroot, 'logs');
+    return ($altpath ? $altpath : path($logroot, 'logs'));
 }
 
 sub init {
@@ -29,10 +30,7 @@ sub init {
     my $logfile = setting('environment');
     $logfile = path($logdir, "$logfile.log");
 
-    my $fh = IO::File->new;
-    unless ($fh->open($logfile, '>>')) {
-        carp "Unable to open $logfile for writing, unable to log";
-    }
+    my $fh = open_file('>>', $logfile);
 
     $fh->autoflush;
     $self->{logfile} = $logfile;
@@ -75,7 +73,9 @@ file.
 =head2 logdir
 
 Returns the log directory, decided by "logs" either in "appdir" setting or in a
-temp directory.
+temp directory. It's also possible to specify a logs directory with the log_path option.
+
+  setting log_path => $dir;
 
 =head2 _log
 

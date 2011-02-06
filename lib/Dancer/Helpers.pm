@@ -6,6 +6,7 @@ package Dancer::Helpers;
 
 use strict;
 use warnings;
+use Carp qw(carp);
 
 use Dancer::Response;
 use Dancer::Config 'setting';
@@ -26,83 +27,62 @@ sub send_file {
         code    => 404,
         message => "No such file: `$path'"
     );
-    Dancer::Response::set($error->render);
+    Dancer::Response->set($error->render);
 }
 
 sub template {
     my ($view, $tokens, $options) = @_;
 
-    my $app = Dancer::App->current;
-
-   # If 'layout' was given in the options hashref, use it if it's a true value,
-   # or don't use a layout if it was false (0, or undef); if layout wasn't
-   # given in the options hashref, go with whatever the current layout setting
-   # is.
-    my $layout =
-      exists $options->{layout}
-      ? ($options->{layout} ? $options->{layout} : undef)
-      : $app->setting('layout');
-
-
-    # these are the default tokens provided for template processing
-    $tokens ||= {};
-    $tokens->{dancer_version} = $Dancer::VERSION;
-    $tokens->{settings}       = Dancer::Config->settings;
-    $tokens->{request}        = Dancer::SharedData->request;
-    $tokens->{params}         = Dancer::SharedData->request->params;
-
-    if (setting('session')) {
-        $tokens->{session} = Dancer::Session->get;
-    }
-
     my $content;
+
     if ($view) {
-        $view = Dancer::Template->engine->view($view);
-
-        if (!-r $view) {
+        $content = Dancer::Template->engine->apply_renderer($view, $tokens);
+        if (! defined $content) {
             my $error = Dancer::Error->new(
                 code    => 404,
                 message => "Page not found",
             );
-            return Dancer::Response::set($error->render);
+            return Dancer::Response->set($error->render);
         }
-
-        $_->($tokens) for (@{$app->registry->hooks->{before_template}});
-
-        $content = Dancer::Template->engine->render($view, $tokens);
-        return $content if not defined $layout;
     } else {
-        # No view name specified; look for an option named content, and,
-        # if found, use that as the content, putting the layout around it.
-        if (exists $options->{content}) {
-            $content = delete $options->{content};
-            return $content if not defined $layout;
-        } else {
-            my $error = Dancer::Error->new(
-                code    => 404,
-                message => "Page not found",
-            );
-            return Dancer::Response::set($error->render);
-        }
+        $options ||= {};
+        $content = delete $options->{content};
     }
 
-    my $full_content =
-      Dancer::Template->engine->layout($layout, $tokens, $content);
-    return $full_content;
+    my $full_content = Dancer::Template->engine->apply_layout($content, $tokens, $options);
+    defined $full_content
+      and return $full_content;
+
+    my $error = Dancer::Error->new(
+        code    => 404,
+        message => "Page not found",
+    );
+    return Dancer::Response::set($error->render);
 }
 
+# DEPRECATED
 sub render_with_layout {
     my ($content, $tokens, $options) = @_;
-    $options ||= {};
-    $options->{content} = $content;
-    return template('', $tokens, $options);
+    carp "'render_with_layout' is DEPRECATED, use the 'engine' keyword "
+       . "to get the template engine, and use 'apply_layout' on the result";
+
+    my $full_content = Dancer::Template->engine->apply_layout($content, $tokens, $options);
+
+    if (! defined $full_content) {
+        my $error = Dancer::Error->new(
+            code    => 404,
+            message => "Page not found",
+        );
+        return Dancer::Response::set($error->render);
+    }
+    return $full_content;
 }
 
 sub error {
     my ($class, $content, $status) = @_;
     $status ||= 500;
     my $error = Dancer::Error->new(code => $status, message => $content);
-    Dancer::Response::set($error->render);
+    Dancer::Response->set($error->render);
 }
 
 sub redirect {
@@ -113,8 +93,8 @@ sub redirect {
         my $request = Dancer::SharedData->request;
         $destination = $request->uri_for($destination, {}, 1);
     }
-    Dancer::Response::status($status || 302);
-    Dancer::Response::headers('Location' => $destination);
+    Dancer::Response->status($status || 302);
+    Dancer::Response->headers('Location' => $destination);
 }
 
 #
