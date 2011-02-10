@@ -237,11 +237,11 @@ sub version_check {
     my $resp = send_http_request('http://search.cpan.org/api/module/Dancer');
 
     if ($resp) {
-        my $data;
-        eval { $data = Dancer::from_json($resp) };
-        $data or die "Can't understand search.cpan.org's reply.\n";
-
-        $latest_version = $data->{'version'};
+        if ( $resp =~ /"version" (?:\s+)? \: (?:\s+)? "(\d\.\d+)"/x ) {
+            $latest_version = $1;
+        } else {
+            die "Can't understand search.cpan.org's reply.\n";
+        }
     }
 
     return if $DANCER_VERSION =~  m/_/;
@@ -267,10 +267,12 @@ sub download_file {
 }
 
 sub templates($) {
-    my $appname = shift;
-    my $appfile = $appname;
+    my $appname    = shift;
+    my $appfile    = $appname;
+    my $cleanfiles = $appname;
 
-    $appfile =~ s{::}{/}g;
+    $appfile    =~ s{::}{/}g;
+    $cleanfiles =~ s{::}{-}g;
 
     return {
 
@@ -294,7 +296,7 @@ WriteMakefile(
         'Dancer'     => [% dancer_version %],
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean               => { FILES => '$appname-*' },
+    clean               => { FILES => '$cleanfiles-*' },
 );
 ",
 'index.tt'  => 
