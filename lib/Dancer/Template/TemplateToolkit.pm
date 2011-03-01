@@ -14,8 +14,9 @@ my $_engine;
 sub init {
     my ($self) = @_;
 
-    croak "Template is needed by Dancer::Template::TemplateToolkit"
-      unless Dancer::ModuleLoader->load('Template');
+    my $class = $self->config->{subclass} || "Template";
+    croak "$class is needed by Dancer::Template::TemplateToolkit"
+      if !$class->can("process") and !Dancer::ModuleLoader->load($class);
 
     my $charset = setting('charset') || '';
     my @encoding = length($charset) ? ( ENCODING => $charset ) : ();
@@ -40,13 +41,15 @@ sub init {
 
     $tt_config->{INCLUDE_PATH} = setting('views');
 
-    $_engine = Template->new(%$tt_config);
+    $_engine = $class->new(%$tt_config);
 }
 
 sub render {
     my ($self, $template, $tokens) = @_;
-    croak "'$template' is not a regular file"
-      if !ref($template) && (!-f $template);
+
+    if ( ! ref $template ) {
+        -f $template or croak "'$template' doesn't exist or not a regular file";
+    }
 
     my $content = "";
     my $charset = setting('charset') || '';
@@ -88,6 +91,13 @@ within your config file - for example:
         template_toolkit:
             start_tag: '[%'
             stop_tag: '%]'
+
+By default, L<Template> is used, but you can configure Dancer to use a
+subclass with the C<subclass> option.
+
+    engines:
+        template_toolkit:
+            subclass: My::Template
 
 
 =head1 SEE ALSO
