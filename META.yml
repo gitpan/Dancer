@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Dancer
-version:            1.3059_02
+version:            1.3059_03
 abstract:           A minimal-effort oriented web application framework
 author:  []
 license:            perl
@@ -8,8 +8,7 @@ distribution_type:  module
 configure_requires:
     ExtUtils::MakeMaker:  0
 build_requires:
-    Test::More:           0.94
-    Tie::Hash::NamedCapture:  0
+    Test::More:  0.94
 requires:
     Encode:               0
     File::Basename:       0
