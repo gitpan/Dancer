@@ -318,4 +318,5 @@ t/pod.t
 t/TestAppExt.pm
 t/TestPlugin.pm
 TODO
-META.yml                                 Module meta-data (added by MakeMaker)
+META.yml                                 Module YAML meta-data (added by MakeMaker)
+META.json                                Module JSON meta-data (added by MakeMaker)
