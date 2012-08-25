@@ -18,6 +18,7 @@ no_index:
     - t
     - inc
 requires:
+  Clone: 0
   Encode: 0
   File::Basename: 0
   File::Spec: 0
@@ -32,4 +33,4 @@ resources:
   bugtracker: http://github.com/sukria/Dancer/issues
   homepage: http://perldancer.org/
   repository: http://github.com/sukria/Dancer
-version: 1.3099
+version: 1.3100

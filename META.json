@@ -32,6 +32,7 @@
       },
       "runtime" : {
          "requires" : {
+            "Clone" : "0",
             "Encode" : "0",
             "File::Basename" : "0",
             "File::Spec" : "0",
@@ -55,5 +56,5 @@
          "url" : "http://github.com/sukria/Dancer"
       }
    },
-   "version" : "1.3099"
+   "version" : "1.3100"
 }
