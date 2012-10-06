@@ -32,7 +32,6 @@
       },
       "runtime" : {
          "requires" : {
-            "Clone" : "0",
             "Encode" : "0",
             "File::Basename" : "0",
             "File::Spec" : "0",
@@ -49,12 +48,12 @@
    "release_status" : "stable",
    "resources" : {
       "bugtracker" : {
-         "web" : "http://github.com/sukria/Dancer/issues"
+         "web" : "https://github.com/sukria/Dancer/issues"
       },
       "homepage" : "http://perldancer.org/",
       "repository" : {
-         "url" : "http://github.com/sukria/Dancer"
+         "url" : "https://github.com/sukria/Dancer"
       }
    },
-   "version" : "1.3100"
+   "version" : "1.3110"
 }
