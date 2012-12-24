@@ -1,86 +1,107 @@
-use 5.008005;
-use ExtUtils::MakeMaker;
 
-# ctags support
-# run perl Makfefile.PL && make tags
-sub MY::postamble {
-    my $postamble = <<'MAKE_FRAG';
-.PHONY: tags
+use strict;
+use warnings;
 
-tags:
-	ctags -f tags --recurse --totals \
-        --exclude=blib \
-        --exclude=.git \
-        --exclude='*.swp' \
-        --languages=Perl --langmap=Perl:+.t 
+use 5.005030;
 
-author_test:
-	RELEASE_TESTING=1 $(MAKE) test
+use ExtUtils::MakeMaker 6.30;
 
-MAKE_FRAG
-}
 
-WriteMakefile1(
-    NAME         => 'Dancer',
-    ABSTRACT     => "A minimal-effort oriented web application framework",
-    LICENSE      => 'perl',
-    VERSION_FROM => 'lib/Dancer.pm',
-    EXE_FILES    => ['script/dancer'],
 
-    META_MERGE => {
-        resources => {
-            repository => 'https://github.com/sukria/Dancer',
-            bugtracker => 'https://github.com/sukria/Dancer/issues',
-            homepage   => 'http://perldancer.org/',
-        },
-    },
-
-    BUILD_REQUIRES => {
-        'Test::More'              => '0.94',
-    },
-
-    PREREQ_PM => {
-
-        # non-core
-        'LWP'                        => '0',
-        'HTTP::Body'                 => '1.07', # needed for cleanup()
-        'HTTP::Server::Simple::PSGI' => '0.11',
-        'MIME::Types'                => '0',
-        'URI'                        => '1.59',
-        'Try::Tiny'                  => '0.09',
-
-        # core
-        'File::Basename' => '0',
-        'File::Spec'     => '0',
-        'Encode'         => '0',
-        'Time::HiRes'    => '0', # in core since 5.7
-    },
-
-    test      => {TESTS => join( ' ', (glob( 't/*.t'), glob('t/*/*.t')))},
-    clean     => {FILES => "t/lib/sessions/*.yml logs/*.log t/*/logs/*" }
-
+my %WriteMakefileArgs = (
+  "ABSTRACT" => "Lightweight yet powerful web application framework",
+  "AUTHOR" => "Dancer Core Developers",
+  "BUILD_REQUIRES" => {
+    "Capture::Tiny" => "0.12",
+    "File::Find" => 0,
+    "File::Spec::Functions" => 0,
+    "File::Temp" => "0.22",
+    "FindBin" => 0,
+    "HTTP::Body" => 0,
+    "HTTP::Request::Common" => 0,
+    "HTTP::Server::Simple::PSGI" => 0,
+    "LWP::UserAgent" => 0,
+    "Module::Build" => "0.3601",
+    "Test::Fatal" => 0,
+    "Test::More" => "0.92",
+    "Test::TCP" => "1.13",
+    "YAML" => 0,
+    "YAML::Any" => 0,
+    "utf8" => 0,
+    "vars" => 0
+  },
+  "CONFIGURE_REQUIRES" => {
+    "ExtUtils::MakeMaker" => "6.30",
+    "Module::Build" => "0.3601"
+  },
+  "DISTNAME" => "Dancer",
+  "EXE_FILES" => [],
+  "LICENSE" => "perl",
+  "NAME" => "Dancer",
+  "PREREQ_PM" => {
+    "Carp" => 0,
+    "Config::Any" => 0,
+    "Cwd" => 0,
+    "Data::Dumper" => 0,
+    "Digest::SHA1" => 0,
+    "Encode" => 0,
+    "Exporter" => "5.57",
+    "Fcntl" => 0,
+    "File::Basename" => 0,
+    "File::Copy" => 0,
+    "File::Spec" => 0,
+    "HTTP::Body" => 0,
+    "HTTP::Date" => 0,
+    "HTTP::Headers" => 0,
+    "HTTP::Server::Simple::PSGI" => 0,
+    "IO::File" => 0,
+    "JSON" => 0,
+    "List::Util" => 0,
+    "MIME::Types" => 0,
+    "Moo" => "0.009014",
+    "Moo::Role" => 0,
+    "MooX::Types::MooseLike" => "0.16",
+    "MooX::Types::MooseLike::Base" => 0,
+    "MooX::Types::MooseLike::Numeric" => 0,
+    "POSIX" => 0,
+    "Plack::Request" => 0,
+    "Scalar::Util" => 0,
+    "Template" => 0,
+    "Template::Tiny" => 0,
+    "Test::Builder" => 0,
+    "Test::More" => 0,
+    "URI" => 0,
+    "URI::Escape" => 0,
+    "YAML::Any" => 0,
+    "overload" => 0,
+    "parent" => 0,
+    "strict" => 0,
+    "warnings" => 0
+  },
+  "VERSION" => "1.9999_01",
+  "test" => {
+    "TESTS" => "t/*.t t/roles/*.t t/template_tiny/*.t"
+  }
 );
 
-sub WriteMakefile1 {  #Written by Alexandr Ciornii, version 0.21. Added by eumm-upgrade.
-    my %params=@_;
-    my $eumm_version=$ExtUtils::MakeMaker::VERSION;
-    $eumm_version=eval $eumm_version;
-    die "EXTRA_META is deprecated" if exists $params{EXTRA_META};
-    die "License not specified" if not exists $params{LICENSE};
-    if ($params{BUILD_REQUIRES} and $eumm_version < 6.5503) {
-        #EUMM 6.5502 has problems with BUILD_REQUIRES
-        $params{PREREQ_PM}={ %{$params{PREREQ_PM} || {}} , %{$params{BUILD_REQUIRES}} };
-        delete $params{BUILD_REQUIRES};
-    }
-    delete $params{CONFIGURE_REQUIRES} if $eumm_version < 6.52;
-    delete $params{MIN_PERL_VERSION} if $eumm_version < 6.48;
-    delete $params{META_MERGE} if $eumm_version < 6.46;
-    delete $params{META_ADD} if $eumm_version < 6.46;
-    delete $params{LICENSE} if $eumm_version < 6.31;
-    delete $params{AUTHOR} if $] < 5.005;
-    delete $params{ABSTRACT_FROM} if $] < 5.005;
-    delete $params{BINARY_LOCATION} if $] < 5.005;
 
-    WriteMakefile(%params);
+unless ( eval { ExtUtils::MakeMaker->VERSION(6.56) } ) {
+  my $br = delete $WriteMakefileArgs{BUILD_REQUIRES};
+  my $pp = $WriteMakefileArgs{PREREQ_PM};
+  for my $mod ( keys %$br ) {
+    if ( exists $pp->{$mod} ) {
+      $pp->{$mod} = $br->{$mod} if $br->{$mod} > $pp->{$mod};
+    }
+    else {
+      $pp->{$mod} = $br->{$mod};
+    }
+  }
 }
+
+delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
+  unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
+
+WriteMakefile(%WriteMakefileArgs);
+
+
 

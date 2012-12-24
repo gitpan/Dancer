@@ -1,9 +1,13 @@
-package Dancer::Logger::Console;
-use strict;
-use warnings;
-use base 'Dancer::Logger::Abstract';
+# ABSTRACT: TODO
 
-sub _log {
+package Dancer::Logger::Console;
+{
+    $Dancer::Logger::Console::VERSION = '1.9999_01';
+}
+use Moo;
+with 'Dancer::Core::Role::Logger';
+
+sub log {
     my ($self, $level, $message) = @_;
     print STDERR $self->format_message($level => $message);
 }
@@ -12,33 +16,25 @@ sub _log {
 
 __END__
 
+=pod
+
 =head1 NAME
 
-Dancer::Logger::Console - console-based logging engine for Dancer
+Dancer::Logger::Console - TODO
 
-=head1 SYNOPSIS
+=head1 VERSION
 
-=head1 DESCRIPTION
-
-This is a console-based logging engine that prints your logs to the console.
-
-=head1 METHODS
-
-=head2 _log
-
-Writes the log message to the console/screen.
+version 1.9999_01
 
 =head1 AUTHOR
 
-Alexis Sukrieh
+Dancer Core Developers
 
-=head1 LICENSE AND COPYRIGHT
+=head1 COPYRIGHT AND LICENSE
 
-Copyright 2009-2010 Alexis Sukrieh.
+This software is copyright (c) 2012 by Alexis Sukrieh.
 
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
-See http://dev.perl.org/licenses/ for more information.
-
+=cut

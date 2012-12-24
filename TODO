@@ -1,26 +1,40 @@
-                                TODO
 
+[X] Dancer::Core::App
+[X] Dancer::Core::Route
+[X] Dancer::Core::Response
+[X] Dancer::Core::Context
+[X] Dancer::Core::Server::Standalone
+[ ] Dancer::Core::Server::PSGI
+[ ] Dancer::Core::Server::Debug
+[X] Dancer::Core::Config
+[X] Dancer::Core::Hook
+[X] Dancer::Core::Cookie
+[X] Dancer::Core::MIME
 
-            This is the roadmap of upcoming developments
+[X] Dancer::Core::Role::Template
+[ ] Dancer::Template::Simple
+[X] Dancer::Template::Toolkit
 
-* see http://github.com/sukria/dancer/issues#issue/125
+[X] Dancer::Core::Role::Logger
+[ ] Dancer::Logger::File
+[X] Dancer::Logger::Console
 
-* headers (a sane Dancer::Header class for all headers, for D::H::PSGI, * D::H::Standalone, D::Request, D::Response);
-* rework the concept of D::Engines so we can have multiple D::Serializers loaded at once
-* possibility to define a serializer for a route, a list of routes, in a route (locally), ...
-* <dams> : nothing should be more global than to a Dancer app. Dancer should not become a bloated MVC, but to be pragmmatic :
-  * a Dancer app should have at most only one template engine attached to it
-  * a Dancer app should have at most only one session engine attached to it
-  * a Dancer app should be able to have multiple serializer attached to it
-* <dams> : config should be changed so that
-  * template, session, serializer defined would be by default global.
-  * if specified in the config, templates and sessions could be set per app
-  * if specified in the config, serializers could be set per app and routes.
-* <dams> : the serializer keyword should limit the serializer scope the route (if used inside a route definition) or to the app (if used outside of a route definition)
-* <dams> : Change Dancer::Plugin API : Dancer::Plugin::Foo should inherit from Dancer::Plugin themselves.
+[X] Dancer::Core::Role::Session
+[ ] Dancer::Session::YAML
+[ ] Dancer::Session::Simple
 
-* <ambs> : Dancer::Error could be rewritten to use dancer::object attributes.
+[X] Dancer::Core::Role::Serializer
+[X] Dancer::Serializer::JSON
+[X] Dancer::Serializer::YAML
+[X] Dancer::Serializer::Dumper
 
+[ ] Dancer::Core::Role::Plugin (??)
 
-[ Tests ]
-
+...
+ - The following keywords are deprecated actually on Dancer 1.
+   Should we deprecate them for ever and ever in Dancer 2?
+   - layout  (set layout instead)
+   - logger  (set logger instead)
+   - mime_type (use mime)
+   - render_with_layout (use engine(template)->apply_layout
+   - set_cookie (use cookie)

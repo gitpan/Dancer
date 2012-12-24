@@ -1,19 +1,28 @@
-package Dancer::Logger::Null;
-use strict;
-use warnings;
-use base 'Dancer::Logger::Abstract';
+# ABSTRACT: Blackhole-like silent logging engine for Dancer
 
-sub _log {1}
+package Dancer::Logger::Null;
+{
+    $Dancer::Logger::Null::VERSION = '1.9999_01';
+}
+use Moo;
+with 'Dancer::Core::Role::Logger';
+
+
+sub log {1}
 
 1;
 
 __END__
 
+=pod
+
 =head1 NAME
 
-Dancer::Logger::Null - blackhole-like silent logging engine for Dancer
+Dancer::Logger::Null - Blackhole-like silent logging engine for Dancer
 
-=head1 SYNOPSIS
+=head1 VERSION
+
+version 1.9999_01
 
 =head1 DESCRIPTION
 
@@ -22,21 +31,19 @@ the log messages instead of displaying them anywhere.
 
 =head1 METHODS
 
-=head2 _log
+=head2 log
 
 Discards the message.
 
 =head1 AUTHOR
 
-Alexis Sukrieh
+Dancer Core Developers
 
-=head1 LICENSE AND COPYRIGHT
+=head1 COPYRIGHT AND LICENSE
 
-Copyright 2009-2010 Alexis Sukrieh.
+This software is copyright (c) 2012 by Alexis Sukrieh.
 
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
-See http://dev.perl.org/licenses/ for more information.
-
+=cut

@@ -1,12 +1,17 @@
 package Dancer::ModuleLoader;
+{
+    $Dancer::ModuleLoader::VERSION = '1.9999_01';
+}
 
-# Abstraction layer for dynamic module loading
+# ABSTRACT: Dynamic module loading helpers for Dancer core components
 
 use strict;
 use warnings;
 
+
 sub load {
     my ($class, $module, $version) = @_;
+
     # 0 is a valid version, so testing trueness of $version is not enough
     if (defined $version && length $version) {
         my ($res, $error) = $class->load_with_params($module);
@@ -17,10 +22,12 @@ sub load {
         $error and return wantarray ? (0, $error) : 0;
         return 1;
     }
+
     # normal 'use', can be done via require + import
     my ($res, $error) = $class->load_with_params($module);
     return wantarray ? ($res, $error) : $res;
 }
+
 
 sub require {
     my ($class, $module) = @_;
@@ -34,15 +41,18 @@ sub require {
     return 1;
 }
 
+
 sub load_with_params {
     my ($class, $module, @args) = @_;
     my ($res, $error) = $class->require($module);
     $res or return wantarray ? (0, $error) : 0;
+
     # From perlfunc : If no "import" method can be found then the call is
     # skipped, even if there is an AUTOLOAD method.
     if ($module->can('import')) {
+
         # bump Exporter Level to import symbols in the caller
-        local $Exporter::ExportLevel = ( $Exporter::ExportLevel || 0 ) + 1;
+        local $Exporter::ExportLevel = ($Exporter::ExportLevel || 0) + 1;
         local $@;
         eval { $module->import(@args) };
         my $error = $@;
@@ -50,6 +60,7 @@ sub load_with_params {
     }
     return 1;
 }
+
 
 sub use_lib {
     my ($class, @args) = @_;
@@ -61,32 +72,19 @@ sub use_lib {
     return 1;
 }
 
-sub class_from_setting {
-    my ($self, $namespace, $setting) = @_;
-
-    my $class = '';
-    for my $token (split /_/, $setting) {
-        $class .= ucfirst($token);
-    }
-    return "${namespace}::${class}";
-}
-
 1;
 
 __END__
 
+=pod
+
 =head1 NAME
 
-Dancer::ModuleLoader - dynamic module loading helpers for Dancer core components
+Dancer::ModuleLoader - Dynamic module loading helpers for Dancer core components
 
-=head1 SYNOPSIS
+=head1 VERSION
 
-Taken directly from Dancer::Template::TemplateToolkit (which is core):
-
-    die "Template is needed by Dancer::Template::TemplateToolkit"
-      unless Dancer::ModuleLoader->load('Template');
-
-    # we now have Template loaded
+version 1.9999_01
 
 =head1 DESCRIPTION
 
@@ -94,8 +92,7 @@ Sometimes in Dancer core we need to use modules, but we don't want to declare
 them all in advance in compile-time. These could be because the specific modules
 provide extra features which depend on code that isn't (and shouldn't) be in
 core, or perhaps because we only want these components loaded in lazy style,
-saving loading time a bit. For example, why load L<Template> (which isn't
-required by L<Dancer>) when you don't use L<Dancer::Template::TemplateToolkit>?
+saving loading time a bit.
 
 To do such things takes a bit of code for localizing C<$@> and C<eval>ing. That
 code has been refactored into this module to help Dancer core developers.
@@ -104,7 +101,9 @@ B<Please only use this for Dancer core modules>. If you're writing an external
 Dancer module (L<Dancer::Template::Tiny>, L<Dancer::Session::Cookie>, etc.),
 please simply "C<use ModuleYouNeed>" in your code and don't use this module.
 
-=head1 METHODS/SUBROUTINES
+WARNING, all the following methods are CLASS methods.
+
+=head1 METHODS
 
 =head2 load
 
@@ -185,45 +184,15 @@ can be generated and dynamic.
 In scalar context, returns 1 if successful, 0 if not.
 In list context, returns 1 if successful, C<(0, "error message")> if not.
 
-=head2 class_from_setting
-
-Given a setting in Dancer::Config, composes the class it should be.
-
-This is the function that translates:
-
-    # in config.yaml
-    template: "template_toolkit"
-
-To the class:
-
-    Dancer::Template::TemplateToolkit
-
-Example:
-
-    use Dancer::ModuleLoader;
-    my $class = Dancer::ModuleLoader->class_from_setting(
-        'Dancer::Template' => 'template_toolkit',
-    );
-
-    # $class == 'Dancer::Template::TemplateToolkit
-
-    $class = Dancer::ModuleLoader->class_from_setting(
-        'Dancer::Template' => 'tiny',
-    );
-
-    # class == 'Dancer::Template::Tiny
-
 =head1 AUTHOR
 
-Alexis Sukrieh
+Dancer Core Developers
 
-=head1 LICENSE AND COPYRIGHT
+=head1 COPYRIGHT AND LICENSE
 
-Copyright 2009-2010 Alexis Sukrieh.
+This software is copyright (c) 2012 by Alexis Sukrieh.
 
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
-See http://dev.perl.org/licenses/ for more information.
-
+=cut

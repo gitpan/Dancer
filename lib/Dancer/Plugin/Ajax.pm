@@ -1,63 +1,48 @@
+# ABSTRACT: a plugin for adding Ajax route handlers
+
 package Dancer::Plugin::Ajax;
+{
+    $Dancer::Plugin::Ajax::VERSION = '1.9999_01';
+}
 
 use strict;
 use warnings;
 
 use Dancer ':syntax';
-use Dancer::Exception ':all';
 use Dancer::Plugin;
 
-our $VERSION = '1.00';
 
-register 'ajax' => \&ajax;
-
-hook before => sub {
+hook 'before' => sub {
     if (request->is_ajax) {
-        content_type( plugin_setting->{content_type} || 'text/xml' );
+        content_type('text/xml');
     }
 };
 
-sub ajax {
-    my ($pattern, @rest) = @_;
+register 'ajax' => sub {
+    my ($dsl, $pattern, @rest) = @_;
 
     my $code;
     for my $e (@rest) { $code = $e if (ref($e) eq 'CODE') }
 
     my $ajax_route = sub {
+
         # must be an XMLHttpRequest
-        if (not request->is_ajax) {
-            pass and return 0;
+        if (not $dsl->request->is_ajax) {
+            $dsl->pass and return 0;
         }
 
         # disable layout
-        my $layout = setting('layout');
-        setting('layout' => undef);
-        my $response = try {
-            $code->();
-        } catch {
-            my $e = $_;
-            setting('layout' => $layout);
-            die $e;
-        };
-        setting('layout' => $layout);
+        my $layout = $dsl->setting('layout');
+        $dsl->setting('layout' => undef);
+        my $response = $code->();
+        $dsl->setting('layout' => $layout);
         return $response;
     };
 
-    # rebuild the @rest array with the compiled route handler
-    my @compiled_rest;
-    for my $e (@rest) {
-        if (ref($e) eq 'CODE') {
-            push @compiled_rest, {ajax => 1}, $ajax_route;
-        }
-        else {
-            push @compiled_rest, {ajax => 1}, $e;
-        }
-    }
+    $dsl->any(['get', 'post'] => $pattern, $ajax_route);
+};
 
-    any ['get', 'post'] => $pattern, @compiled_rest;
-}
-
-register_plugin;
+register_plugin for_versions => [2];
 1;
 
 __END__
@@ -67,6 +52,10 @@ __END__
 =head1 NAME
 
 Dancer::Plugin::Ajax - a plugin for adding Ajax route handlers
+
+=head1 VERSION
+
+version 1.9999_01
 
 =head1 SYNOPSIS
 
@@ -100,24 +89,19 @@ Disable the layout
 
 =item *
 
-The action built matches POST / GET requests.
+The action built is a POST request.
 
 =back
 
-=head1 CONFIGURATION
-
-By default the plugin will use a content-type of 'text/xml' but this can be overrided
-with plugin setting 'content_type'.
-
-Here is example to use JSON:
-
-  plugins:
-    'Ajax':
-      content_type: 'application/json'
-
-
 =head1 AUTHOR
 
-This module has been written by Alexis Sukrieh <sukria@sukria.net>
+Dancer Core Developers
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2012 by Alexis Sukrieh.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut

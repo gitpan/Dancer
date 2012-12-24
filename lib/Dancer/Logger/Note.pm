@@ -1,31 +1,33 @@
+# ABSTRACT: Test::More note() logging engine for Dancer
+
 package Dancer::Logger::Note;
-use strict;
-use warnings;
-use base 'Dancer::Logger::Abstract';
-
-sub init {
-    my $self = shift;
-    $self->SUPER::init(@_);
-    require Test::More;
+{
+    $Dancer::Logger::Note::VERSION = '1.9999_01';
 }
+use Moo;
+use Test::More;
+with 'Dancer::Core::Role::Logger';
 
-sub _log {
+
+sub log {
     my ($self, $level, $message) = @_;
 
-    Test::More::note(
-        $self->format_message( $level => $message )
-    );
+    Test::More::note($self->format_message($level => $message));
 }
 
 1;
 
 __END__
 
+=pod
+
 =head1 NAME
 
 Dancer::Logger::Note - Test::More note() logging engine for Dancer
 
-=head1 SYNOPSIS
+=head1 VERSION
+
+version 1.9999_01
 
 =head1 DESCRIPTION
 
@@ -39,26 +41,19 @@ harness. It will only be visible in the verbose TAP stream." -- Test::More.
 
 =head1 METHODS
 
-=head2 init
-
-This method is called when C<< ->new() >> is called. It just loads Test::More
-lazily.
-
-=head2 _log
+=head2 log
 
 Use Test::More's note() to output the log message.
 
 =head1 AUTHOR
 
-Alexis Sukrieh
+Dancer Core Developers
 
-=head1 LICENSE AND COPYRIGHT
+=head1 COPYRIGHT AND LICENSE
 
-Copyright 2009-2010 Alexis Sukrieh.
+This software is copyright (c) 2012 by Alexis Sukrieh.
 
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
-See http://dev.perl.org/licenses/ for more information.
-
+=cut

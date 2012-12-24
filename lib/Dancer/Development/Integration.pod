@@ -1,6 +1,17 @@
+# ABSTRACT: Development guide for Dancer's core developers
+# PODNAME: Dancer::Development::Integration
+
+__END__
+
+=pod
+
 =head1 NAME
 
-Dancer::Development::Integration - guide for Dancer's core-team members
+Dancer::Development::Integration - Development guide for Dancer's core developers
+
+=head1 VERSION
+
+version 1.9999_01
 
 =head1 DESCRIPTION
 
@@ -16,9 +27,9 @@ ways of handling the (increasing number!) of pull requests.
 We will first define the most important terms used in this
 documentation:
 
-=over 
+=over
 
-=item * B<PR> 
+=item * B<PR>
 
 Acronym for B<P>ull B<R>equest
 
@@ -47,7 +58,7 @@ either rejecting the PR, or merging it into the integration branch.
 
 =head2 Processing a Pull Request
 
-This procedure describes how an integrator should process a PR. 
+This procedure describes how an integrator should process a PR.
 
 Let's say the user I<$user> has sent a PR, he has followed the
 instructions described in L<Dancer::Development> so his work is based
@@ -69,11 +80,10 @@ when working on a feature, we're going to do that in a topic branch,
 named C<review/$user>. Then, this branch will be merged into C<devel>
 and we will just have to drop it.
 
-
 First, we make sure we are in sync with C<origin/devel>
 
     git checkout devel
-    git pull origin devel 
+    git pull origin devel
 
 Then, from that branch we create a I<temp> sandbox
 
@@ -155,7 +165,7 @@ Dancer 1.3002 is the last release of Dancer. As it belongs to a development
 series, it can provide new features, code refactoring and deprecations. Its
 codebase is handled by the integration branch, C<devel>.
 
-=item * 
+=item *
 
 When a bug is found in 1.2xxx, it's fixed in the C<frozen> branch, and a new
 release is built from here and then uploaded to CPAN.
@@ -184,6 +194,13 @@ bumping the version number to 1.5000_01
 
 =head1 AUTHOR
 
-This documentation has been written by Alexis Sukrieh C<< <sukria@sukria.net> >>.
+Dancer Core Developers
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2012 by Alexis Sukrieh.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut

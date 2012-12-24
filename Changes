@@ -1,0 +1,6 @@
+1.9999_01
+
+    * First DEVELEOPER release of Dancer 2
+      complete rewrite of Dancer with a Moo backend.  
+      (Alexis Sukrieh, David Precious, Damien Krotkine, SawyerX, Yanick Champoux
+      and others, plus Matt S. Trout as a reviewer).

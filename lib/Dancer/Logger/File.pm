@@ -1,89 +1,99 @@
-package Dancer::Logger::File;
-use strict;
-use warnings;
-use Carp;
-use base 'Dancer::Logger::Abstract';
+# ABSTRACT: file-based logging engine for Dancer
 
-use Dancer::Config 'setting';
+package Dancer::Logger::File;
+{
+    $Dancer::Logger::File::VERSION = '1.9999_01';
+}
+use Carp 'carp';
+use Moo;
+use Dancer::Core::Types;
+
+with 'Dancer::Core::Role::Logger';
+
+use File::Spec;
 use Dancer::FileUtils qw(open_file);
 use IO::File;
 
-sub logdir {
-    my $altpath = setting('log_path');
-    return $altpath if $altpath;
 
-    my $logroot = setting('appdir');
-
-    if ($logroot) {
-        if (!-d $logroot && not mkdir $logroot) {
-            carp "log directory $logroot doesn't exist, am unable to create it";
-            return;
+has log_dir => (
+    is      => 'rw',
+    isa     => Str,
+    trigger => sub {
+        my ($self, $dir) = @_;
+        if (!-d $dir && !mkdir $dir) {
+            return carp
+              "Log directory \"$dir\" does not exist and unable to create it.";
         }
-    }
+        return carp "Log directory \"$dir\" is not writable." if !-w $dir;
+    },
+    builder => '_build_log_dir',
+    lazy    => 1,
+);
 
-    my $expected_path = $logroot                                  ?
-                        Dancer::FileUtils::path($logroot, 'logs') :
-                        Dancer::FileUtils::path('logs');
-
-    return $expected_path if (-d $expected_path && -x _ && -w _);
-
-    unless (-w $logroot and -x _) {
-        my $perm = (stat $logroot)[2] & 07777;
-        chmod($perm | 0700, $logroot);
-        unless (-w $logroot and -x _) {
-            carp "log directory $logroot isn't writable/executable and can't chmod it";
-            return;
-        }
-    }
-    return $expected_path;
+sub _build_log_dir {
+    my ($self) = @_;
+    return $self->config->{logdir}
+      || File::Spec->catdir($self->location, 'logs');
 }
 
-sub init {
+has file_name => (
+    is      => 'ro',
+    isa     => Str,
+    builder => '_build_file_name',
+    lazy    => 1
+);
+
+sub _build_file_name {
+    my ($self) = @_;
+    my $env = $self->environment;
+    return "$env.log";
+}
+
+has log_file => (is => 'rw', isa => Str);
+has fh => (is => 'rw');
+
+sub BUILD {
     my $self = shift;
-    $self->SUPER::init(@_);
-
-    my $logdir = logdir();
-    return unless ($logdir);
-
-    my $logfile = setting('log_file') || setting('environment').".log";
-
-    mkdir($logdir) unless(-d $logdir);
-    $logfile = File::Spec->catfile($logdir, $logfile);
+    my $logfile = File::Spec->catfile($self->log_dir, $self->file_name);
 
     my $fh;
-    unless($fh = open_file('>>', $logfile)) {
+    unless ($fh = open_file('>>', $logfile)) {
         carp "unable to create or append to $logfile";
         return;
     }
     $fh->autoflush;
-    $self->{logfile} = $logfile;
-    $self->{fh} = $fh;
+    $self->log_file($logfile);
+    $self->fh($fh);
 }
 
-sub _log {
-    my ($self, $level, $message) = @_;
-    my $fh = $self->{fh};
 
-    return unless(ref $fh && $fh->opened);
+sub log {
+    my ($self, $level, $message) = @_;
+    my $fh = $self->fh;
+
+    return unless (ref $fh && $fh->opened);
 
     $fh->print($self->format_message($level => $message))
-        or carp "writing to logfile $self->{logfile} failed";
+      or carp "writing to logfile $self->{logfile} failed";
 }
 
 1;
 
 __END__
 
+=pod
+
 =head1 NAME
 
 Dancer::Logger::File - file-based logging engine for Dancer
 
-=head1 SYNOPSIS
+=head1 VERSION
+
+version 1.9999_01
 
 =head1 DESCRIPTION
 
-This is a file-based logging engine that allows you to save your logs to files
-on disk.
+This is a logging engine that allows you to save your logs to files on disk.
 
 =head1 METHODS
 
@@ -100,21 +110,19 @@ It's also possible to specify a logs directory with the log_path option.
 
   setting log_path => $dir;
 
-=head2 _log
+=head2 log
 
 Writes the log message to the file.
 
 =head1 AUTHOR
 
-Alexis Sukrieh
+Dancer Core Developers
 
-=head1 LICENSE AND COPYRIGHT
+=head1 COPYRIGHT AND LICENSE
 
-Copyright 2009-2010 Alexis Sukrieh.
+This software is copyright (c) 2012 by Alexis Sukrieh.
 
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
-See http://dev.perl.org/licenses/ for more information.
-
+=cut

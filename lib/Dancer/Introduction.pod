@@ -1,6 +1,17 @@
+# ABSTRACT: A gentle introduction to Dancer
+# PODNAME: Dancer::Introduction
+
+__END__
+
+=pod
+
 =head1 NAME
 
 Dancer::Introduction - A gentle introduction to Dancer
+
+=head1 VERSION
+
+version 1.9999_01
 
 =head1 DESCRIPTION
 
@@ -62,7 +73,6 @@ method 'get', so only GET requests will be honoured by that route:
         return "Hello ".param('name');
     };
 
-
 =head2 HTTP METHODS
 
 Here are some of the standard HTTP methods which you can use to define your
@@ -103,7 +113,6 @@ Or even, a route handler that would match any HTTP methods:
         # code
     };
 
-
 =head2 ROUTE HANDLERS
 
 The route action is the code reference declared. It can access parameters
@@ -119,7 +128,6 @@ A route pattern can contain one or more tokens (a word prefixed with ':'). Each
 token found in a route pattern is used as a named-pattern match. Any match will
 be set in the params hashref.
 
-
     get '/hello/:name' => sub {
         "Hey ".param('name').", welcome here!";
     };
@@ -127,9 +135,8 @@ be set in the params hashref.
 Tokens can be optional, for example:
 
     get '/hello/:name?' => sub {
-        "Hello there " . (param('name') || "whoever you are!");
+        "Hello there " . param('name') || "whoever you are!";
     };
-
 
 =head2 WILDCARDS MATCHING
 
@@ -187,7 +194,7 @@ you can use lexical prefix like this:
     prefix '/home' => sub {
       get '/page1' => sub {}; # will match '/home/page1'
     }; ## prefix reset to previous value on exit
-    
+
     get '/page1' => sub {}; will match /page1
 
 =head1 ACTION SKIPPING
@@ -205,7 +212,6 @@ This is done with the B<pass> keyword, like in the following example
     get '/say/:number' => sub {
         "I say a number: ".params->{number};
     };
-
 
 =head2 DEFAULT ERROR PAGES
 
@@ -230,15 +236,15 @@ B<show_errors> setting.
 Note that you can also choose to consider all warnings in your route handlers
 as errors when the setting B<warnings> is set to 1.
 
-=head1 HOOKS
+=head1 FILTERS
 
-=head2 Before hooks
+=head2 Before filters
 
-Before hooks are evaluated before each request within the context of the
+Before filters are evaluated before each request within the context of the
 request and can modify the request and response. It's possible to define
 variables which will be accessible in the action blocks with the keyword 'var'.
 
-    hook 'before' => sub {
+    before sub {
         var note => 'Hi there';
         request->path_info('/foo/oversee')
     };
@@ -248,11 +254,10 @@ variables which will be accessible in the action blocks with the keyword 'var'.
         vars->{note}; # 'Hi there'
     };
 
-
 For another example, this can be used along with session support to easily
 give non-logged-in users a login page:
 
-    hook 'before' => sub {
+    before sub {
         if (!session('user') && request->path_info !~ m{^/login}) {
             # Pass the original path requested along to the handler:
             var requested_path => request->path_info;
@@ -260,37 +265,35 @@ give non-logged-in users a login page:
         }
     };
 
-
 The request keyword returns the current Dancer::Request object representing the
 incoming request. See the documentation of the L<Dancer::Request> module for
 details.
 
-=head2 After hooks 
+=head2 After filters
 
-C<after> hooks are evaluated after the response has been built by a route
+C<after> filters are evaluated after the response has been built by a route
 handler, and can alter the response itself, just before it's sent to the
 client.
 
-The hook is given the response object as its first argument:
+The filter is given the response object as its first argument:
 
-    hook 'after' => sub {
+    after sub {
         my $response = shift;
-        $response->{content} = 'after hook got here!';
+        $response->{content} = 'after filter got here!';
     };
 
+=head2 Before template filters
 
-=head2 Before template hook
-
-C<before_template_render> hooks are called whenever a template is going to be
+C<before_template> hooks are called whenever a template is going to be
 processed, they are passed the tokens hash which they can alter.
 
-    hook 'before_template_render' => sub {
+    before_template sub {
         my $tokens = shift;
         $tokens->{foo} = 'bar';
-    };
+    }
 
 The tokens hash will then be passed to the template with all the modifications
-performed by the hook. This is a good way to setup some global vars you like
+performed by the filter. This is a good way to setup some global vars you like
 to have in all your templates, like the name of the user logged in or a
 section name.
 
@@ -300,24 +303,21 @@ Configuring a Dancer application can be done in many ways. The easiest one (and
 maybe the dirtiest) is to put all your settings statements at the top of
 your script, before calling the dance() method.
 
-Other ways are possible, you can write all your setting calls in the file
-`appdir/config.yml'. For this, you must have installed the YAML module, and of
-course, write the conffile in YAML.
+Other ways are possible.  You could write all your setting calls in the file
+`appdir/config.yml'. You would, of course, have write the conffile in YAML.
 
-That's better than the first option, but it's still not
-perfect as you can't switch easily from an environment to another without
-rewriting the config.yml file.
-
-The better way is to have one config.yml file with default global settings,
-like the following:
+While better than the first option, it's still not perfect.  You can't easily
+switch from an environment to another (for example, from development to
+production) without rewriting the config.yml file.  The best way is to have
+one config.yml file with default global settings, like the following:
 
     # appdir/config.yml
     logger: 'file'
     layout: 'main'
 
 And then write as many environment files as you like in appdir/environments.
-That way, the appropriate  environment config file will be loaded according to
-the running environment (if none is specified, it will be 'development').
+That way, the appropriate environment config file will be loaded according to
+the running environment (if none is specified, 'development' is assumed).
 
 Note that you can change the running environment using the --environment
 commandline switch.
@@ -336,6 +336,10 @@ And in a production one:
     log: 'warning'
     startup_info: 0
     show_errors:  0
+
+Please note that you are not limited to writing configuration files in YAML.
+Dancer supports any file format that is supported by L< Config::Any >, such as
+JSON, XML, INI files, and Apache-style config files.
 
 =head2 load
 
@@ -366,7 +370,6 @@ the config keyword:
         return "This is " . config->{appname};
     };
 
-
 =head1 Importing just the syntax
 
 If you want to use more complex file hierarchies, you can import just the
@@ -392,23 +395,21 @@ only one method is possible for logging messages but future releases may add
 additional logging methods, for instance logging to syslog.
 
 In order to enable the logging system for your application, you first have to
-start the logger engine in your config.yml
+start the logger engine in your config file:
 
     logger: 'file'
 
 Then you can choose which kind of messages you want to actually log:
 
-    log: 'debug'     # will log debug, warning, error and info messages
-    log: 'info'      # will log info, warning and error messages
-    log: 'warning'   # will log warning and error messages
-    log: 'error'     # will log error messages
+    log: 'debug'     # will log debug, warning and errors
+    log: 'warning'   # will log warning and errors
+    log: 'error'     # will log only errors
 
 A directory appdir/logs will be created and will host one logfile per
 environment. The log message contains the time it was written, the PID of the
 current process, the message and the caller information (file and line).
 
-To log messages, use the debug, info, warning and error functions. For
-instance:
+To log messages, use the debug, warning and error methods, for instance:
 
     debug "This is a debug message";
 
@@ -546,12 +547,10 @@ A setting is key/value pair assigned by the keyword B<set>:
 
     set setting_name => 'setting_value';
 
-More usefully, settings can be defined in a YAML configuration file.
+More usefully, settings can be defined in a configuration file.
 Environment-specific settings can also be defined in environment-specific files
 (for instance, you don't want auto_reload in production, and might want extra
 logging in development).  See the cookbook for examples.
-
-See L<Dancer::Config> for complete details about supported settings.
 
 =head1 SERIALIZERS
 
@@ -559,8 +558,8 @@ When writing a webservice, data serialization/deserialization is a common issue
 to deal with. Dancer can automatically handle that for you, via a serializer.
 
 When setting up a serializer, a new behaviour is authorized for any route
-handler you define: any response that is a reference will be rendered as a
-serialized string, via the current serializer.
+handler you define: any non-scalar response will be rendered as a serialized
+string, via the current serializer.
 
 Here is an example of a route handler that will return a HashRef
 
@@ -574,7 +573,7 @@ Here is an example of a route handler that will return a HashRef
         }
     };
 
-As soon as the content is a reference - and a serializer is set, which is not
+As soon as the content is not a scalar - and a serializer is set, which is not
 the case by default - Dancer renders the response via the current
 serializer.
 
@@ -627,5 +626,16 @@ This is a possible webapp created with Dancer:
 
     # run the webserver
     Dancer->dance;
+
+=head1 AUTHOR
+
+Dancer Core Developers
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2012 by Alexis Sukrieh.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut

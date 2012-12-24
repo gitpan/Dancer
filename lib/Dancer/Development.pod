@@ -1,7 +1,17 @@
+# ABSTRACT: Guide for developers interested in contributing to Dancer
+# PODNAME: Dancer::Development
+
+__END__
+
+=pod
 
 =head1 NAME
 
-Dancer::Development - guide for developers interested in contributing
+Dancer::Development - Guide for developers interested in contributing to Dancer
+
+=head1 VERSION
+
+version 1.9999_01
 
 =head1 DESCRIPTION
 
@@ -100,12 +110,12 @@ A good way to help the project is to find a failing build log on the CPAN
 testers: L<http://www.cpantesters.org/distro/D/Dancer.html>
 
 If you find a failing test report, feel free to report it as a GitHub issue:
-L<https://github.com/sukria/Dancer/issues>.
+L<http://github.com/sukria/Dancer/issues>.
 
 =head2 Reporting Bugs
 
 We prefer to have all our bug reports on GitHub, in the issues section:
-L<https://github.com/sukria/Dancer/issues>. It's possible though to report bugs
+L<http://github.com/sukria/Dancer/issues>. It's possible though to report bugs
 on RT as well: L<https://rt.cpan.org/Dist/Display.html?Queue=Dancer>
 
 Please make sure the bug you're reporting does not yet exist. In doubt please
@@ -118,7 +128,7 @@ contributions submitted via GitHub, as it makes tracking these contributions and
 applying them much, much easier. This gives your contribution a much better
 chance of being integrated into Dancer quickly!
 
-To help us achieve high-quality, stable releases, git-flow workflow is used to 
+To help us achieve high-quality, stable releases, git-flow workflow is used to
 handle pull-requests, that means contributors must work on their C<devel> branch
 rather than on their C<master>.  (Master should be touched only by the core dev
 team when preparing a release to CPAN; all ongoing development happens in
@@ -130,7 +140,7 @@ Here is the workflow for submitting a patch:
 
 =item *
 
-Fork the repository L<https://github.com/sukria/Dancer> (click "Fork")
+Fork the repository L<http://github.com/sukria/Dancer> (click "Fork")
 
 =item *
 
@@ -258,7 +268,7 @@ from users and contributors.
 =head2 Repositories
 
 The official repository is hosted on GitHub at the following location:
-L<https://github.com/sukria/Dancer>.
+L<http://github.com/sukria/Dancer>.
 
 Official developers have write access to this repository, contributors are
 invited to fork it if they want to submit patches, as explained in the
@@ -336,6 +346,17 @@ reports. This is done to make sure the new merge doesn't bring regressions.
 For current information on Dancer's plans for the future, see the file TODO at
 L<https://github.com/sukria/Dancer/blob/master/TODO>.
 
+=cut
+
 =head1 AUTHOR
 
-This document has been written by Alexis Sukrieh L<sukria@cpan.org>
+Dancer Core Developers
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2012 by Alexis Sukrieh.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut

@@ -1,29 +1,44 @@
+#ABSTRACT: Pure Perl 5 template engine for Dancer
+
 package Dancer::Template::Simple;
+{
+    $Dancer::Template::Simple::VERSION = '1.9999_01';
+}
 use strict;
 use warnings;
 use Carp;
 
-use base 'Dancer::Template::Abstract';
-Dancer::Template::Simple->attributes('start_tag', 'stop_tag');
+use Moo;
 use Dancer::FileUtils 'read_file_content';
-use Dancer::Exception qw(:all);
 
-sub init {
+with 'Dancer::Core::Role::Template';
+
+
+has start_tag => (
+    is      => 'rw',
+    default => sub {'<%'},
+);
+
+has stop_tag => (
+    is      => 'rw',
+    default => sub {'%>'},
+);
+
+sub _build_name {'Simple'}
+
+sub BUILD {
     my $self     = shift;
     my $settings = $self->config;
 
-    my $start = $settings->{'start_tag'} || '<%';
-    my $stop  = $settings->{'stop_tag'}  || '%>';
-
-    $self->start_tag($start) unless defined $self->start_tag;
-    $self->stop_tag($stop)   unless defined $self->stop_tag;
+    $settings->{$_} and $self->$_($settings->{$_})
+      for qw/ start_tag stop_tag /;
 }
 
 sub render {
     my ($self, $template, $tokens) = @_;
     my $content;
 
-    $content = _read_content_from_template($template);
+    $content = read_file_content($template);
     $content = $self->parse_branches($content, $tokens);
 
     return $content;
@@ -97,24 +112,6 @@ sub parse_branches {
     return join "", @buffer;
 }
 
-# private
-
-sub _read_content_from_template {
-    my ($template) = @_;
-    my $content = undef;
-
-    if (ref($template)) {
-        $content = $$template;
-    }
-    else {
-        raise core_template => "'$template' is not a regular file"
-          unless -f $template;
-        $content = read_file_content($template);
-        raise core_template => "unable to read content for file $template"
-          if not defined $content;
-    }
-    return $content;
-}
 
 sub _find_value_from_token_name {
     my ($key, $tokens) = @_;
@@ -160,7 +157,11 @@ __END__
 
 =head1 NAME
 
-Dancer::Template::Simple - pure Perl 5 template engine for Dancer
+Dancer::Template::Simple - Pure Perl 5 template engine for Dancer
+
+=head1 VERSION
+
+version 1.9999_01
 
 =head1 DESCRIPTION
 
@@ -197,11 +198,13 @@ L<Dancer>, L<Dancer::Template>
 
 =head1 AUTHOR
 
-This module has been written by Alexis Sukrieh.
+Dancer Core Developers
 
-=head1 LICENSE
+=head1 COPYRIGHT AND LICENSE
 
-This module is free software and is released under the same terms as Perl
-itself.
+This software is copyright (c) 2012 by Alexis Sukrieh.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut

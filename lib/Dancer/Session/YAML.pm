@@ -1,106 +1,97 @@
 package Dancer::Session::YAML;
+{
+    $Dancer::Session::YAML::VERSION = '1.9999_01';
+}
 
-use strict;
-use warnings;
+# ABSTRACT: YAML-file-based session backend for Dancer
+
+use Moo;
+use Dancer::Core::Types;
 use Carp;
-use base 'Dancer::Session::Abstract';
-
 use Fcntl ':flock';
-use Dancer::Logger;
-use Dancer::ModuleLoader;
-use Dancer::Config 'setting';
 use Dancer::FileUtils qw(path set_file_mode);
-use Dancer::Exception qw(:all);
+use YAML::Any;
 
-# static
+with 'Dancer::Core::Role::SessionFactory';
 
-my %session_dir_initialized;
 
-sub init {
+has session_dir => (
+    is       => 'ro',
+    isa      => Str,
+    required => 1,
+);
+
+sub BUILD {
     my $self = shift;
-    $self->SUPER::init(@_);
 
-    if (!keys %session_dir_initialized) {
-        raise core_session => "YAML is needed and is not installed"
-          unless Dancer::ModuleLoader->load('YAML');
+    if (!-d $self->session_dir) {
+        mkdir $self->session_dir
+          or croak "Unable to create session dir : "
+          . $self->session_dir . ' : '
+          . $!;
     }
+}
 
-    # default value for session_dir
-    setting('session_dir' => path(setting('appdir'), 'sessions'))
-      if not defined setting('session_dir');
+sub _sessions {
+    my ($self) = @_;
+    my $sessions = [];
 
-    my $session_dir = setting('session_dir');
-    if (! exists $session_dir_initialized{$session_dir}) {
-        $session_dir_initialized{$session_dir} = 1;
-        # make sure session_dir exists
-        if (!-d $session_dir) {
-            mkdir $session_dir
-              or raise core_session => "session_dir $session_dir cannot be created";
+    opendir(my $dh, $self->session_dir)
+      or croak "Unable to open directory " . $self->session_dir . " : $!";
+
+    while (my $file = readdir($dh)) {
+        next if $file eq '.' || $file eq '..';
+        if ($file =~ /(\w+)\.yml/) {
+            push @{$sessions}, $1;
         }
-        Dancer::Logger::core("session_dir : $session_dir");
     }
+    closedir($dh);
+
+    return $sessions;
 }
 
-# create a new session and return the newborn object
-# representing that session
-sub create {
-    my ($class) = @_;
-
-    my $self = Dancer::Session::YAML->new;
-    $self->flush;
-    return $self;
+sub yaml_file {
+    my ($self, $id) = @_;
+    return path($self->session_dir, "$id.yml");
 }
 
-# deletes the dir cache
-sub reset {
-    my ($class) = @_;
-    %session_dir_initialized = ();
-}
-
-# Return the session object corresponding to the given id
-sub retrieve {
-    my ($class, $id) = @_;
-    my $session_file = yaml_file($id);
+sub _retrieve {
+    my ($self, $id) = @_;
+    my $session_file = $self->yaml_file($id);
 
     return unless -f $session_file;
 
     open my $fh, '+<', $session_file or die "Can't open '$session_file': $!\n";
     flock $fh, LOCK_EX or die "Can't lock file '$session_file': $!\n";
-    my $content = YAML::LoadFile($fh);
+    my $new_session = YAML::Any::LoadFile($fh);
     close $fh or die "Can't close '$session_file': $!\n";
 
-    return $content;
+    return $new_session;
 }
 
-# instance
+sub _destroy {
+    my ($self, $id) = @_;
+    my $session_file = $self->yaml_file($id);
+    return if !-f $session_file;
 
-sub yaml_file {
-    my ($id) = @_;
-    return path(setting('session_dir'), "$id.yml");
+    unlink $session_file;
 }
 
-sub destroy {
-    my ($self) = @_;
-    use Dancer::Logger;
-    Dancer::Logger::core(
-        "trying to remove session file: " . yaml_file($self->id));
-    unlink yaml_file($self->id) if -f yaml_file($self->id);
-}
-
-sub flush {
-    my $self         = shift;
-    my $session_file = yaml_file( $self->id );
+sub _flush {
+    my ($self, $session) = @_;
+    my $session_file = $self->yaml_file($session->id);
 
     open my $fh, '>', $session_file or die "Can't open '$session_file': $!\n";
     flock $fh, LOCK_EX or die "Can't lock file '$session_file': $!\n";
     set_file_mode($fh);
-    print {$fh} YAML::Dump($self);
+    print {$fh} YAML::Any::Dump($session);
     close $fh or die "Can't close '$session_file': $!\n";
 
-    return $self;
+    return $session;
 }
 
 1;
+
 __END__
 
 =pod
@@ -109,23 +100,35 @@ __END__
 
 Dancer::Session::YAML - YAML-file-based session backend for Dancer
 
+=head1 VERSION
+
+version 1.9999_01
+
 =head1 DESCRIPTION
 
 This module implements a session engine based on YAML files. Session are stored
 in a I<session_dir> as YAML files. The idea behind this module was to provide a
-transparent session storage for the developer. 
+human-readable session storage for the developer.
 
-This backend is intended to be used in development environments, when looking
+This backend is intended to be used in development environments, when digging
 inside a session can be useful.
 
-It's not recommended to use this session engine in production environments.
+This backend an perfectly be used in production environments, but two things
+should be kept in mind: The content of the session files is in plain text, and
+the session files should be purged by a CRON job.
+
+=head1 ATTRIBUTES
+
+=head2 session_dir
+
+Where to store the session files.
 
 =head1 CONFIGURATION
 
 The setting B<session> should be set to C<YAML> in order to use this session
 engine in a Dancer application.
 
-Files will be stored to the value of the setting C<session_dir>, whose default 
+Files will be stored to the value of the setting C<session_dir>, whose default
 value is C<appdir/sessions>.
 
 Here is an example configuration that use this session engine and stores session
@@ -134,39 +137,23 @@ files in /tmp/dancer-sessions
     session: "YAML"
     session_dir: "/tmp/dancer-sessions"
 
-=head1 METHODS
-
-=head2 reset
-
-to avoid checking if the sessions directory exists everytime a new session is
-created, this module maintains a cache of session directories it has already
-created. C<reset> wipes this cache out, forcing a test for existence
-of the sessions directory next time a session is created. It takes no argument.
-
-This is particulary useful if you want to remove the sessions directory on the
-system where your app is running, but you want this session engine to continue
-to work without having to restart your application.
-
 =head1 DEPENDENCY
 
 This module depends on L<YAML>.
-
-=head1 AUTHOR
-
-This module has been written by Alexis Sukrieh, see the AUTHORS file for
-details.
 
 =head1 SEE ALSO
 
 See L<Dancer::Session> for details about session usage in route handlers.
 
-=head1 COPYRIGHT
+=head1 AUTHOR
 
-This module is copyright (c) 2009 Alexis Sukrieh <sukria@sukria.net>
+Dancer Core Developers
 
-=head1 LICENSE
+=head1 COPYRIGHT AND LICENSE
 
-This module is free software and is released under the same terms as Perl
-itself.
+This software is copyright (c) 2012 by Alexis Sukrieh.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut

@@ -1,41 +1,46 @@
+# ABSTRACT: in-memory session backend for Dancer
+
 package Dancer::Session::Simple;
-
-use strict;
-use warnings;
-use base 'Dancer::Session::Abstract';
-
-my %sessions;
-
-# create a new session and return the newborn object
-# representing that session
-sub create {
-    my ($class) = @_;
-
-    my $self = Dancer::Session::Simple->new;
-    $self->flush;
-    return $self;
+{
+    $Dancer::Session::Simple::VERSION = '1.9999_01';
 }
+use Moo;
+use Dancer::Core::Types;
+use Carp;
 
-# Return the session object corresponding to the given id
-sub retrieve {
-    my ($class, $id) = @_;
+with 'Dancer::Core::Role::SessionFactory';
 
-    return $sessions{$id};
-}
+# The singleton that contains all the session objects created
+my $SESSIONS = {};
 
 
-sub destroy {
+sub _sessions {
     my ($self) = @_;
-    undef $sessions{$self->id};
+    return [keys %{$SESSIONS}];
 }
 
-sub flush {
-    my $self = shift;
-    $sessions{$self->id} = $self;
-    return $self;
+sub _retrieve {
+    my ($class, $id) = @_;
+    my $s = $SESSIONS->{$id};
+
+    croak "Invalid session ID: $id"
+      if !defined $s;
+
+    return $s;
+}
+
+sub _destroy {
+    my ($class, $id) = @_;
+    undef $SESSIONS->{$id};
+}
+
+sub _flush {
+    my ($class, $session) = @_;
+    $SESSIONS->{$session->id} = $session;
 }
 
 1;
+
 __END__
 
 =pod
@@ -44,35 +49,40 @@ __END__
 
 Dancer::Session::Simple - in-memory session backend for Dancer
 
+=head1 VERSION
+
+version 1.9999_01
+
 =head1 DESCRIPTION
 
 This module implements a very simple session backend, holding all session data
 in memory.  This means that sessions are volatile, and no longer exist when the
 process exits.  This module is likely to be most useful for testing purposes.
 
+=head1 DISCLAIMER
+
+This session factory should not be used in production and is only for
+single-process application workers. As the sessions objects are stored
+in-memory, they cannot be shared among multiple workers.
 
 =head1 CONFIGURATION
 
 The setting B<session> should be set to C<Simple> in order to use this session
 engine in a Dancer application.
 
-
-=head1 AUTHOR
-
-This module has been written by David Precious, see the AUTHORS file for
-details.
-
 =head1 SEE ALSO
 
 See L<Dancer::Session> for details about session usage in route handlers.
 
-=head1 COPYRIGHT
+=head1 AUTHOR
 
-This module is copyright (c) 2010 David Precious <davidp@preshweb.co.uk>
+Dancer Core Developers
 
-=head1 LICENSE
+=head1 COPYRIGHT AND LICENSE
 
-This module is free software and is released under the same terms as Perl
-itself.
+This software is copyright (c) 2012 by Alexis Sukrieh.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut

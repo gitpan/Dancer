@@ -1,11 +1,12 @@
-package Dancer::Serializer::YAML;
+# ABSTRACT: Serializer for handling YAML data
 
-use strict;
-use warnings;
-use Carp;
-use Dancer::ModuleLoader;
-use Dancer::Exception qw(:all);
-use base 'Dancer::Serializer::Abstract';
+package Dancer::Serializer::YAML;
+{
+    $Dancer::Serializer::YAML::VERSION = '1.9999_01';
+}
+use Moo;
+use Carp 'croak';
+with 'Dancer::Core::Role::Serializer';
 
 # helpers
 
@@ -23,32 +24,34 @@ sub to_yaml {
 
 # class definition
 
-sub loaded { Dancer::ModuleLoader->load('YAML') }
-
-sub init {
-    my ($self) = @_;
-    raise core_serializer => 'YAML is needed and is not installed'
-      unless $self->loaded;
-}
+sub BUILD { eval "use YAML::Any ()"; croak "Fail to load YAML: $@" if $@ }
+sub loaded {1}
 
 sub serialize {
     my ($self, $entity) = @_;
-    YAML::Dump($entity);
+    YAML::Any::Dump($entity);
 }
 
 sub deserialize {
     my ($self, $content) = @_;
-    YAML::Load($content);
+    YAML::Any::Load($content);
 }
 
 sub content_type {'text/x-yaml'}
 
 1;
+
 __END__
+
+=pod
 
 =head1 NAME
 
-Dancer::Serializer::YAML - serializer for handling YAML data
+Dancer::Serializer::YAML - Serializer for handling YAML data
+
+=head1 VERSION
+
+version 1.9999_01
 
 =head1 SYNOPSIS
 
@@ -67,3 +70,16 @@ Deserialize a YAML structure to a data structure
 =head2 content_type
 
 Return 'text/x-yaml'
+
+=head1 AUTHOR
+
+Dancer Core Developers
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2012 by Alexis Sukrieh.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut
