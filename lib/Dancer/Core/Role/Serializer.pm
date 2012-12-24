@@ -2,7 +2,7 @@
 
 package Dancer::Core::Role::Serializer;
 {
-    $Dancer::Core::Role::Serializer::VERSION = '1.9999_01';
+    $Dancer::Core::Role::Serializer::VERSION = '1.9999_02';
 }
 use Dancer::Core::Types;
 
@@ -58,7 +58,7 @@ Dancer::Core::Role::Serializer - TODO
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 AUTHOR
 

@@ -11,7 +11,7 @@ Dancer::Cookbook - Example-driven quick-start to the Dancer web framework
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 DESCRIPTION
 

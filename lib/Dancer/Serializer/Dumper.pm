@@ -2,7 +2,7 @@
 
 package Dancer::Serializer::Dumper;
 {
-    $Dancer::Serializer::Dumper::VERSION = '1.9999_01';
+    $Dancer::Serializer::Dumper::VERSION = '1.9999_02';
 }
 
 use Moo;
@@ -58,7 +58,7 @@ Dancer::Serializer::Dumper - Serializer for handling Dumper data
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 SYNOPSIS
 

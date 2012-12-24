@@ -11,7 +11,7 @@ Dancer::Tutorial - An example to get you dancing
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 What is Dancer?
 

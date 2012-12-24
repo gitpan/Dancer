@@ -1,7 +1,7 @@
 # ABSTRACT: Manipulate hooks with Dancer
 package Dancer::Core::Hook;
 {
-    $Dancer::Core::Hook::VERSION = '1.9999_01';
+    $Dancer::Core::Hook::VERSION = '1.9999_02';
 }
 use Moo;
 use Dancer::Core::Types;
@@ -53,7 +53,7 @@ Dancer::Core::Hook - Manipulate hooks with Dancer
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 SYNOPSIS
 

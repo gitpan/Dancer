@@ -1,6 +1,6 @@
 package Dancer::Core::Session;
 {
-    $Dancer::Core::Session::VERSION = '1.9999_01';
+    $Dancer::Core::Session::VERSION = '1.9999_02';
 }
 
 #ABSTRACT: class to represent any session object
@@ -94,7 +94,7 @@ Dancer::Core::Session - class to represent any session object
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 DESCRIPTION
 

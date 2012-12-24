@@ -2,7 +2,7 @@
 
 package Dancer::Core::Role::Headers;
 {
-    $Dancer::Core::Role::Headers::VERSION = '1.9999_01';
+    $Dancer::Core::Role::Headers::VERSION = '1.9999_02';
 }
 
 use Moo::Role;
@@ -78,7 +78,7 @@ Dancer::Core::Role::Headers - TODO
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 AUTHOR
 

@@ -2,7 +2,7 @@
 
 package Dancer::Session::Simple;
 {
-    $Dancer::Session::Simple::VERSION = '1.9999_01';
+    $Dancer::Session::Simple::VERSION = '1.9999_02';
 }
 use Moo;
 use Dancer::Core::Types;
@@ -51,7 +51,7 @@ Dancer::Session::Simple - in-memory session backend for Dancer
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 DESCRIPTION
 

@@ -1,6 +1,6 @@
 package Dancer::Plugin;
 {
-    $Dancer::Plugin::VERSION = '1.9999_01';
+    $Dancer::Plugin::VERSION = '1.9999_02';
 }
 
 # ABSTRACT: Extending Dancer's DSL with plugins
@@ -61,7 +61,7 @@ sub register_plugin {
     # if the caller has not a dsl, we cant register the plugin
     return if !$caller->can('dsl');
 
-    my $dancer_major_version = int($caller->dsl->dancer_version);
+    my $dancer_major_version = $caller->dancer_app->api_version;
     my $plugin_version = eval "\$${plugin}::VERSION" || '??';
 
     # make sure the plugin is compatible with this version of Dancer
@@ -249,7 +249,7 @@ Dancer::Plugin - Extending Dancer's DSL with plugins
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 DESCRIPTION
 

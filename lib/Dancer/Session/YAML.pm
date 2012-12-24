@@ -1,6 +1,6 @@
 package Dancer::Session::YAML;
 {
-    $Dancer::Session::YAML::VERSION = '1.9999_01';
+    $Dancer::Session::YAML::VERSION = '1.9999_02';
 }
 
 # ABSTRACT: YAML-file-based session backend for Dancer
@@ -102,7 +102,7 @@ Dancer::Session::YAML - YAML-file-based session backend for Dancer
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 DESCRIPTION
 

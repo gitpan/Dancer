@@ -11,7 +11,7 @@ Dancer::Development - Guide for developers interested in contributing to Dancer
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 DESCRIPTION
 

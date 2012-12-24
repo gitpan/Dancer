@@ -14,7 +14,7 @@ my $views =
 
     package Foo;
 
-    use Dancer 2.0;
+    use Dancer;
     set session => 'Simple';
 
     set views    => $views;

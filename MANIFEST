@@ -156,6 +156,7 @@ t/runner.t
 t/server.t
 t/session_engines.t
 t/session_object.t
+t/sessions/7d9bfdf3ff768fe6723f0e59d7bdc61b8e65a053.yml
 t/shared_engines.t
 t/special_import.t
 t/splat.t

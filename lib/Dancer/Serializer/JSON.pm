@@ -2,7 +2,7 @@
 
 package Dancer::Serializer::JSON;
 {
-    $Dancer::Serializer::JSON::VERSION = '1.9999_01';
+    $Dancer::Serializer::JSON::VERSION = '1.9999_02';
 }
 use Moo;
 use JSON ();
@@ -62,7 +62,7 @@ Dancer::Serializer::JSON - Serializer for handling JSON data
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 SYNOPSIS
 

@@ -2,7 +2,7 @@
 
 package Dancer::Core::Server::Standalone;
 {
-    $Dancer::Core::Server::Standalone::VERSION = '1.9999_01';
+    $Dancer::Core::Server::Standalone::VERSION = '1.9999_02';
 }
 
 use Moo;
@@ -52,7 +52,7 @@ Dancer::Core::Server::Standalone - TODO
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 DESCRIPTION
 

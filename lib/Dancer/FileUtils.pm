@@ -2,7 +2,7 @@
 
 package Dancer::FileUtils;
 {
-    $Dancer::FileUtils::VERSION = '1.9999_01';
+    $Dancer::FileUtils::VERSION = '1.9999_02';
 }
 
 use strict;
@@ -112,7 +112,7 @@ Dancer::FileUtils - File utility helpers
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 SYNOPSIS
 

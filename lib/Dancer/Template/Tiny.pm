@@ -1,6 +1,6 @@
 package Dancer::Template::Tiny;
 {
-    $Dancer::Template::Tiny::VERSION = '1.9999_01';
+    $Dancer::Template::Tiny::VERSION = '1.9999_02';
 }
 
 # ABSTRACT: Template::Tiny engine for Dancer
@@ -54,7 +54,7 @@ Dancer::Template::Tiny - Template::Tiny engine for Dancer
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 SYNOPSIS
 

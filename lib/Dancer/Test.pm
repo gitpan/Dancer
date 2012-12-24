@@ -2,7 +2,7 @@
 
 package Dancer::Test;
 {
-    $Dancer::Test::VERSION = '1.9999_01';
+    $Dancer::Test::VERSION = '1.9999_02';
 }
 use strict;
 use warnings;
@@ -385,7 +385,7 @@ Dancer::Test - Useful routines for testing Dancer apps
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 DESCRIPTION
 

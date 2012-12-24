@@ -2,7 +2,7 @@
 
 package Dancer::Core::Dispatcher;
 {
-    $Dancer::Core::Dispatcher::VERSION = '1.9999_01';
+    $Dancer::Core::Dispatcher::VERSION = '1.9999_02';
 }
 use Moo;
 use Encode;
@@ -183,7 +183,7 @@ Dancer::Core::Dispatcher - TODO
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 AUTHOR
 

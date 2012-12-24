@@ -1,6 +1,6 @@
 package Dancer::Core::Role::Config;
 {
-    $Dancer::Core::Role::Config::VERSION = '1.9999_01';
+    $Dancer::Core::Role::Config::VERSION = '1.9999_02';
 }
 
 # ABSTRACT: Config role for Dancer core objects
@@ -317,7 +317,7 @@ Dancer::Core::Role::Config - Config role for Dancer core objects
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 DESCRIPTION
 

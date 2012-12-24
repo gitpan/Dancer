@@ -2,7 +2,7 @@
 
 package Dancer::Template::TemplateToolkit;
 {
-    $Dancer::Template::TemplateToolkit::VERSION = '1.9999_01';
+    $Dancer::Template::TemplateToolkit::VERSION = '1.9999_02';
 }
 
 use strict;
@@ -70,7 +70,7 @@ Dancer::Template::TemplateToolkit - Template toolkit engine for Dancer
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 SYNOPSIS
 

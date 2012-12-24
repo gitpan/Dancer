@@ -2,7 +2,7 @@
 
 package Dancer::Core::App;
 {
-    $Dancer::Core::App::VERSION = '1.9999_01';
+    $Dancer::Core::App::VERSION = '1.9999_02';
 }
 
 use strict;
@@ -39,7 +39,7 @@ has plugins => (
 has api_version => (
     is      => 'ro',
     isa     => Num,
-    default => sub {1},
+    default => sub {2},
 );
 
 
@@ -531,7 +531,7 @@ Dancer::Core::App - TODO
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 ATTRIBUTES
 

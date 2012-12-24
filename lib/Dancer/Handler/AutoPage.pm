@@ -2,7 +2,7 @@
 
 package Dancer::Handler::AutoPage;
 {
-    $Dancer::Handler::AutoPage::VERSION = '1.9999_01';
+    $Dancer::Handler::AutoPage::VERSION = '1.9999_02';
 }
 use Moo;
 use Carp 'croak';
@@ -62,7 +62,7 @@ Dancer::Handler::AutoPage - TODO
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 AUTHOR
 

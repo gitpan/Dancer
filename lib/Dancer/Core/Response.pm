@@ -2,7 +2,7 @@
 
 package Dancer::Core::Response;
 {
-    $Dancer::Core::Response::VERSION = '1.9999_01';
+    $Dancer::Core::Response::VERSION = '1.9999_02';
 }
 
 use strict;
@@ -171,7 +171,7 @@ Dancer::Core::Response - Response object for Dancer
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 METHODS
 

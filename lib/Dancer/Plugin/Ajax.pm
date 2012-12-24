@@ -2,7 +2,7 @@
 
 package Dancer::Plugin::Ajax;
 {
-    $Dancer::Plugin::Ajax::VERSION = '1.9999_01';
+    $Dancer::Plugin::Ajax::VERSION = '1.9999_02';
 }
 
 use strict;
@@ -55,7 +55,7 @@ Dancer::Plugin::Ajax - a plugin for adding Ajax route handlers
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 SYNOPSIS
 

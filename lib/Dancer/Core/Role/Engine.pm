@@ -2,7 +2,7 @@
 
 package Dancer::Core::Role::Engine;
 {
-    $Dancer::Core::Role::Engine::VERSION = '1.9999_01';
+    $Dancer::Core::Role::Engine::VERSION = '1.9999_02';
 }
 use Moo::Role;
 use Dancer::Core::Types;
@@ -45,7 +45,7 @@ Dancer::Core::Role::Engine - TODO
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 AUTHOR
 

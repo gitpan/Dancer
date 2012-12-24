@@ -11,7 +11,7 @@ Dancer::Config - Configure Dancer to suit your needs
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 DESCRIPTION
 

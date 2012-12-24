@@ -2,7 +2,7 @@
 
 package Dancer::Core::Role::Logger;
 {
-    $Dancer::Core::Role::Logger::VERSION = '1.9999_01';
+    $Dancer::Core::Role::Logger::VERSION = '1.9999_02';
 }
 use Dancer::Core::Types;
 
@@ -143,7 +143,7 @@ Dancer::Core::Role::Logger - TODO
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 AUTHOR
 

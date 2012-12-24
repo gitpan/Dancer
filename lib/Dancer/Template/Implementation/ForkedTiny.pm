@@ -1,6 +1,6 @@
 package Dancer::Template::Implementation::ForkedTiny;
 {
-    $Dancer::Template::Implementation::ForkedTiny::VERSION = '1.9999_01';
+    $Dancer::Template::Implementation::ForkedTiny::VERSION = '1.9999_02';
 }
 
 # ABSTRACT: Dancer own implementation of Template::Tiny
@@ -230,7 +230,7 @@ Dancer::Template::Implementation::ForkedTiny - Dancer own implementation of Temp
 
 =head1 VERSION
 
-version 1.9999_01
+version 1.9999_02
 
 =head1 SYNOPSIS
 
