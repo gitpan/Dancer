@@ -2,7 +2,7 @@
 
 package Dancer::Core::Cookie;
 {
-    $Dancer::Core::Cookie::VERSION = '1.9999_02';
+    $Dancer::Core::Cookie::VERSION = '2.0000_01';
 }
 use Moo;
 use URI::Escape;
@@ -187,7 +187,7 @@ Dancer::Core::Cookie - A cookie representing class
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 SYNOPSIS
 

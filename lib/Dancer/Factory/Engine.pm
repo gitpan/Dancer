@@ -2,7 +2,7 @@
 
 package Dancer::Factory::Engine;
 {
-    $Dancer::Factory::Engine::VERSION = '1.9999_02';
+    $Dancer::Factory::Engine::VERSION = '2.0000_01';
 }
 use strict;
 use warnings;
@@ -44,7 +44,7 @@ Dancer::Factory::Engine - TODO
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 AUTHOR
 

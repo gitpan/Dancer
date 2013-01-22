@@ -1,6 +1,6 @@
 package Dancer::Core::Session;
 {
-    $Dancer::Core::Session::VERSION = '1.9999_02';
+    $Dancer::Core::Session::VERSION = '2.0000_01';
 }
 
 #ABSTRACT: class to represent any session object
@@ -19,6 +19,23 @@ has id => (
 );
 
 
+has data => (
+    is      => 'rw',
+    lazy    => 1,
+    default => sub { {} },
+);
+
+
+has expires => (
+    is     => 'rw',
+    isa    => Str,
+    coerce => sub {
+        my $value = shift;
+        $value += time;
+    },
+);
+
+
 sub read {
     my ($self, $key) = @_;
     return $self->data->{$key};
@@ -31,56 +48,10 @@ sub write {
 }
 
 
-has is_secure => (
-    is      => 'rw',
-    isa     => Bool,
-    default => sub {0},
-);
-
-
-has is_http_only => (
-    is      => 'rw',
-    isa     => Bool,
-    default => sub {1},
-);
-
-
-has expires => (
-    is  => 'rw',
-    isa => Str,
-);
-
-
-has data => (
-    is      => 'rw',
-    lazy    => 1,
-    default => sub { {} },
-);
-
-
-has creation_time => (
-    is      => 'ro',
-    default => sub { time() },
-);
-
-
-sub cookie {
-    my ($self) = @_;
-
-    my %cookie = (
-        name      => 'dancer.session',
-        value     => $self->id,
-        secure    => $self->is_secure,
-        http_only => $self->is_http_only,
-    );
-
-    if (my $expires = $self->expires) {
-        $cookie{expires} = $expires;
-    }
-
-    return Dancer::Core::Cookie->new(%cookie);
+sub delete {
+    my ($self, $key, $value) = @_;
+    delete $self->data->{$key};
 }
-
 
 1;
 
@@ -94,12 +65,12 @@ Dancer::Core::Session - class to represent any session object
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 DESCRIPTION
 
-A session object encapsulates anything related to a specific session: it's ID,
-its data, creation timestampe...
+A session object encapsulates anything related to a specific session: its ID,
+its data, and its expiration.
 
 It is completely agnostic of how it will be stored, this is the role of
 a factory that consumes L<Dancer::Core::Role::SessionFactory> to know about that.
@@ -117,32 +88,21 @@ The identifier of the session object. Required. By default,
 L<Dancer::Core::Role::SessionFactory> sets this to a randomly-generated,
 guaranteed-unique string.
 
-=head2 is_secure 
-
-Boolean flag to tell if the session cookie is secure or not.
-
-Default is false.
-
-=head2 is_http_only
-
-Boolean flag to tell if the session cookie is http only.
-
-Default is true.
-
-=head2 expires
-
-Timestamp for the expiry of the session cookie.
-
-Default is no expiry (session cookie will leave for the whole browser's
-session).
-
 =head2 data
 
 Contains the data of the session (Hash).
 
-=head2 creation_time
+=head2 expires
 
-A timestamp of the moment when the session was created.
+Number of seconds for the expiry of the session cookie. Don't add the current
+timestamp to it, will be done automatically.
+
+Default is no expiry (session cookie will leave for the whole browser's
+session).
+
+For a lifetime of one hour:
+
+  expires => 3600
 
 =head1 METHODS
 
@@ -152,13 +112,23 @@ Reader on the session data
 
     my $value = $session->read('something');
 
+Returns C<undef> if the key does not exist in the session.
+
 =head2 write
 
 Writer on the session data
 
-=head2 cookie
+  $session->write('something', $value);
 
-Coerce the session object into a L<Dancer::Core::Cookie> object.
+Returns C<$value>.
+
+=head2 delete
+
+Deletes a key from session data
+
+  $session->delete('something');
+
+Returns the value deleted from the session.
 
 =head1 AUTHOR
 

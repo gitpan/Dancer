@@ -1,6 +1,6 @@
-package Dancer::Session::YAML;
+package Dancer::SessionFactory::YAML;
 {
-    $Dancer::Session::YAML::VERSION = '1.9999_02';
+    $Dancer::SessionFactory::YAML::VERSION = '2.0000_01';
 }
 
 # ABSTRACT: YAML-file-based session backend for Dancer
@@ -16,9 +16,9 @@ with 'Dancer::Core::Role::SessionFactory';
 
 
 has session_dir => (
-    is       => 'ro',
-    isa      => Str,
-    required => 1,
+    is      => 'ro',
+    isa     => Str,
+    default => sub { path('.', 'sessions') },
 );
 
 sub BUILD {
@@ -63,10 +63,10 @@ sub _retrieve {
 
     open my $fh, '+<', $session_file or die "Can't open '$session_file': $!\n";
     flock $fh, LOCK_EX or die "Can't lock file '$session_file': $!\n";
-    my $new_session = YAML::Any::LoadFile($fh);
+    my $data = YAML::Any::LoadFile($fh);
     close $fh or die "Can't close '$session_file': $!\n";
 
-    return $new_session;
+    return $data;
 }
 
 sub _destroy {
@@ -78,16 +78,16 @@ sub _destroy {
 }
 
 sub _flush {
-    my ($self, $session) = @_;
-    my $session_file = $self->yaml_file($session->id);
+    my ($self, $id, $data) = @_;
+    my $session_file = $self->yaml_file($id);
 
     open my $fh, '>', $session_file or die "Can't open '$session_file': $!\n";
     flock $fh, LOCK_EX or die "Can't lock file '$session_file': $!\n";
     set_file_mode($fh);
-    print {$fh} YAML::Any::Dump($session);
+    print {$fh} YAML::Any::Dump($data);
     close $fh or die "Can't close '$session_file': $!\n";
 
-    return $session;
+    return $data;
 }
 
 1;
@@ -98,11 +98,11 @@ __END__
 
 =head1 NAME
 
-Dancer::Session::YAML - YAML-file-based session backend for Dancer
+Dancer::SessionFactory::YAML - YAML-file-based session backend for Dancer
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 DESCRIPTION
 

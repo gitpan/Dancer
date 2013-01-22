@@ -2,7 +2,7 @@
 
 package Dancer::Core::Role::Hookable;
 {
-    $Dancer::Core::Role::Hookable::VERSION = '1.9999_02';
+    $Dancer::Core::Role::Hookable::VERSION = '2.0000_01';
 }
 use Moo::Role;
 use Dancer::Core::Types;
@@ -52,7 +52,8 @@ sub _add_postponed_hooks {
     # find the internal name of the hooks, from the caller name
     my $caller = ref($self);
     my ($dancer, $h_type, $h_name, @rest) = map {lc} split /::/, $caller;
-    $h_name = $rest[0] if $h_name eq 'Role';
+    $h_name = $rest[0]  if $h_name eq 'Role';
+    $h_type = 'session' if $h_type eq 'sessionfactory';
     if ($h_type =~ /(template|logger|serializer|session)/) {
         $h_name = $h_type;
         $h_type = 'engine';
@@ -144,7 +145,7 @@ Dancer::Core::Role::Hookable - Role for hookable objects
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 AUTHOR
 

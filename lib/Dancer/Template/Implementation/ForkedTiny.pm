@@ -1,6 +1,6 @@
 package Dancer::Template::Implementation::ForkedTiny;
 {
-    $Dancer::Template::Implementation::ForkedTiny::VERSION = '1.9999_02';
+    $Dancer::Template::Implementation::ForkedTiny::VERSION = '2.0000_01';
 }
 
 # ABSTRACT: Dancer own implementation of Template::Tiny
@@ -177,7 +177,7 @@ sub _foreach {
 
     # Resolve the expression
     my $list = $self->_expression($stash, $expr);
-    unless (ref $list eq 'ARRAY') {
+    if (ref $list ne 'ARRAY') {
         return '';
     }
 
@@ -230,7 +230,7 @@ Dancer::Template::Implementation::ForkedTiny - Dancer own implementation of Temp
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 SYNOPSIS
 

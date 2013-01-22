@@ -13,7 +13,7 @@ Dancer::Manual - What is Dancer, and how do I use it?
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 dancer manual
 

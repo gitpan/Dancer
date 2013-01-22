@@ -2,7 +2,7 @@
 
 package Dancer::Template::Simple;
 {
-    $Dancer::Template::Simple::VERSION = '1.9999_02';
+    $Dancer::Template::Simple::VERSION = '2.0000_01';
 }
 use strict;
 use warnings;
@@ -23,8 +23,6 @@ has stop_tag => (
     is      => 'rw',
     default => sub {'%>'},
 );
-
-sub _build_name {'Simple'}
 
 sub BUILD {
     my $self     = shift;
@@ -161,7 +159,7 @@ Dancer::Template::Simple - Pure Perl 5 template engine for Dancer
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 DESCRIPTION
 

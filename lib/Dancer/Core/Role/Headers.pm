@@ -2,7 +2,7 @@
 
 package Dancer::Core::Role::Headers;
 {
-    $Dancer::Core::Role::Headers::VERSION = '1.9999_02';
+    $Dancer::Core::Role::Headers::VERSION = '2.0000_01';
 }
 
 use Moo::Role;
@@ -22,6 +22,7 @@ has headers => (
         HTTP::Headers->new();
     },
 );
+
 
 sub header {
     my $self   = shift;
@@ -78,7 +79,15 @@ Dancer::Core::Role::Headers - TODO
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
+
+=head1 METHODS
+
+=head2 header($name)
+
+Return the value of the given header, if present. If the header has multiple
+values, returns an the list of values if called in list context, the first one
+in scalar.
 
 =head1 AUTHOR
 

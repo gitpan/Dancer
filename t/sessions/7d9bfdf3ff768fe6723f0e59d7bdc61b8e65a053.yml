@@ -1,7 +1,0 @@
---- !!perl/hash:Dancer::Core::Session
-creation_time: 1356356283
-data:
-  name: three
-id: 7d9bfdf3ff768fe6723f0e59d7bdc61b8e65a053
-is_http_only: 1
-is_secure: 0

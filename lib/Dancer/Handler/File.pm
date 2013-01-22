@@ -2,7 +2,7 @@
 
 package Dancer::Handler::File;
 {
-    $Dancer::Handler::File::VERSION = '1.9999_02';
+    $Dancer::Handler::File::VERSION = '2.0000_01';
 }
 use Carp 'croak';
 use Moo;
@@ -137,7 +137,7 @@ Dancer::Handler::File - TODO
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 AUTHOR
 

@@ -17,6 +17,7 @@ my %module_build_args = (
     "HTTP::Server::Simple::PSGI" => 0,
     "LWP::UserAgent" => 0,
     "Module::Build" => "0.3601",
+    "Path::Class" => 0,
     "Test::Fatal" => 0,
     "Test::More" => "0.92",
     "Test::TCP" => "1.13",
@@ -34,14 +35,16 @@ my %module_build_args = (
     "Dancer Core Developers"
   ],
   "dist_name" => "Dancer",
-  "dist_version" => "1.9999_02",
+  "dist_version" => "2.0000_01",
   "license" => "perl",
   "module_name" => "Dancer",
   "recommends" => {
+    "CGI::Deurl::XS" => 0,
     "JSON::XS" => 0,
     "Plack::Request" => 0,
     "Test::Builder" => 0,
-    "Test::More" => 0
+    "Test::More" => 0,
+    "URL::Encode::XS" => 0
   },
   "recursive_test_files" => 1,
   "requires" => {

@@ -1,6 +1,6 @@
 package Dancer::Core::Request;
 {
-    $Dancer::Core::Request::VERSION = '1.9999_02';
+    $Dancer::Core::Request::VERSION = '2.0000_01';
 }
 
 # ABSTRACT: Interface for accessing incoming requests
@@ -15,6 +15,14 @@ use Dancer::Core::Types;
 use Dancer::Core::Request::Upload;
 
 with 'Dancer::Core::Role::Headers';
+
+
+# check presence of XS module to speedup request
+eval { require URL::Encode::XS; };
+our $XS_URL_DECODE = !$@;
+
+eval { require CGI::Deurl::XS; };
+our $XS_PARSE_QUERY_STRING = !$@;
 
 
 # add an attribute for each HTTP_* variables
@@ -203,7 +211,7 @@ sub is_patch  { $_[0]->{method} eq 'PATCH' }
 sub request_method { method(@_) }
 sub input_handle { $_[0]->env->{'psgi.input'} || $_[0]->env->{'PSGI.INPUT'} }
 
-my $_count = 0;
+our $_count = 0;
 
 sub BUILD {
     my ($self) = @_;
@@ -482,6 +490,7 @@ sub _build_params {
 
 sub _url_decode {
     my ($self, $encoded) = @_;
+    return URL::Encode::XS::url_decode($encoded) if $XS_URL_DECODE;
     my $clean = $encoded;
     $clean =~ tr/\+/ /;
     $clean =~ s/%([a-fA-F0-9]{2})/pack "H2", $1/eg;
@@ -499,9 +508,17 @@ sub _parse_post_params {
 sub _parse_get_params {
     my ($self) = @_;
     return $self->{_query_params} if defined $self->{_query_params};
+
     $self->{_query_params} = {};
 
-    my $source = $self->env->{QUERY_STRING} || '';
+    my $source = $self->env->{QUERY_STRING};
+    return if !defined $source || $source eq '';
+
+    if ($XS_PARSE_QUERY_STRING) {
+        return $self->{_query_params} =
+          CGI::Deurl::XS::parse_query_string($source) // {};
+    }
+
     foreach my $token (split /[&;]/, $source) {
         my ($key, $val) = split(/=/, $token);
         next unless defined $key;
@@ -666,7 +683,7 @@ Dancer::Core::Request - Interface for accessing incoming requests
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 SYNOPSIS
 
@@ -978,6 +995,12 @@ Dancer::Request object through specific accessors, here are those supported:
 =item C<user_agent>
 
 =back
+
+=head1 EXTRA SPEED
+
+Install URL::Encode::XS and CGI::Deurl::XS for extra speed.
+
+Dancer::Core::Request will use it if they detect their presence.
 
 =head1 SEE ALSO
 

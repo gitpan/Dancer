@@ -1,8 +1,8 @@
-# ABSTRACT: TODO
+# ABSTRACT: Dancer's Domain Specific Language (DSL)
 
 package Dancer::Core::DSL;
 {
-    $Dancer::Core::DSL::VERSION = '1.9999_02';
+    $Dancer::Core::DSL::VERSION = '2.0000_01';
 }
 
 use Moo;
@@ -89,8 +89,7 @@ sub dancer_app     { shift->app }
 sub dancer_version { Dancer->VERSION }
 
 sub dancer_major_version {
-    my @tokens = split /\./, dancer_version;
-    return $tokens[0];
+    return (split /\./, dancer_version)[0];
 }
 
 sub debug   { shift->log(debug   => @_) }
@@ -170,7 +169,7 @@ sub any {
     my $app = $self->app;
 
     if ($methods) {
-        unless (ref($methods) eq 'ARRAY') {
+        if (ref($methods) ne 'ARRAY') {
             unshift @params, $methods;
             $methods = [qw(get post put del options patch)];
         }
@@ -332,6 +331,7 @@ sub core_debug {
     print STDERR "core: $msg\n";
 }
 
+
 1;
 
 __END__
@@ -340,11 +340,11 @@ __END__
 
 =head1 NAME
 
-Dancer::Core::DSL - TODO
+Dancer::Core::DSL - Dancer's Domain Specific Language (DSL)
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 FUNCTIONS
 
@@ -362,6 +362,10 @@ If settings were defined returns number of settings.
 alias for L<setting>:
     set('foo' => '42');
     my $port=set('port');
+
+=head1 SEE ALSO
+
+L<http://advent.perldancer.org/2010/18>
 
 =head1 AUTHOR
 

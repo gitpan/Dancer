@@ -2,7 +2,7 @@
 
 package Dancer::Logger::File;
 {
-    $Dancer::Logger::File::VERSION = '1.9999_02';
+    $Dancer::Logger::File::VERSION = '2.0000_01';
 }
 use Carp 'carp';
 use Moo;
@@ -89,7 +89,7 @@ Dancer::Logger::File - file-based logging engine for Dancer
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 DESCRIPTION
 

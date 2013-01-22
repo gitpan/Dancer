@@ -2,7 +2,7 @@
 
 package Dancer::Template::TemplateToolkit;
 {
-    $Dancer::Template::TemplateToolkit::VERSION = '1.9999_02';
+    $Dancer::Template::TemplateToolkit::VERSION = '2.0000_01';
 }
 
 use strict;
@@ -16,8 +16,6 @@ with 'Dancer::Core::Role::Template';
 
 
 has '+engine' => (isa => InstanceOf ['Template'],);
-
-sub _build_name {'TemplateToolkit'}
 
 sub _build_engine {
     my $self      = shift;
@@ -70,7 +68,7 @@ Dancer::Template::TemplateToolkit - Template toolkit engine for Dancer
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 SYNOPSIS
 

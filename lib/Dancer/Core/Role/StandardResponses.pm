@@ -2,7 +2,7 @@
 
 package Dancer::Core::Role::StandardResponses;
 {
-    $Dancer::Core::Role::StandardResponses::VERSION = '1.9999_02';
+    $Dancer::Core::Role::StandardResponses::VERSION = '2.0000_01';
 }
 use Moo::Role;
 
@@ -40,7 +40,7 @@ Dancer::Core::Role::StandardResponses - TODO
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 AUTHOR
 

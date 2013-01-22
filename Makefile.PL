@@ -22,6 +22,7 @@ my %WriteMakefileArgs = (
     "HTTP::Server::Simple::PSGI" => 0,
     "LWP::UserAgent" => 0,
     "Module::Build" => "0.3601",
+    "Path::Class" => 0,
     "Test::Fatal" => 0,
     "Test::More" => "0.92",
     "Test::TCP" => "1.13",
@@ -78,7 +79,7 @@ my %WriteMakefileArgs = (
     "strict" => 0,
     "warnings" => 0
   },
-  "VERSION" => "1.9999_02",
+  "VERSION" => "2.0000_01",
   "test" => {
     "TESTS" => "t/*.t t/roles/*.t t/template_tiny/*.t"
   }

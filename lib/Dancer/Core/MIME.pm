@@ -1,6 +1,6 @@
 package Dancer::Core::MIME;
 {
-    $Dancer::Core::MIME::VERSION = '1.9999_02';
+    $Dancer::Core::MIME::VERSION = '2.0000_01';
 }
 
 # ABSTRACT: TODO
@@ -93,7 +93,7 @@ Dancer::Core::MIME - TODO
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 AUTHOR
 

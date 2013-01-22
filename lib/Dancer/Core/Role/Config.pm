@@ -1,6 +1,6 @@
 package Dancer::Core::Role::Config;
 {
-    $Dancer::Core::Role::Config::VERSION = '1.9999_02';
+    $Dancer::Core::Role::Config::VERSION = '2.0000_01';
 }
 
 # ABSTRACT: Config role for Dancer core objects
@@ -22,6 +22,8 @@ has config_location => (
     lazy    => 1,
     builder => '_build_config_location',
 );
+
+requires '_build_config_location';
 
 has config => (
     is      => 'rw',
@@ -224,10 +226,9 @@ my $_setters = {
 
         my $engine_options =
           $self->_get_config_for_engine(session => $value, $config);
-        $engine_options->{session_dir}
-          ||= File::Spec->catdir($self->config_location, 'sessions');
+
         return Dancer::Factory::Engine->create(
-            session => $value,
+            session_factory => $value,
             %{$engine_options},
             postponed_hooks => $self->get_postponed_hooks,
         );
@@ -317,7 +318,7 @@ Dancer::Core::Role::Config - Config role for Dancer core objects
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 DESCRIPTION
 

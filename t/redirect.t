@@ -14,7 +14,7 @@ subtest 'basic redirects' => sub {
         get '/redirect' => sub { header 'X-Foo' => 'foo'; redirect '/'; };
         get '/redirect_querystring' => sub { redirect '/login?failed=1' };
     }
-    use Dancer::Test 'App';
+    use Dancer::Test apps => ['App'];
 
     response_status_is  [GET => '/'] => 200;
     response_content_is [GET => '/'] => "home";
@@ -48,7 +48,7 @@ subtest 'absolute and relative redirects' => sub {
         get '/absolute' => sub { redirect "/absolute"; };
         get '/relative' => sub { redirect "somewhere/else"; };
     }
-    use Dancer::Test 'App';
+    use Dancer::Test apps => ['App'];
 
     response_headers_include
       [GET      => '/absolute_with_host'],
@@ -71,7 +71,7 @@ subtest 'redirect behind a proxy' => sub {
         set behind_proxy => 1;
         get '/bounce' => sub { redirect '/' };
     }
-    use Dancer::Test 'App';
+    use Dancer::Test apps => ['App'];
 
     $ENV{X_FORWARDED_HOST} = "nice.host.name";
     response_headers_include

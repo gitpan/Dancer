@@ -1,8 +1,8 @@
 # ABSTRACT: in-memory session backend for Dancer
 
-package Dancer::Session::Simple;
+package Dancer::SessionFactory::Simple;
 {
-    $Dancer::Session::Simple::VERSION = '1.9999_02';
+    $Dancer::SessionFactory::Simple::VERSION = '2.0000_01';
 }
 use Moo;
 use Dancer::Core::Types;
@@ -31,12 +31,12 @@ sub _retrieve {
 
 sub _destroy {
     my ($class, $id) = @_;
-    undef $SESSIONS->{$id};
+    delete $SESSIONS->{$id};
 }
 
 sub _flush {
-    my ($class, $session) = @_;
-    $SESSIONS->{$session->id} = $session;
+    my ($class, $id, $data) = @_;
+    $SESSIONS->{$id} = $data;
 }
 
 1;
@@ -47,11 +47,11 @@ __END__
 
 =head1 NAME
 
-Dancer::Session::Simple - in-memory session backend for Dancer
+Dancer::SessionFactory::Simple - in-memory session backend for Dancer
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 DESCRIPTION
 

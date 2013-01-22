@@ -1,6 +1,6 @@
 package Dancer;
 {
-    $Dancer::VERSION = '1.9999_02';
+    $Dancer::VERSION = '2.0000_01';
 }
 
 # ABSTRACT: Lightweight yet powerful web application framework
@@ -81,7 +81,7 @@ sub import {
 
     $final_args{dsl} ||= 'Dancer::Core::DSL';
 
-    # never instanciated the runner, should do it now
+    # never instantiated the runner, should do it now
     if (not defined $runner) {
 
         # TODO should support commandline options as well
@@ -174,7 +174,7 @@ Dancer - Lightweight yet powerful web application framework
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 DESCRIPTION
 

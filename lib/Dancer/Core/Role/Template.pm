@@ -2,7 +2,7 @@
 
 package Dancer::Core::Role::Template;
 {
-    $Dancer::Core::Role::Template::VERSION = '1.9999_02';
+    $Dancer::Core::Role::Template::VERSION = '2.0000_01';
 }
 
 use Dancer::Core::Types;
@@ -24,7 +24,6 @@ sub supported_hooks {
 
 sub _build_type {'Template'}
 
-requires '_build_name';
 requires 'render';
 
 has name => (
@@ -32,6 +31,8 @@ has name => (
     lazy    => 1,
     builder => 1,
 );
+
+sub _build_name { (my $name = ref shift) =~ s/^Dancer::Template:://; $name; }
 
 has charset => (
     is      => 'ro',
@@ -147,7 +148,7 @@ sub _prepare_tokens_options {
         $tokens->{vars}     = $self->context->buffer;
 
         $tokens->{session} = $self->context->session->data
-          if defined $self->context->app->setting('session');
+          if $self->context->has_session;
     }
 
     return $tokens;
@@ -190,7 +191,7 @@ Dancer::Core::Role::Template - TODO
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 AUTHOR
 

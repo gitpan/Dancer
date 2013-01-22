@@ -2,7 +2,7 @@
 
 package Dancer::Core::Role::Logger;
 {
-    $Dancer::Core::Role::Logger::VERSION = '1.9999_02';
+    $Dancer::Core::Role::Logger::VERSION = '2.0000_01';
 }
 use Dancer::Core::Types;
 
@@ -107,7 +107,7 @@ sub format_message {
         my $char = shift;
 
         my $cb = $chars_mapping->{$char};
-        unless ($cb) {
+        if (!$cb) {
             Carp::carp "\%$char not supported.";
             return "-";
         }
@@ -143,7 +143,7 @@ Dancer::Core::Role::Logger - TODO
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 AUTHOR
 

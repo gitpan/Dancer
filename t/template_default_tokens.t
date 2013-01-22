@@ -28,7 +28,7 @@ my $views =
     };
 }
 
-use Dancer::Test 'Foo';
+use Dancer::Test apps => ['Foo'];
 
 my $expected = "perl_version: $]
 dancer_version: ${Dancer::VERSION}

@@ -1,6 +1,6 @@
 package Dancer::Template::Tiny;
 {
-    $Dancer::Template::Tiny::VERSION = '1.9999_02';
+    $Dancer::Template::Tiny::VERSION = '2.0000_01';
 }
 
 # ABSTRACT: Template::Tiny engine for Dancer
@@ -19,8 +19,9 @@ with 'Dancer::Core::Role::Template';
 has '+engine' =>
   (isa => InstanceOf ['Dancer::Template::Implementation::ForkedTiny'],);
 
-sub _build_name   {'Tiny'}
-sub _build_engine { Dancer::Template::Implementation::ForkedTiny->new }
+sub _build_engine {
+    Dancer::Template::Implementation::ForkedTiny->new(%{$_[0]->config});
+}
 
 
 sub render {
@@ -54,7 +55,7 @@ Dancer::Template::Tiny - Template::Tiny engine for Dancer
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 SYNOPSIS
 

@@ -1,6 +1,6 @@
 package Dancer::Core::Role::SessionFactory;
 {
-    $Dancer::Core::Role::SessionFactory::VERSION = '1.9999_02';
+    $Dancer::Core::Role::SessionFactory::VERSION = '2.0000_01';
 }
 
 #ABSTRACT: Role for session factories
@@ -33,15 +33,66 @@ sub supported_hooks {
       /;
 }
 
-sub _build_type {'Session'}
+sub _build_type {
+    'SessionFactory';
+}    # XXX vs 'Session'?  Unused, so I can't tell -- xdg
+
+
+has cookie_name => (
+    is      => 'ro',
+    isa     => Str,
+    default => sub {'dancer.session'},
+);
+
+
+has cookie_domain => (
+    is        => 'ro',
+    isa       => Str,
+    predicate => 1,
+);
+
+
+has cookie_path => (
+    is      => 'ro',
+    isa     => Str,
+    default => sub {"/"},
+);
+
+
+has cookie_duration => (
+    is        => 'ro',
+    isa       => Num,
+    predicate => 1,
+);
+
+
+has is_secure => (
+    is      => 'rw',
+    isa     => Bool,
+    default => sub {0},
+);
+
+
+has is_http_only => (
+    is      => 'rw',
+    isa     => Bool,
+    default => sub {1},
+);
 
 
 sub create {
     my ($self) = @_;
-    my $session = Dancer::Core::Session->new(id => $self->generate_id);
+
+    my %args = (id => $self->generate_id,);
+
+    $args{expires} = $self->cookie_duration
+      if $self->has_cookie_duration;
+
+    my $session = Dancer::Core::Session->new(%args);
+
     $self->execute_hook('engine.session.before_create', $session);
 
-    eval { $self->_flush($session) };
+    eval { $self->_flush($session->id, $session->data) };
     croak "Unable to create a new session: $@"
       if $@;
 
@@ -76,14 +127,23 @@ requires '_retrieve';
 
 sub retrieve {
     my ($self, %params) = @_;
-    my $session;
     my $id = $params{id};
 
     $self->execute_hook('engine.session.before_retrieve', $id);
 
-    eval { $session = $self->_retrieve($id) };
+    my $data = eval { $self->_retrieve($id) };
     croak "Unable to retrieve session with id '$id'"
       if $@;
+
+    my %args = (id => $id,);
+
+    $args{data} = $data
+      if $data and ref $data eq 'HASH';
+
+    $args{expires} = $self->cookie_duration
+      if $self->has_cookie_duration;
+
+    my $session = Dancer::Core::Session->new(%args);
 
     $self->execute_hook('engine.session.after_retrieve', $session);
     return $session;
@@ -113,12 +173,37 @@ sub flush {
     my $session = $params{session};
     $self->execute_hook('engine.session.before_flush', $session);
 
-    eval { $self->_flush($session) };
+    eval { $self->_flush($session->id, $session->data) };
     croak "Unable to flush session: $@"
       if $@;
 
     $self->execute_hook('engine.session.after_flush', $session);
     return $session->id;
+}
+
+
+sub cookie {
+    my ($self, %params) = @_;
+    my $session = $params{session};
+    croak "cookie() requires a valid 'session' parameter"
+      unless ref($session) && $session->isa("Dancer::Core::Session");
+
+    my %cookie = (
+        value     => $session->id,
+        name      => $self->cookie_name,
+        path      => $self->cookie_path,
+        secure    => $self->is_secure,
+        http_only => $self->is_http_only,
+    );
+
+    $cookie{domain} = $self->cookie_domain
+      if $self->has_cookie_domain;
+
+    if (my $expires = $session->expires) {
+        $cookie{expires} = $expires;
+    }
+
+    return Dancer::Core::Cookie->new(%cookie);
 }
 
 
@@ -146,21 +231,48 @@ Dancer::Core::Role::SessionFactory - Role for session factories
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 DESCRIPTION
 
 Any class that consumes this role will be able to store, create, retrieve and
 destroy session objects.
 
-=head1 METHODS
+=head1 ATTRIBUTES
 
-=head2 sessions
+=head2 cookie_name
 
-Return a list of all session IDs stored in the backend.
-Useful to create cleaning scripts, in conjunction with session's creation time.
+The name of the cookie to create for storing the session key
 
-Required method : C<_sessions>
+Defaults to C<dancer.session>
+
+=head2 cookie_domain
+
+The domain of the cookie to create for storing the session key.
+Defaults to the empty string and is unused as a result.
+
+=head2 cookie_path
+
+The path of the cookie to create for storing the session key.
+Defaults to "/".
+
+=head2 cookie_duration
+
+Default duration before session cookie expiration.  If set, the
+L<Dancer::Core::Session> C<expires> attribute will be set to the current time
+plus this duration.
+
+=head2 is_secure
+
+Boolean flag to tell if the session cookie is secure or not.
+
+Default is false.
+
+=head2 is_http_only
+
+Boolean flag to tell if the session cookie is http only.
+
+Default is true.
 
 =head1 INTERFACE
 
@@ -195,7 +307,8 @@ found, triggers an exception.
 
     my $session = MySessionFactory->retrieve(id => $id);
 
-The method C<_retrieve> must be implemented.
+The method C<_retrieve> must be implemented.  It must take C<$id> as a single
+argument and must return a hash reference of session data.
 
 =head2 destroy
 
@@ -204,7 +317,8 @@ destroyed session if succeeded, triggers an exception otherwise.
 
     MySessionFactory->destroy(id => $id);
 
-The C<_destroy> method must be implemented.
+The C<_destroy> method must be implemented. It must take C<$id> as a single
+argumenet and destroy the underlying data.
 
 =head2 flush
 
@@ -215,7 +329,22 @@ An exception is triggered if the session is unable to be updated in the backend.
 
     MySessionFactory->flush(session => $session);
 
-The C<_flush> method must be implemented.
+The C<_flush> method must be implemented.  It must take two arguments: the C<$id>
+and a hash reference of session data.
+
+=head2 cookie
+
+Coerce a session object into a L<Dancer::Core::Cookie> object.
+
+    MySessionFactory->cookie(session => $session);
+
+=head2 sessions
+
+Return a list of all session IDs stored in the backend.
+Useful to create cleaning scripts, in conjunction with session's creation time.
+
+The C<_sessions> method must be implemented.  It must return an array reference
+of session IDs (or an empty array reference).
 
 =head1 AUTHOR
 

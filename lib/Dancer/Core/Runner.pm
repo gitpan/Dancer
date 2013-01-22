@@ -1,7 +1,7 @@
 # ABSTRACT: Top-layer class to start a dancer app
 package Dancer::Core::Runner;
 {
-    $Dancer::Core::Runner::VERSION = '1.9999_02';
+    $Dancer::Core::Runner::VERSION = '2.0000_01';
 }
 
 use Moo;
@@ -116,12 +116,29 @@ sub _build_location {
     # default to the dir that contains the script...
     my $location = Dancer::FileUtils::dirname($script);
 
-    # ... but we go one step upper if we find out we're in bin or public
-    $location = Dancer::FileUtils::path($location, '..')
-      if File::Basename::basename($location) eq 'bin'
-      || File::Basename::basename($location) eq 'public';
+    #we try to find bin and lib
+    my $subdir       = $location;
+    my $subdir_found = 0;
 
-    $self->location($location);
+    #maximum of 10 iterations, to prevent infinite loop
+    for (1 .. 10) {
+
+        #try to find libdir and bindir to determine the root of dancer app
+        my $libdir = Dancer::FileUtils::path($subdir, 'lib');
+        my $bindir = Dancer::FileUtils::path($subdir, 'bin');
+
+        #try to find .dancer_app file to determine the root of dancer app
+        my $dancerdir = Dancer::FileUtils::path($subdir, '.dancer');
+
+        # if one of them is found, keep that
+        if ((-d $libdir && -d $bindir) || (-f $dancerdir)) {
+            $subdir_found = 1;
+            last;
+        }
+        $subdir = Dancer::FileUtils::path($subdir, '..');
+    }
+
+    $self->location($subdir_found ? $subdir : $location);
 }
 
 
@@ -168,7 +185,7 @@ Dancer::Core::Runner - Top-layer class to start a dancer app
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 DESCRIPTION
 
@@ -195,7 +212,7 @@ The environment string. The options, in this order, are:
 =head2 postponed_hooks
 
 Postponed hooks will be applied at the end, when the hookable objects are 
-instanciated, not before.
+instantiated, not before.
 
 =head2 caller
 

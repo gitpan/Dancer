@@ -2,7 +2,7 @@
 
 package Dancer::Test;
 {
-    $Dancer::Test::VERSION = '1.9999_02';
+    $Dancer::Test::VERSION = '2.0000_01';
 }
 use strict;
 use warnings;
@@ -16,19 +16,28 @@ use Data::Dumper;
 use parent 'Exporter';
 our @EXPORT = qw(
   dancer_response
-  route_exists
-  route_doesnt_exist
+
   response_content_is
   response_content_isnt
-  response_status_is
-  response_status_isnt
-  response_headers_include
-  response_headers_are_deeply
+  response_content_is_deeply
   response_content_like
   response_content_unlike
-  response_content_is_deeply
+
+  response_status_is
+  response_status_isnt
+
+  response_headers_include
+  response_headers_are_deeply
+
   response_is_file
+
+  route_exists
+  route_doesnt_exist
+
 );
+
+#dancer1 also has read_logs, response_redirect_location_is
+#cf. https://github.com/PerlDancer/Dancer2/issues/25
 
 use Dancer::Core::Dispatcher;
 use Dancer::Core::Request;
@@ -274,12 +283,18 @@ sub response_headers_include {
 
 
 sub import {
-    my ($class,  @applications) = @_;
-    my ($caller, $script)       = caller;
+    my ($class, %options) = @_;
 
-    # if no app is passed, assume the caller is one.
-    @applications = ($caller)
-      if !@applications && $caller->can('dancer_app');
+    my @applications;
+    if (ref $options{apps} eq ref([])) {
+        @applications = @{$options{apps}};
+    }
+    else {
+        my ($caller, $script) = caller;
+
+        # if no app is passed, assume the caller is one.
+        @applications = ($caller) if $caller->can('dancer_app');
+    }
 
     # register the apps to the test dispatcher
     $_dispatcher->apps([map { $_->dancer_app } @applications]);
@@ -385,37 +400,147 @@ Dancer::Test - Useful routines for testing Dancer apps
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 DESCRIPTION
 
+provides useful routines to test Dancer apps.
+
+$test_name is always optional.
+
 =head1 FUNCTIONS
 
-=head2 dancer_response
+=head2 dancer_response ($method, $path, $params, $arg_env);
 
-=head2 response_status_is
+Returns a Dancer::Response object for the given request.
 
-=head2 route_exists
+Only $method and $path are required.
 
-=head2 route_doesnt_exist
+$params is a hashref with 'body' as a string; 'headers' can be an arrayref or
+a HTTP::Headers object, 'files' can be arrayref of hashref, containing some 
+files to upload:
 
-=head2 response_status_isnt
+	dancer_response($method, $path, 
+		{ params => $params, 
+			body => $body, 
+			headers => $headers, 
+			files => [{filename => '/path/to/file', name => 'my_file'}] 
+		}
+	);
 
-=head2 response_content_is
+A good reason to use this function is for testing POST requests. Since POST
+requests may not be idempotent, it is necessary to capture the content and
+status in one shot. Calling the response_status_is and response_content_is
+functions in succession would make two requests, each of which could alter the
+state of the application and cause Schrodinger's cat to die.
 
-=head2 response_content_isnt
+    my $response = dancer_response POST => '/widgets';
+    is $response->{status}, 202, "response for POST /widgets is 202";
+    is $response->{content}, "Widget #1 has been scheduled for creation",
+        "response content looks good for first POST /widgets";
 
-=head2 response_content_like
+    $response = dancer_response POST => '/widgets';
+    is $response->{status}, 202, "response for POST /widgets is 202";
+    is $response->{content}, "Widget #2 has been scheduled for creation",
+        "response content looks good for second POST /widgets";
 
-=head2 response_content_unlike
+It's possible to test file uploads:
 
-=head2 response_content_is_deeply
+    post '/upload' => sub { return upload('image')->content };
 
-=head2 response_is_file
+    $response = dancer_response(POST => '/upload', {files => [{name => 'image', filename => '/path/to/image.jpg'}]});
 
-=head2 response_headers_are_deeply
+In addition, you can supply the file contents as the C<data> key:
 
-=head2 response_headers_include
+    my $data  = 'A test string that will pretend to be file contents.';
+    $response = dancer_response(POST => '/upload', {
+        files => [{name => 'test', filename => "filename.ext", data => $data}]
+    });
+
+=head2 response_status_is ($request, $expected, $test_name);
+
+Asserts that Dancer's response for the given request has a status equal to the
+one given.
+
+    response_status_is [GET => '/'], 200, "response for GET / is 200";
+
+=head2 route_exists([$method, $path], $test_name)
+
+Asserts that the given request matches a route handler in Dancer's
+registry.
+
+    route_exists [GET => '/'], "GET / is handled";
+
+=head2 route_doesnt_exist([$method, $path], $test_name)
+
+Asserts that the given request does not match any route handler 
+in Dancer's registry.
+
+    route_doesnt_exist [GET => '/bogus_path'], "GET /bogus_path is not handled";
+
+=head2 response_status_isnt([$method, $path], $status, $test_name)
+
+Asserts that the status of Dancer's response is not equal to the
+one given.
+
+    response_status_isnt [GET => '/'], 404, "response for GET / is not a 404";
+
+=head2 response_content_is([$method, $path], $expected, $test_name)
+
+Asserts that the response content is equal to the C<$expected> string.
+
+ response_content_is [GET => '/'], "Hello, World", 
+        "got expected response content for GET /";
+
+=head2 response_content_isnt([$method, $path], $not_expected, $test_name)
+
+Asserts that the response content is not equal to the C<$not_expected> string.
+
+    response_content_isnt [GET => '/'], "Hello, World", 
+        "got expected response content for GET /";
+
+=head2 response_content_like([$method, $path], $regexp, $test_name)
+
+Asserts that the response content for the given request matches the regexp
+given.
+
+    response_content_like [GET => '/'], qr/Hello, World/, 
+        "response content looks good for GET /";
+
+=head2 response_content_unlike([$method, $path], $regexp, $test_name)
+
+Asserts that the response content for the given request does not match the regexp
+given.
+
+    response_content_unlike [GET => '/'], qr/Page not found/, 
+        "response content looks good for GET /";
+
+=head2 response_content_is_deeply([$method, $path], $expected_struct, $test_name)
+
+Similar to response_content_is(), except that if response content and 
+$expected_struct are references, it does a deep comparison walking each data 
+structure to see if they are equivalent.  
+
+If the two structures are different, it will display the place where they start
+differing.
+
+    response_content_is_deeply [GET => '/complex_struct'], 
+        { foo => 42, bar => 24}, 
+        "got expected response structure for GET /complex_struct";
+
+=head2 response_is_file ($request, $test_name);
+
+=head2 response_headers_are_deeply([$method, $path], $expected, $test_name)
+
+Asserts that the response headers data structure equals the one given.
+
+    response_headers_are_deeply [GET => '/'], [ 'X-Powered-By' => 'Dancer 1.150' ];
+
+=head2 response_headers_include([$method, $path], $expected, $test_name)
+
+Asserts that the response headers data structure includes some of the defined ones.
+
+    response_headers_include [GET => '/'], [ 'Content-Type' => 'text/plain' ];
 
 =head2 import
 
@@ -430,7 +555,7 @@ to test.
     use t::lib::Foo;
     use t::lib::Bar;
 
-    use Dancer::Test 't::lib::Foo', 't::lib::Bar';
+    use Dancer::Test apps => ['t::lib::Foo', 't::lib::Bar'];
 
 =head1 AUTHOR
 

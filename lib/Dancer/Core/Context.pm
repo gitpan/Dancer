@@ -1,6 +1,6 @@
 package Dancer::Core::Context;
 {
-    $Dancer::Core::Context::VERSION = '1.9999_02';
+    $Dancer::Core::Context::VERSION = '2.0000_01';
 }
 
 # ABSTRACT: handles everything proper to a request's context.
@@ -101,6 +101,7 @@ has session => (
     isa     => Session,
     lazy    => 1,
     builder => '_build_session',
+    clearer => 1,
 );
 
 sub _build_session {
@@ -113,23 +114,65 @@ sub _build_session {
       if !defined $engine;
 
     # find the session cookie if any
-    my $session_id;
-    my $session_cookie = $self->cookie('dancer.session');
-    if (defined $session_cookie) {
-        $session_id = $session_cookie->value;
-    }
+    if (!$self->destroyed_session) {
+        my $session_id;
+        my $session_cookie = $self->cookie($engine->cookie_name);
+        if (defined $session_cookie) {
+            $session_id = $session_cookie->value;
+        }
 
-    # if we have a session cookie, try to retrieve the session
-    if (defined $session_id) {
-        eval { $session = $engine->retrieve(id => $session_id) };
-        croak "Fail to retreive session: $@"
-          if $@ && $@ !~ /Unable to retrieve session/;
+        # if we have a session cookie, try to retrieve the session
+        if (defined $session_id) {
+            eval { $session = $engine->retrieve(id => $session_id) };
+            croak "Fail to retreive session: $@"
+              if $@ && $@ !~ /Unable to retrieve session/;
+        }
     }
 
     # create the session if none retrieved
     return $session ||= $engine->create();
 }
 
+
+sub has_session {
+    my ($self) = @_;
+
+    my $engine = $self->app->setting('session')
+      or return;
+
+    return $self->{session}
+      || ($self->cookie($engine->cookie_name) && !$self->destroyed_session);
+}
+
+
+has destroyed_session => (
+    is        => 'rw',
+    isa       => InstanceOf ['Dancer::Core::Session'],
+    predicate => 1,
+);
+
+
+sub destroy_session {
+    my ($self) = @_;
+
+    # Find the session engine
+    my $engine = $self->app->setting('session');
+    croak "No session engine defined, cannot use session."
+      if !defined $engine;
+
+    # Expire session, set the expired cookie and destroy the session
+    # Setting the cookie ensures client gets an expired cookie unless
+    # a new session is created and supercedes it
+    my $session = $self->session;
+    $session->expires(-86400);    # yesterday
+    $engine->destroy(id => $session->id);
+
+    # Clear session in context and invalidate session cookie in request
+    $self->destroyed_session($session);
+    $self->clear_session;
+
+    return;
+}
 
 1;
 
@@ -143,13 +186,33 @@ Dancer::Core::Context - handles everything proper to a request's context.
 
 =head1 VERSION
 
-version 1.9999_02
+version 2.0000_01
 
 =head1 ATTRIBUTES
 
 =head2 session
 
 Handle for the current session object, if any
+
+=head2 destroyed_session
+
+We cache a destroyed session here; once this is set we must not attempt to
+retrieve the session from the cookie in the request.  If no new session is
+created, this is set (with expiration) as a cookie to force the browser to
+expire the cookie.
+
+=head1 METHODS
+
+=head2 has_session
+
+Returns true if session engine has been defined and if either a session object
+has been instantiated in the context or if a session cookie was found and not
+subsequently invalidated.
+
+=head2 destroy_session
+
+Destroys the current session and ensures any subsquent session is created
+from scratch and not from the request session cookie
 
 =head1 AUTHOR
 
