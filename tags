@@ -9,11 +9,11 @@ BUILD	lib/Dancer/Core/Error.pm	/^sub BUILD {$/;"	s
 BUILD	lib/Dancer/Core/Request.pm	/^sub BUILD {$/;"	s
 BUILD	lib/Dancer/Core/Response.pm	/^sub BUILD {$/;"	s
 BUILD	lib/Dancer/Core/Role/Hookable.pm	/^sub BUILD { }$/;"	s
+BUILD	lib/Dancer/Core/Role/SessionFactory/File.pm	/^sub BUILD {$/;"	s
 BUILD	lib/Dancer/Core/Route.pm	/^sub BUILD {$/;"	s
 BUILD	lib/Dancer/Handler/File.pm	/^sub BUILD {$/;"	s
 BUILD	lib/Dancer/Logger/File.pm	/^sub BUILD {$/;"	s
 BUILD	lib/Dancer/Serializer/YAML.pm	/^sub BUILD { eval "use YAML::Any ()"; croak "Fail to load YAML: $@" if $@ }$/;"	s
-BUILD	lib/Dancer/Session/YAML.pm	/^sub BUILD {$/;"	s
 BUILD	lib/Dancer/Template/Simple.pm	/^sub BUILD {$/;"	s
 Dancer	lib/Dancer.pm	/^package Dancer;$/;"	p
 Dancer::Core	lib/Dancer/Core.pm	/^package Dancer::Core;$/;"	p
@@ -37,8 +37,8 @@ Dancer::Core::Role::Hookable	lib/Dancer/Core/Role/Hookable.pm	/^package Dancer::
 Dancer::Core::Role::Logger	lib/Dancer/Core/Role/Logger.pm	/^package Dancer::Core::Role::Logger;$/;"	p
 Dancer::Core::Role::Serializer	lib/Dancer/Core/Role/Serializer.pm	/^package Dancer::Core::Role::Serializer;$/;"	p
 Dancer::Core::Role::Server	lib/Dancer/Core/Role/Server.pm	/^package Dancer::Core::Role::Server;$/;"	p
-Dancer::Core::Role::Session	lib/Dancer/Core/Role/Session.pm	/^package Dancer::Core::Role::Session;$/;"	p
 Dancer::Core::Role::SessionFactory	lib/Dancer/Core/Role/SessionFactory.pm	/^package Dancer::Core::Role::SessionFactory;$/;"	p
+Dancer::Core::Role::SessionFactory::File	lib/Dancer/Core/Role/SessionFactory/File.pm	/^package Dancer::Core::Role::SessionFactory::File;$/;"	p
 Dancer::Core::Role::StandardResponses	lib/Dancer/Core/Role/StandardResponses.pm	/^package Dancer::Core::Role::StandardResponses;$/;"	p
 Dancer::Core::Role::Template	lib/Dancer/Core/Role/Template.pm	/^package Dancer::Core::Role::Template;$/;"	p
 Dancer::Core::Route	lib/Dancer/Core/Route.pm	/^package Dancer::Core::Route;$/;"	p
@@ -46,6 +46,7 @@ Dancer::Core::Runner	lib/Dancer/Core/Runner.pm	/^package Dancer::Core::Runner;$/
 Dancer::Core::Server::PSGI	lib/Dancer/Core/Server/PSGI.pm	/^package Dancer::Core::Server::PSGI;$/;"	p
 Dancer::Core::Server::Standalone	lib/Dancer/Core/Server/Standalone.pm	/^package Dancer::Core::Server::Standalone;$/;"	p
 Dancer::Core::Session	lib/Dancer/Core/Session.pm	/^package Dancer::Core::Session;$/;"	p
+Dancer::Core::Time	lib/Dancer/Core/Time.pm	/^package Dancer::Core::Time;$/;"	p
 Dancer::Core::Types	lib/Dancer/Core/Types.pm	/^package Dancer::Core::Types;$/;"	p
 Dancer::Factory::Engine	lib/Dancer/Factory/Engine.pm	/^package Dancer::Factory::Engine;$/;"	p
 Dancer::FileUtils	lib/Dancer/FileUtils.pm	/^package Dancer::FileUtils;$/;"	p
@@ -58,19 +59,22 @@ Dancer::Logger::Diag	lib/Dancer/Logger/Diag.pm	/^package Dancer::Logger::Diag;$/
 Dancer::Logger::File	lib/Dancer/Logger/File.pm	/^package Dancer::Logger::File;$/;"	p
 Dancer::Logger::Note	lib/Dancer/Logger/Note.pm	/^package Dancer::Logger::Note;$/;"	p
 Dancer::Logger::Null	lib/Dancer/Logger/Null.pm	/^package Dancer::Logger::Null;$/;"	p
+Dancer::ModuleLoader	lib/Dancer/ModuleLoader.pm	/^package Dancer::ModuleLoader;$/;"	p
 Dancer::Plugin	lib/Dancer/Plugin.pm	/^package Dancer::Plugin;$/;"	p
 Dancer::Plugin::Ajax	lib/Dancer/Plugin/Ajax.pm	/^package Dancer::Plugin::Ajax;$/;"	p
 Dancer::Serializer::Dumper	lib/Dancer/Serializer/Dumper.pm	/^package Dancer::Serializer::Dumper;$/;"	p
 Dancer::Serializer::JSON	lib/Dancer/Serializer/JSON.pm	/^package Dancer::Serializer::JSON;$/;"	p
 Dancer::Serializer::YAML	lib/Dancer/Serializer/YAML.pm	/^package Dancer::Serializer::YAML;$/;"	p
-Dancer::Session::Simple	lib/Dancer/Session/Simple.pm	/^package Dancer::Session::Simple;$/;"	p
-Dancer::Session::YAML	lib/Dancer/Session/YAML.pm	/^package Dancer::Session::YAML;$/;"	p
+Dancer::SessionFactory::Simple	lib/Dancer/SessionFactory/Simple.pm	/^package Dancer::SessionFactory::Simple;$/;"	p
+Dancer::SessionFactory::YAML	lib/Dancer/SessionFactory/YAML.pm	/^package Dancer::SessionFactory::YAML;$/;"	p
 Dancer::Template::Implementation::ForkedTiny	lib/Dancer/Template/Implementation/ForkedTiny.pm	/^package Dancer::Template::Implementation::ForkedTiny;$/;"	p
 Dancer::Template::Simple	lib/Dancer/Template/Simple.pm	/^package Dancer::Template::Simple;$/;"	p
 Dancer::Template::TemplateToolkit	lib/Dancer/Template/TemplateToolkit.pm	/^package Dancer::Template::TemplateToolkit;$/;"	p
 Dancer::Template::Tiny	lib/Dancer/Template/Tiny.pm	/^package Dancer::Template::Tiny;$/;"	p
 Dancer::Test	lib/Dancer/Test.pm	/^package Dancer::Test;$/;"	p
-ROUTE	lib/Dancer/Core/Dispatcher.pm	/^        ROUTE:$/;"	l
+Example	lib/Dancer/Core/Time.pm	/^Example: $/;"	l
+MyDancerDSL	t/lib/MyDancerDSL.pm	/^package MyDancerDSL;$/;"	p
+ROUTE	lib/Dancer/Core/Dispatcher.pm	/^      ROUTE:$/;"	l
 VERSION	lib/Dancer.pm	/^sub VERSION {$/;"	s
 _add_postponed_hooks	lib/Dancer/Core/Role/Hookable.pm	/^sub _add_postponed_hooks {$/;"	s
 _build_backend	lib/Dancer/Core/Server/Standalone.pm	/^sub _build_backend {$/;"	s
@@ -83,22 +87,20 @@ _build_default_config	lib/Dancer/Core/App.pm	/^sub _build_default_config {$/;"	s
 _build_dispatcher	lib/Dancer/Core/Role/Server.pm	/^sub _build_dispatcher {$/;"	s
 _build_dsl_keywords	lib/Dancer/Core/Role/DSL.pm	/^sub _build_dsl_keywords {$/;"	s
 _build_engine	lib/Dancer/Template/TemplateToolkit.pm	/^sub _build_engine {$/;"	s
-_build_engine	lib/Dancer/Template/Tiny.pm	/^sub _build_engine { Dancer::Template::Implementation::ForkedTiny->new }$/;"	s
+_build_engine	lib/Dancer/Template/Tiny.pm	/^sub _build_engine {$/;"	s
 _build_env_from_request	lib/Dancer/Test.pm	/^sub _build_env_from_request {$/;"	s
 _build_environment	lib/Dancer/Core/App.pm	/^sub _build_environment {'development'}$/;"	s
 _build_environment	lib/Dancer/Core/Runner.pm	/^sub _build_environment {$/;"	s
+_build_epoch	lib/Dancer/Core/Time.pm	/^sub _build_epoch {$/;"	s
 _build_error_template	lib/Dancer/Core/Error.pm	/^sub _build_error_template {$/;"	s
 _build_file_name	lib/Dancer/Logger/File.pm	/^sub _build_file_name {$/;"	s
+_build_gmt_string	lib/Dancer/Core/Time.pm	/^sub _build_gmt_string {$/;"	s
 _build_hooks	lib/Dancer/Core/Role/Hookable.pm	/^sub _build_hooks {$/;"	s
-_build_id	lib/Dancer/Core/Role/Session.pm	/^sub _build_id {$/;"	s
-_build_id	lib/Dancer/Core/Session.pm	/^sub _build_id {$/;"	s
 _build_location	lib/Dancer/Core/Runner.pm	/^sub _build_location {$/;"	s
 _build_log_dir	lib/Dancer/Logger/File.pm	/^sub _build_log_dir {$/;"	s
+_build_name	lib/Dancer/Core/Role/Template.pm	/^sub _build_name { (my $name = ref shift) =~ s\/^Dancer::Template::\/\/; $name; }$/;"	s
 _build_name	lib/Dancer/Core/Server/PSGI.pm	/^sub _build_name {'PSGI'}$/;"	s
 _build_name	lib/Dancer/Core/Server/Standalone.pm	/^sub _build_name {'Standalone'}$/;"	s
-_build_name	lib/Dancer/Template/Simple.pm	/^sub _build_name { 'Simple' }$/;"	s
-_build_name	lib/Dancer/Template/TemplateToolkit.pm	/^sub _build_name {'TemplateToolkit'}$/;"	s
-_build_name	lib/Dancer/Template/Tiny.pm	/^sub _build_name   {'Tiny'}$/;"	s
 _build_params	lib/Dancer/Core/Request.pm	/^sub _build_params {$/;"	s
 _build_path	lib/Dancer/Core/Request.pm	/^sub _build_path {$/;"	s
 _build_path_info	lib/Dancer/Core/Request.pm	/^sub _build_path_info {$/;"	s
@@ -106,14 +108,15 @@ _build_regexp_from_string	lib/Dancer/Core/Route.pm	/^sub _build_regexp_from_stri
 _build_request	lib/Dancer/Core/Context.pm	/^sub _build_request {$/;"	s
 _build_request_env	lib/Dancer/Core/Request.pm	/^sub _build_request_env {$/;"	s
 _build_request_from_env	lib/Dancer/Test.pm	/^sub _build_request_from_env {$/;"	s
+_build_seconds	lib/Dancer/Core/Time.pm	/^sub _build_seconds {$/;"	s
 _build_server	lib/Dancer/Core/Runner.pm	/^sub _build_server {$/;"	s
+_build_session	lib/Dancer/Core/Context.pm	/^sub _build_session {$/;"	s
 _build_static_page	lib/Dancer/Core/Error.pm	/^sub _build_static_page {$/;"	s
 _build_title	lib/Dancer/Core/Error.pm	/^sub _build_title {$/;"	s
 _build_trapper	lib/Dancer/Logger/Capture.pm	/^sub _build_trapper { Dancer::Logger::Capture::Trap->new }$/;"	s
 _build_type	lib/Dancer/Core/Role/Logger.pm	/^sub _build_type {'Logger'}$/;"	s
 _build_type	lib/Dancer/Core/Role/Serializer.pm	/^sub _build_type {'Serializer'}$/;"	s
-_build_type	lib/Dancer/Core/Role/Session.pm	/^sub _build_type {'Session'}$/;"	s
-_build_type	lib/Dancer/Core/Role/SessionFactory.pm	/^sub _build_type {'Session'}$/;"	s
+_build_type	lib/Dancer/Core/Role/SessionFactory.pm	/^sub _build_type {$/;"	s
 _build_type	lib/Dancer/Core/Role/Template.pm	/^sub _build_type {'Template'}$/;"	s
 _build_uploads	lib/Dancer/Core/Request.pm	/^sub _build_uploads {$/;"	s
 _camelize	lib/Dancer/Factory/Engine.pm	/^sub _camelize {$/;"	s
@@ -126,14 +129,17 @@ _compile_config_entry	lib/Dancer/Core/Role/Config.pm	/^sub _compile_config_entry
 _compile_keyword	lib/Dancer/Core/Role/DSL.pm	/^sub _compile_keyword {$/;"	s
 _construct_export_map	lib/Dancer/Core/Role/DSL.pm	/^sub _construct_export_map {$/;"	s
 _decode	lib/Dancer/Core/Request.pm	/^sub _decode {$/;"	s
-_destroy	lib/Dancer/Session/Simple.pm	/^sub _destroy {$/;"	s
+_destroy	lib/Dancer/Core/Role/SessionFactory/File.pm	/^sub _destroy {$/;"	s
+_destroy	lib/Dancer/SessionFactory/Simple.pm	/^sub _destroy {$/;"	s
 _epoch_to_gmtstring	lib/Dancer/Core/Cookie.pm	/^sub _epoch_to_gmtstring {$/;"	s
 _expand_req	lib/Dancer/Test.pm	/^sub _expand_req {$/;"	s
 _expression	lib/Dancer/Template/Implementation/ForkedTiny.pm	/^sub _expression {$/;"	s
 _find_dancer_apps_for_dispatcher	lib/Dancer/Test.pm	/^sub _find_dancer_apps_for_dispatcher {$/;"	s
 _find_value_from_token_name	lib/Dancer/Template/Simple.pm	/^sub _find_value_from_token_name {$/;"	s
-_flush	lib/Dancer/Session/Simple.pm	/^sub _flush {$/;"	s
+_flush	lib/Dancer/Core/Role/SessionFactory/File.pm	/^sub _flush {$/;"	s
+_flush	lib/Dancer/SessionFactory/Simple.pm	/^sub _flush {$/;"	s
 _foreach	lib/Dancer/Template/Implementation/ForkedTiny.pm	/^sub _foreach {$/;"	s
+_freeze_to_handle	lib/Dancer/SessionFactory/YAML.pm	/^sub _freeze_to_handle {$/;"	s
 _get_config_for_engine	lib/Dancer/Core/Role/Config.pm	/^sub _get_config_for_engine {$/;"	s
 _get_dsl	lib/Dancer/Plugin.pm	/^sub _get_dsl {$/;"	s
 _has_something_to_read	lib/Dancer/Core/Request.pm	/^sub _has_something_to_read {$/;"	s
@@ -141,6 +147,7 @@ _html_encode	lib/Dancer/Core/Error.pm	/^sub _html_encode {$/;"	s
 _html_sitemap	t/lib/FooPlugin.pm	/^sub _html_sitemap {$/;"	s
 _include_in_headers	lib/Dancer/Test.pm	/^sub _include_in_headers {$/;"	s
 _init_for_context	lib/Dancer/Core/App.pm	/^sub _init_for_context {$/;"	s
+_init_hooks	lib/Dancer/Core/App.pm	/^sub _init_hooks {$/;"	s
 _init_prefix	lib/Dancer/Core/Route.pm	/^sub _init_prefix {$/;"	s
 _init_regexp	lib/Dancer/Core/Route.pm	/^sub _init_regexp {$/;"	s
 _init_request_headers	lib/Dancer/Core/Request.pm	/^sub _init_request_headers {$/;"	s
@@ -149,6 +156,7 @@ _merge_params	lib/Dancer/Core/Request.pm	/^sub _merge_params {$/;"	s
 _normalize_config	lib/Dancer/Core/Role/Config.pm	/^sub _normalize_config {$/;"	s
 _normalize_config_entry	lib/Dancer/Core/Role/Config.pm	/^sub _normalize_config_entry {$/;"	s
 _parse_duration	lib/Dancer/Core/Cookie.pm	/^sub _parse_duration {$/;"	s
+_parse_duration	lib/Dancer/Core/Time.pm	/^sub _parse_duration {$/;"	s
 _parse_get_params	lib/Dancer/Core/Request.pm	/^sub _parse_get_params {$/;"	s
 _parse_post_params	lib/Dancer/Core/Request.pm	/^sub _parse_post_params {$/;"	s
 _prepare_tokens_options	lib/Dancer/Core/Role/Template.pm	/^sub _prepare_tokens_options {$/;"	s
@@ -160,7 +168,10 @@ _render_html	lib/Dancer/Core/Error.pm	/^sub _render_html {$/;"	s
 _req_label	lib/Dancer/Test.pm	/^sub _req_label {$/;"	s
 _req_to_response	lib/Dancer/Test.pm	/^sub _req_to_response {$/;"	s
 _retreive_get_urls	t/lib/FooPlugin.pm	/^sub _retreive_get_urls {$/;"	s
-_retrieve	lib/Dancer/Session/Simple.pm	/^sub _retrieve {$/;"	s
+_retrieve	lib/Dancer/Core/Role/SessionFactory/File.pm	/^sub _retrieve {$/;"	s
+_retrieve	lib/Dancer/SessionFactory/Simple.pm	/^sub _retrieve {$/;"	s
+_sessions	lib/Dancer/Core/Role/SessionFactory/File.pm	/^sub _sessions {$/;"	s
+_sessions	lib/Dancer/SessionFactory/Simple.pm	/^sub _sessions {$/;"	s
 _set_body_params	lib/Dancer/Core/Request.pm	/^sub _set_body_params {$/;"	s
 _set_config_entries	lib/Dancer/Core/Role/Config.pm	/^sub _set_config_entries {$/;"	s
 _set_config_entry	lib/Dancer/Core/Role/Config.pm	/^sub _set_config_entry {$/;"	s
@@ -170,8 +181,8 @@ _set_route_params	lib/Dancer/Core/Request.pm	/^sub _set_route_params {$/;"	s
 _should	lib/Dancer/Core/Role/Logger.pm	/^sub _should {$/;"	s
 _sort_headers	lib/Dancer/Test.pm	/^sub _sort_headers {$/;"	s
 _template_name	lib/Dancer/Core/Role/Template.pm	/^sub _template_name {$/;"	s
+_thaw_from_handle	lib/Dancer/SessionFactory/YAML.pm	/^sub _thaw_from_handle {$/;"	s
 _url_decode	lib/Dancer/Core/Request.pm	/^sub _url_decode {$/;"	s
-_use_lib	lib/Dancer.pm	/^sub _use_lib {$/;"	s
 add_alias	lib/Dancer/Core/MIME.pm	/^sub add_alias {$/;"	s
 add_hook	lib/Dancer/Core/Role/Hookable.pm	/^sub add_hook {$/;"	s
 add_route	lib/Dancer/Core/App.pm	/^sub add_route {$/;"	s
@@ -194,15 +205,14 @@ config	lib/Dancer/Core/DSL.pm	/^sub config { shift->app->settings }$/;"	s
 content	lib/Dancer/Core/Request/Upload.pm	/^sub content {$/;"	s
 content_type	lib/Dancer/Core/DSL.pm	/^sub content_type { shift->response->content_type(@_) }$/;"	s
 content_type	lib/Dancer/Core/Response.pm	/^sub content_type {$/;"	s
-content_type	lib/Dancer/Core/Role/Serializer.pm	/^sub content_type { 'text\/plain' }$/;"	s
+content_type	lib/Dancer/Core/Role/Serializer.pm	/^sub content_type {'text\/plain'}$/;"	s
 content_type	lib/Dancer/Serializer/Dumper.pm	/^sub content_type {'text\/x-data-dumper'}$/;"	s
 content_type	lib/Dancer/Serializer/JSON.pm	/^sub content_type {'application\/json'}$/;"	s
 content_type	lib/Dancer/Serializer/YAML.pm	/^sub content_type {'text\/x-yaml'}$/;"	s
 context	lib/Dancer/Core/DSL.pm	/^sub context { shift->app->context }$/;"	s
 cookie	lib/Dancer/Core/Context.pm	/^sub cookie {$/;"	s
 cookie	lib/Dancer/Core/DSL.pm	/^sub cookie { shift->context->cookie(@_) }$/;"	s
-cookie	lib/Dancer/Core/Role/Session.pm	/^sub cookie {$/;"	s
-cookie	lib/Dancer/Core/Session.pm	/^sub cookie {$/;"	s
+cookie	lib/Dancer/Core/Role/SessionFactory.pm	/^sub cookie {$/;"	s
 cookies	lib/Dancer/Core/Context.pm	/^sub cookies { shift->request->cookies(@_) }$/;"	s
 cookies	lib/Dancer/Core/DSL.pm	/^sub cookies { shift->context->cookies }$/;"	s
 copy_to	lib/Dancer/Core/Request/Upload.pm	/^sub copy_to {$/;"	s
@@ -212,33 +222,35 @@ core_debug	lib/Dancer/Core/DSL.pm	/^sub core_debug {$/;"	s
 core_debug	lib/Dancer/Core/Role/DSL.pm	/^sub core_debug {$/;"	s
 create	lib/Dancer/Core/Role/SessionFactory.pm	/^sub create {$/;"	s
 create	lib/Dancer/Factory/Engine.pm	/^sub create {$/;"	s
-create	lib/Dancer/Session/YAML.pm	/^sub create { goto &new }$/;"	s
 dance	lib/Dancer/Core/DSL.pm	/^sub dance { shift->start(@_) }$/;"	s
-dancer_app	lib/Dancer/Core/DSL.pm	/^sub dancer_app { shift->app }$/;"	s
+dancer_app	lib/Dancer/Core/DSL.pm	/^sub dancer_app     { shift->app }$/;"	s
+dancer_major_version	lib/Dancer/Core/DSL.pm	/^sub dancer_major_version {$/;"	s
 dancer_response	lib/Dancer/Test.pm	/^sub dancer_response {$/;"	s
 dancer_version	lib/Dancer/Core/DSL.pm	/^sub dancer_version { Dancer->VERSION }$/;"	s
 debug	lib/Dancer/Core/DSL.pm	/^sub debug   { shift->log(debug   => @_) }$/;"	s
 debug	lib/Dancer/Core/Role/Logger.pm	/^sub debug   { $_[0]->_should('debug')   and $_[0]->log('debug',   $_[1]) }$/;"	s
 default_config	lib/Dancer/Core/Runner.pm	/^sub default_config {$/;"	s
-default_error_page	lib/Dancer/Core/Error.pm	/^sub default_error_page { $/;"	s
+default_error_page	lib/Dancer/Core/Error.pm	/^sub default_error_page {$/;"	s
 del	lib/Dancer/Core/DSL.pm	/^sub del {$/;"	s
-delete	lib/Dancer/Core/Role/Session.pm	/^sub delete {$/;"	s
+delete	lib/Dancer/Core/Session.pm	/^sub delete {$/;"	s
 deserialize	lib/Dancer/Serializer/Dumper.pm	/^sub deserialize {$/;"	s
 deserialize	lib/Dancer/Serializer/JSON.pm	/^sub deserialize {$/;"	s
 deserialize	lib/Dancer/Serializer/YAML.pm	/^sub deserialize {$/;"	s
 destroy	lib/Dancer/Core/Role/SessionFactory.pm	/^sub destroy {$/;"	s
-destroy	lib/Dancer/Session/YAML.pm	/^sub destroy {$/;"	s
+destroy_session	lib/Dancer/Core/Context.pm	/^sub destroy_session {$/;"	s
 dirname	lib/Dancer/Core/DSL.pm	/^sub dirname { shift and Dancer::FileUtils::dirname(@_) }$/;"	s
 dirname	lib/Dancer/FileUtils.pm	/^sub dirname { File::Basename::dirname(@_) }$/;"	s
 dispatch	lib/Dancer/Core/Dispatcher.pm	/^sub dispatch {$/;"	s
-dsl	lib/Dancer/Core/DSL.pm	/^sub dsl { shift }$/;"	s
+dsl	lib/Dancer/Core/Role/DSL.pm	/^sub dsl { $_[0] }$/;"	s
 dsl_keywords	lib/Dancer/Core/DSL.pm	/^sub dsl_keywords {$/;"	s
-dsl_keywords_as_list	lib/Dancer/Core/DSL.pm	/^sub dsl_keywords_as_list {$/;"	s
+dsl_keywords_as_list	lib/Dancer/Core/Role/DSL.pm	/^sub dsl_keywords_as_list {$/;"	s
 dumper	lib/Dancer/Core/Error.pm	/^sub dumper {$/;"	s
 encode_content	lib/Dancer/Core/Response.pm	/^sub encode_content {$/;"	s
 engine	lib/Dancer/Core/App.pm	/^sub engine {$/;"	s
 engine	lib/Dancer/Core/DSL.pm	/^sub engine { shift->app->engine(@_) }$/;"	s
+entete	t/lib/MyDancerDSL.pm	/^sub entete { goto &Dancer::Core::DSL::header }$/;"	s
 environment	lib/Dancer/Core/Error.pm	/^sub environment {$/;"	s
+envoie	t/lib/MyDancerDSL.pm	/^sub envoie { goto &Dancer::Core::DSL::post }$/;"	s
 error	lib/Dancer/Core/DSL.pm	/^sub error   { shift->log(error   => @_) }$/;"	s
 error	lib/Dancer/Core/Response.pm	/^sub error {$/;"	s
 error	lib/Dancer/Core/Role/Logger.pm	/^sub error   { $_[0]->_should('error')   and $_[0]->log('error',   $_[1]) }$/;"	s
@@ -246,11 +258,10 @@ execute	lib/Dancer/Core/Route.pm	/^sub execute {$/;"	s
 execute_hook	lib/Dancer/Core/Role/Hookable.pm	/^sub execute_hook {$/;"	s
 execute_hook	lib/Dancer/Plugin.pm	/^sub execute_hook {$/;"	s
 export_symbols_to	lib/Dancer/Core/Role/DSL.pm	/^sub export_symbols_to {$/;"	s
-false	lib/Dancer/Core/DSL.pm	/^sub false { 0 }$/;"	s
+false	lib/Dancer/Core/DSL.pm	/^sub false {0}$/;"	s
 file_handle	lib/Dancer/Core/Request/Upload.pm	/^sub file_handle {$/;"	s
 finish	lib/Dancer/Core/App.pm	/^sub finish {$/;"	s
 flush	lib/Dancer/Core/Role/SessionFactory.pm	/^sub flush {$/;"	s
-flush	lib/Dancer/Session/YAML.pm	/^sub flush {$/;"	s
 for_file	lib/Dancer/Core/MIME.pm	/^sub for_file {$/;"	s
 for_name	lib/Dancer/Core/MIME.pm	/^sub for_name {$/;"	s
 format_message	lib/Dancer/Core/Role/Logger.pm	/^sub format_message {$/;"	s
@@ -265,43 +276,47 @@ from_json	lib/Dancer/Serializer/JSON.pm	/^sub from_json {$/;"	s
 from_yaml	lib/Dancer/Core/DSL.pm	/^sub from_yaml {$/;"	s
 from_yaml	lib/Dancer/Serializer/YAML.pm	/^sub from_yaml {$/;"	s
 full_message	lib/Dancer/Core/Error.pm	/^sub full_message {$/;"	s
+gateau	t/lib/MyDancerDSL.pm	/^sub gateau { goto &Dancer::Core::DSL::cookie }$/;"	s
+generate_id	lib/Dancer/Core/Role/SessionFactory.pm	/^    sub generate_id {$/;"	s
 get	lib/Dancer/Core/DSL.pm	/^sub get {$/;"	s
 get_caller	lib/Dancer/Core/Error.pm	/^sub get_caller {$/;"	s
-get_current_session	lib/Dancer/Core/Role/Session.pm	/^sub get_current_session {$/;"	s
 get_postponed_hooks	lib/Dancer/Core/Role/Config.pm	/^sub get_postponed_hooks {$/;"	s
-get_route	t/lib/FooPlugin.pm	/^        get_route:$/;"	l
+get_route	t/lib/FooPlugin.pm	/^      get_route:$/;"	l
 halt	lib/Dancer/Core/DSL.pm	/^sub halt { shift->app->context->response->halt }$/;"	s
 halt	lib/Dancer/Core/Response.pm	/^sub halt { shift->is_halted(1) }$/;"	s
 has_hook	lib/Dancer/Core/Role/Hookable.pm	/^sub has_hook {$/;"	s
+has_session	lib/Dancer/Core/Context.pm	/^sub has_session {$/;"	s
 has_setting	lib/Dancer/Core/Role/Config.pm	/^sub has_setting {$/;"	s
-header	lib/Dancer/Core/DSL.pm	/^sub header { shift->response->header(@_) }$/;"	s
+header	lib/Dancer/Core/DSL.pm	/^sub header       { shift->response->header(@_) }$/;"	s
 header	lib/Dancer/Core/Role/Headers.pm	/^sub header {$/;"	s
-headers	lib/Dancer/Core/DSL.pm	/^sub headers { shift->response->header(@_) }$/;"	s
+headers	lib/Dancer/Core/DSL.pm	/^sub headers      { shift->response->header(@_) }$/;"	s
 headers_to_array	lib/Dancer/Core/Role/Headers.pm	/^sub headers_to_array {$/;"	s
 hook	lib/Dancer/Core/DSL.pm	/^sub hook {$/;"	s
 hook	lib/Dancer/Plugin.pm	/^hook:$/;"	l
 hook_aliases	lib/Dancer/Core/Role/Hookable.pm	/^sub hook_aliases {$/;"	s
 hook_candidates	lib/Dancer/Core/App.pm	/^sub hook_candidates {$/;"	s
-host	lib/Dancer/Core/Request.pm	/^sub host { $/;"	s
+host	lib/Dancer/Core/Request.pm	/^sub host {$/;"	s
 import	lib/Dancer.pm	/^sub import {$/;"	s
 import	lib/Dancer/Plugin.pm	/^sub import {$/;"	s
 import	lib/Dancer/Test.pm	/^sub import {$/;"	s
 import	t/lib/PluginWithImport.pm	/^sub import {$/;"	s
 init_route_handlers	lib/Dancer/Core/App.pm	/^sub init_route_handlers {$/;"	s
-input_handle	lib/Dancer/Core/Request.pm	/^sub input_handle   { $_[0]->env->{'psgi.input'} || $_[0]->env->{'PSGI.INPUT'} }$/;"	s
+input_handle	lib/Dancer/Core/Request.pm	/^sub input_handle { $_[0]->env->{'psgi.input'} || $_[0]->env->{'PSGI.INPUT'} }$/;"	s
 is_ajax	lib/Dancer/Core/Request.pm	/^sub is_ajax {$/;"	s
-is_delete	lib/Dancer/Core/Request.pm	/^sub is_delete             { $_[0]->{method} eq 'DELETE' }$/;"	s
+is_delete	lib/Dancer/Core/Request.pm	/^sub is_delete { $_[0]->{method} eq 'DELETE' }$/;"	s
 is_forwarded	lib/Dancer/Core/Response.pm	/^sub is_forwarded {$/;"	s
-is_get	lib/Dancer/Core/Request.pm	/^sub is_get                { $_[0]->{method} eq 'GET' }$/;"	s
-is_head	lib/Dancer/Core/Request.pm	/^sub is_head               { $_[0]->{method} eq 'HEAD' }$/;"	s
-is_patch	lib/Dancer/Core/Request.pm	/^sub is_patch              { $_[0]->{method} eq 'PATCH' }$/;"	s
-is_post	lib/Dancer/Core/Request.pm	/^sub is_post               { $_[0]->{method} eq 'POST' }$/;"	s
-is_put	lib/Dancer/Core/Request.pm	/^sub is_put                { $_[0]->{method} eq 'PUT' }$/;"	s
+is_get	lib/Dancer/Core/Request.pm	/^sub is_get    { $_[0]->{method} eq 'GET' }$/;"	s
+is_head	lib/Dancer/Core/Request.pm	/^sub is_head   { $_[0]->{method} eq 'HEAD' }$/;"	s
+is_patch	lib/Dancer/Core/Request.pm	/^sub is_patch  { $_[0]->{method} eq 'PATCH' }$/;"	s
+is_post	lib/Dancer/Core/Request.pm	/^sub is_post   { $_[0]->{method} eq 'POST' }$/;"	s
+is_put	lib/Dancer/Core/Request.pm	/^sub is_put    { $_[0]->{method} eq 'PUT' }$/;"	s
 key	lib/Dancer/Plugin.pm	/^      key: value$/;"	l
 lexical_prefix	lib/Dancer/Core/App.pm	/^sub lexical_prefix {$/;"	s
 link_to	lib/Dancer/Core/Request/Upload.pm	/^sub link_to {$/;"	s
+load	lib/Dancer/ModuleLoader.pm	/^sub load {$/;"	s
 load_app	lib/Dancer/Core/DSL.pm	/^sub load_app {$/;"	s
 load_config_file	lib/Dancer/Core/Role/Config.pm	/^sub load_config_file {$/;"	s
+load_with_params	lib/Dancer/ModuleLoader.pm	/^sub load_with_params {$/;"	s
 loaded	lib/Dancer/Serializer/Dumper.pm	/^sub loaded {1}$/;"	s
 loaded	lib/Dancer/Serializer/JSON.pm	/^sub loaded {1}$/;"	s
 loaded	lib/Dancer/Serializer/YAML.pm	/^sub loaded {1}$/;"	s
@@ -315,10 +330,11 @@ log	lib/Dancer/Logger/Note.pm	/^sub log {$/;"	s
 log	lib/Dancer/Logger/Null.pm	/^sub log {1}$/;"	s
 make_forward_to	lib/Dancer/Core/Request.pm	/^sub make_forward_to {$/;"	s
 match	lib/Dancer/Core/Route.pm	/^sub match {$/;"	s
-methods	lib/Dancer/Handler/AutoPage.pm	/^sub methods { qw(head get) }$/;"	s
+methods	lib/Dancer/Handler/AutoPage.pm	/^sub methods {qw(head get)}$/;"	s
 methods	lib/Dancer/Handler/File.pm	/^sub methods { ('head', 'get') }$/;"	s
 mime	lib/Dancer/Core/DSL.pm	/^sub mime {$/;"	s
 mime_type	lib/Dancer/Core/App.pm	/^sub mime_type {$/;"	s
+moteur	t/lib/MyDancerDSL.pm	/^sub moteur { goto &Dancer::Core::DSL::engine }$/;"	s
 name	lib/Dancer/Core/Runner.pm	/^sub name {"runner"}$/;"	s
 name_or_type	lib/Dancer/Core/MIME.pm	/^sub name_or_type {$/;"	s
 new	lib/Dancer/Template/Implementation/ForkedTiny.pm	/^sub new {$/;"	s
@@ -330,35 +346,36 @@ param	lib/Dancer/Core/Request.pm	/^sub param { shift->params->{$_[0]} }$/;"	s
 params	lib/Dancer/Core/DSL.pm	/^sub params { shift->request->params }$/;"	s
 params	lib/Dancer/Core/Request.pm	/^sub params {$/;"	s
 parse_branches	lib/Dancer/Template/Simple.pm	/^sub parse_branches {$/;"	s
-pass	lib/Dancer/Core/DSL.pm	/^sub pass { shift->response->pass }$/;"	s
+pass	lib/Dancer/Core/DSL.pm	/^sub pass         { shift->response->pass }$/;"	s
 pass	lib/Dancer/Core/Response.pm	/^sub pass { shift->has_passed(1) }$/;"	s
 patch	lib/Dancer/Core/DSL.pm	/^sub patch {$/;"	s
-path	lib/Dancer/Core/DSL.pm	/^sub path    { shift and Dancer::FileUtils::path(@_)    }$/;"	s
+path	lib/Dancer/Core/DSL.pm	/^sub path    { shift and Dancer::FileUtils::path(@_) }$/;"	s
 path	lib/Dancer/FileUtils.pm	/^sub path {$/;"	s
 path_or_empty	lib/Dancer/FileUtils.pm	/^sub path_or_empty {$/;"	s
-plugin_args	lib/Dancer/Plugin.pm	/^sub plugin_args { @_ }$/;"	s
+plugin_args	lib/Dancer/Plugin.pm	/^sub plugin_args {@_}$/;"	s
 plugin_name	lib/Dancer/Plugin.pm	/^    plugin_name:$/;"	l
 plugin_setting	lib/Dancer/Plugin.pm	/^sub plugin_setting {$/;"	s
 plugins	lib/Dancer/Plugin.pm	/^  plugins:$/;"	l
 port	lib/Dancer/Core/Request.pm	/^sub port                  { $_[0]->env->{SERVER_PORT} }$/;"	s
 post	lib/Dancer/Core/DSL.pm	/^sub post {$/;"	s
 prefix	lib/Dancer/Core/DSL.pm	/^sub prefix {$/;"	s
+prend	t/lib/MyDancerDSL.pm	/^sub prend  { goto &Dancer::Core::DSL::get }$/;"	s
 preprocess	lib/Dancer/Template/Implementation/ForkedTiny.pm	/^sub preprocess {$/;"	s
 process	lib/Dancer/Core/Role/Template.pm	/^sub process {$/;"	s
 process	lib/Dancer/Template/Implementation/ForkedTiny.pm	/^sub process {$/;"	s
 protocol	lib/Dancer/Core/Request.pm	/^sub protocol              { $_[0]->env->{SERVER_PROTOCOL} }$/;"	s
 psgi_app	lib/Dancer/Core/Role/Server.pm	/^sub psgi_app {$/;"	s
-push_header	lib/Dancer/Core/DSL.pm	/^sub push_header { shift->response->push_header(@_) }$/;"	s
+push_header	lib/Dancer/Core/DSL.pm	/^sub push_header  { shift->response->push_header(@_) }$/;"	s
 push_header	lib/Dancer/Core/Role/Headers.pm	/^sub push_header {$/;"	s
 put	lib/Dancer/Core/DSL.pm	/^sub put {$/;"	s
-read	lib/Dancer/Core/Role/Session.pm	/^sub read {$/;"	s
+read	lib/Dancer/Core/Session.pm	/^sub read {$/;"	s
 read	lib/Dancer/Logger/Capture/Trap.pm	/^sub read {$/;"	s
 read_file_content	lib/Dancer/FileUtils.pm	/^sub read_file_content {$/;"	s
 read_glob_content	lib/Dancer/FileUtils.pm	/^sub read_glob_content {$/;"	s
 redirect	lib/Dancer/Core/Context.pm	/^sub redirect {$/;"	s
 redirect	lib/Dancer/Core/DSL.pm	/^sub redirect { shift->context->redirect(@_) }$/;"	s
 redirect	lib/Dancer/Core/Response.pm	/^sub redirect {$/;"	s
-regexp	lib/Dancer/Handler/AutoPage.pm	/^sub regexp { '\/:page' }$/;"	s
+regexp	lib/Dancer/Handler/AutoPage.pm	/^sub regexp {'\/:page'}$/;"	s
 register	lib/Dancer/Core/Role/DSL.pm	/^sub register {$/;"	s
 register	lib/Dancer/Handler/AutoPage.pm	/^sub register {$/;"	s
 register	lib/Dancer/Handler/File.pm	/^sub register {$/;"	s
@@ -378,8 +395,7 @@ replace_hook	lib/Dancer/Core/Role/Hookable.pm	/^sub replace_hook {$/;"	s
 request	lib/Dancer/Core/DSL.pm	/^sub request { shift->context->request }$/;"	s
 request_method	lib/Dancer/Core/Request.pm	/^sub request_method { method(@_) }$/;"	s
 request_uri	lib/Dancer/Core/Request.pm	/^sub request_uri           { $_[0]->env->{REQUEST_URI} }$/;"	s
-reset	lib/Dancer/Core/Role/Session.pm	/^sub reset { return }$/;"	s
-reset	lib/Dancer/Session/YAML.pm	/^sub reset {$/;"	s
+require	lib/Dancer/ModuleLoader.pm	/^sub require {$/;"	s
 reset_default	lib/Dancer/Core/MIME.pm	/^sub reset_default {$/;"	s
 response	lib/Dancer/Core/DSL.pm	/^sub response { shift->context->response }$/;"	s
 response	lib/Dancer/Core/Role/StandardResponses.pm	/^sub response {$/;"	s
@@ -399,15 +415,14 @@ response_not_found	lib/Dancer/Core/Dispatcher.pm	/^sub response_not_found {$/;"	
 response_status_is	lib/Dancer/Test.pm	/^sub response_status_is {$/;"	s
 response_status_isnt	lib/Dancer/Test.pm	/^sub response_status_isnt {$/;"	s
 retrieve	lib/Dancer/Core/Role/SessionFactory.pm	/^sub retrieve {$/;"	s
-retrieve	lib/Dancer/Session/YAML.pm	/^sub retrieve {$/;"	s
 route_doesnt_exist	lib/Dancer/Test.pm	/^sub route_doesnt_exist {$/;"	s
 route_exists	lib/Dancer/Test.pm	/^sub route_exists {$/;"	s
 routes_regexps_for	lib/Dancer/Core/App.pm	/^sub routes_regexps_for {$/;"	s
-runner	lib/Dancer.pm	/^sub runner { $runner }$/;"	s
+runner	lib/Dancer.pm	/^sub runner {$runner}$/;"	s
 runner	lib/Dancer/Core/DSL.pm	/^sub runner { Dancer->runner }$/;"	s
-scheme	lib/Dancer/Core/Request.pm	/^sub scheme                {$/;"	s
+scheme	lib/Dancer/Core/Request.pm	/^sub scheme {$/;"	s
 script_name	lib/Dancer/Core/Request.pm	/^sub script_name           { $_[0]->env->{SCRIPT_NAME} }$/;"	s
-secure	lib/Dancer/Core/Request.pm	/^sub secure                { $_[0]->scheme eq 'https' }$/;"	s
+secure	lib/Dancer/Core/Request.pm	/^sub secure    { $_[0]->scheme eq 'https' }$/;"	s
 send_error	lib/Dancer/Core/DSL.pm	/^sub send_error {$/;"	s
 send_file	lib/Dancer/Core/App.pm	/^sub send_file {$/;"	s
 send_file	lib/Dancer/Core/DSL.pm	/^sub send_file { shift->app->send_file(@_) }$/;"	s
@@ -416,29 +431,31 @@ serialize	lib/Dancer/Serializer/JSON.pm	/^sub serialize {$/;"	s
 serialize	lib/Dancer/Serializer/YAML.pm	/^sub serialize {$/;"	s
 session	lib/Dancer/Core/App.pm	/^sub session {$/;"	s
 session	lib/Dancer/Core/DSL.pm	/^sub session { shift->app->session(@_) }$/;"	s
+sessions	lib/Dancer/Core/Role/SessionFactory.pm	/^sub sessions {$/;"	s
 set	lib/Dancer/Core/DSL.pm	/^sub set { shift->setting(@_) }$/;"	s
+set_cookie_header	lib/Dancer/Core/Role/SessionFactory.pm	/^sub set_cookie_header {$/;"	s
 set_file_mode	lib/Dancer/FileUtils.pm	/^sub set_file_mode {$/;"	s
 setting	lib/Dancer/Core/DSL.pm	/^sub setting { shift->app->setting(@_) }$/;"	s
 setting	lib/Dancer/Core/Role/Config.pm	/^sub setting {$/;"	s
 settings	lib/Dancer/Core/App.pm	/^sub settings {$/;"	s
 settings	lib/Dancer/Core/Role/Config.pm	/^sub settings { shift->config }$/;"	s
 splat	lib/Dancer/Core/DSL.pm	/^sub splat { shift->request->splat }$/;"	s
-splat	lib/Dancer/Core/Request.pm	/^sub splat { @{shift->params->{splat}||[]} }$/;"	s
+splat	lib/Dancer/Core/Request.pm	/^sub splat { @{shift->params->{splat} || []} }$/;"	s
 start	lib/Dancer/Core/DSL.pm	/^sub start { shift->runner->start }$/;"	s
 start	lib/Dancer/Core/Runner.pm	/^sub start {$/;"	s
 start	lib/Dancer/Core/Server/PSGI.pm	/^sub start {$/;"	s
 start	lib/Dancer/Core/Server/Standalone.pm	/^sub start {$/;"	s
-status	lib/Dancer/Core/DSL.pm	/^sub status { shift->response->status(@_) }$/;"	s
+status	lib/Dancer/Core/DSL.pm	/^sub status       { shift->response->status(@_) }$/;"	s
+stop	t/lib/MyDancerDSL.pm	/^sub stop   { goto &Dancer::Core::DSL::halt }$/;"	s
 store	lib/Dancer/Logger/Capture/Trap.pm	/^sub store {$/;"	s
-stuff	t/lib/PluginWithImport.pm	/^sub stuff { $_stuff }$/;"	s
+stuff	t/lib/PluginWithImport.pm	/^sub stuff {$_stuff}$/;"	s
 support_content_type	lib/Dancer/Core/Role/Serializer.pm	/^sub support_content_type {$/;"	s
 supported_hooks	lib/Dancer/Core/App.pm	/^sub supported_hooks {$/;"	s
 supported_hooks	lib/Dancer/Core/Error.pm	/^sub supported_hooks {$/;"	s
 supported_hooks	lib/Dancer/Core/Role/DSL.pm	/^sub supported_hooks { }$/;"	s
 supported_hooks	lib/Dancer/Core/Role/Logger.pm	/^sub supported_hooks {$/;"	s
 supported_hooks	lib/Dancer/Core/Role/Serializer.pm	/^sub supported_hooks {$/;"	s
-supported_hooks	lib/Dancer/Core/Role/Session.pm	/^sub supported_hooks { }$/;"	s
-supported_hooks	lib/Dancer/Core/Role/SessionFactory.pm	/^sub supported_hooks { }$/;"	s
+supported_hooks	lib/Dancer/Core/Role/SessionFactory.pm	/^sub supported_hooks {$/;"	s
 supported_hooks	lib/Dancer/Core/Role/Template.pm	/^sub supported_hooks {$/;"	s
 supported_hooks	lib/Dancer/Handler/File.pm	/^sub supported_hooks {$/;"	s
 t::lib::App1	t/lib/App1.pm	/^package t::lib::App1;$/;"	p
@@ -464,21 +481,22 @@ to_psgi	lib/Dancer/Core/Response.pm	/^sub to_psgi {$/;"	s
 to_string	lib/Dancer/Core/Request.pm	/^sub to_string {$/;"	s
 to_yaml	lib/Dancer/Core/DSL.pm	/^sub to_yaml {$/;"	s
 to_yaml	lib/Dancer/Serializer/YAML.pm	/^sub to_yaml {$/;"	s
-true	lib/Dancer/Core/DSL.pm	/^sub true  { 1 }$/;"	s
+true	lib/Dancer/Core/DSL.pm	/^sub true  {1}$/;"	s
 type	lib/Dancer/Core/Request/Upload.pm	/^sub type {$/;"	s
+understands	lib/Dancer/Core/Time.pm	/^understands:$/;"	l
 upload	lib/Dancer/Core/DSL.pm	/^sub upload { shift->request->upload(@_) }$/;"	s
 upload	lib/Dancer/Core/Request.pm	/^sub upload {$/;"	s
-uri	lib/Dancer/Core/Request.pm	/^sub uri                   { $_[0]->request_uri }$/;"	s
+uri	lib/Dancer/Core/Request.pm	/^sub uri       { $_[0]->request_uri }$/;"	s
 uri_base	lib/Dancer/Core/Request.pm	/^sub uri_base {$/;"	s
 uri_for	lib/Dancer/Core/DSL.pm	/^sub uri_for { shift->request->uri_for(@_) }$/;"	s
 uri_for	lib/Dancer/Core/Request.pm	/^sub uri_for {$/;"	s
+use_lib	lib/Dancer/ModuleLoader.pm	/^sub use_lib {$/;"	s
 user	lib/Dancer/Core/Request.pm	/^sub user                  { $_[0]->env->{REMOTE_USER} }$/;"	s
 var	lib/Dancer/Core/Context.pm	/^sub var {$/;"	s
-var	lib/Dancer/Core/DSL.pm	/^sub var { shift->context->var(@_) }$/;"	s
+var	lib/Dancer/Core/DSL.pm	/^sub var  { shift->context->var(@_) }$/;"	s
 vars	lib/Dancer/Core/Context.pm	/^sub vars { shift->buffer }$/;"	s
 vars	lib/Dancer/Core/DSL.pm	/^sub vars { shift->context->vars }$/;"	s
 view	lib/Dancer/Core/Role/Template.pm	/^sub view {$/;"	s
 warning	lib/Dancer/Core/DSL.pm	/^sub warning { shift->log(warning => @_) }$/;"	s
 warning	lib/Dancer/Core/Role/Logger.pm	/^sub warning { $_[0]->_should('warning') and $_[0]->log('warning', $_[1]) }$/;"	s
-write	lib/Dancer/Core/Role/Session.pm	/^sub write {$/;"	s
-yaml_file	lib/Dancer/Session/YAML.pm	/^sub yaml_file {$/;"	s
+write	lib/Dancer/Core/Session.pm	/^sub write {$/;"	s

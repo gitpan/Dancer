@@ -1,13 +1,12 @@
 use Dancer 2.0;
 use Data::Dumper;
-
 # use Dancer::Plugin::Foo;
 # use Dancer::Plugin::Bar;
 
 set content_type => 'text/plain';
 
 get '/' => sub {
-    template 'test';
+    template 'test'
 };
 
 get '/session' => sub {
@@ -16,7 +15,7 @@ get '/session' => sub {
 };
 
 get '/set/:name/:value' => sub {
-    session(param('name') => param('value'));
+    session( param('name') => param('value'));
 };
 
 get '/all_sessions' => sub {
