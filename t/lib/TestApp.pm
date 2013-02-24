@@ -1,125 +1,86 @@
-package t::lib::TestApp;
-use Dancer2;
+package TestApp;
 
-# this app is intended to cover 100% of the DSL!
+use Dancer;
+use Data::Dumper;
+use LinkBlocker;
 
-# set some MIME aliases...
-mime->add_type(foo => 'text/foo');
-mime->add_alias(f => 'foo');
+block_links_from "www.foo.com";
 
-set 'default_mime_type' => 'text/bar';
-
-# hello route
-get '/' => sub { app->name };
-
-# /haltme should bounce to /
-hook 'before' => sub {
-    if (request->path_info eq '/haltme') {
-        redirect '/';
-        halt;
-    }
-};
-get '/haltme' => sub {"should not be there"};
-
-hook 'after' => sub {
-    my $response = shift;
-    if (request->path_info eq '/rewrite_me') {
-        $response->content("rewritten!");
-    }
-};
-get '/rewrite_me' => sub {"body should not be this one"};
-
-
-# some settings
-set some_var           => 1;
-setting some_other_var => 1;
-set multiple_vars      => 4, can_be_set => 2;
-
-get '/config' => sub {
-    return
-        config->{some_var} . ' '
-      . config->{some_other_var} . ' and '
-      . setting('multiple_vars')
-      . setting('can_be_set');
-};
-
-if ($] >= 5.010) {
-
-    # named captures
-    get
-      qr{/(?<class> usr | content | post )/(?<action> delete | find )/(?<id> \d+ )}x
-      => sub {
-        join(":", sort %{captures()});
-      };
-}
-
-# chained routes with pass
-get '/user/**' => sub {
-    my $user = params->{splat};
-    var user => $user->[0][0];
-    pass;
-};
-
-get '/user/*/home' => sub {
-    my $user = var('user');    # should be set by the previous route
-    "hello $user";
-};
-
-# post & dirname
-post '/dirname' => sub {
-    dirname('/etc/passwd');
-};
-
-# header
-get '/header/:name/:value' => sub {
-    header param('name') => param('value');
+get '/' => sub { "Hello, this is the home" };
+get '/hash' => sub { { a => 1, b => 2, c => 3} };
+get '/with_headers' => sub {
+    header 'X-Foo-Dancer' => 42;
     1;
 };
+get '/headers_again' => sub { request->header('X-Foo-Dancer') };
 
-# push_header
-get '/header/:name/:valueA/:valueB' => sub {
-    push_header param('name') => param('valueA');
-    push_header param('name') => param('valueB');
-    1;
-};
 
-# header
-get '/header_twice/:name/:valueA/:valueB' => sub {
-    header param('name') => param('valueA');
-    header param('name') => param('valueB');
-    1;
-};
-
-# any
-any ['get', 'post'], '/any' => sub {
-    "Called with method " . request->method;
-};
-
-# true and false
-get '/booleans' => sub {
-    join(":", true, false);
-};
-
-# mimes
-get '/mime/:name' => sub {
-    mime->for_name(param('name'));
-};
-
-# content_type
-get '/content_type/:type' => sub {
-    content_type param('type');
-    1;
-};
-
-# prefix
-prefix '/prefix' => sub {
-    get '/bar' => sub {'/prefix/bar'};
-    prefix '/prefix1' => sub {
-        get '/bar' => sub {'/prefix/prefix1/bar'};
+get '/test_app_setting' => sub {
+    return { 
+        onlyroot => setting('onlyroot'),
+        foo => setting('foo'),
+        onlyapp => setting('onlyapp') 
     };
-
-    prefix '/prefix2';
-    get '/foo' => sub {'/prefix/prefix2/foo'};
 };
 
-1;
+get '/name/:name' => sub {
+    "Your name: ".params->{name}
+};
+
+post '/params/:var' => sub {
+    Dumper({
+        params => scalar(params),
+        route  => { params('route') },
+        query  => { params('query') },
+        body   => { params('body') }
+    });
+};
+
+post '/name' => sub {
+    "Your name: ".params->{name}
+};
+
+get '/env' => sub { Dumper(Dancer::SharedData->request) };
+
+get '/cookies' => sub { Dumper(cookies()) };
+
+get '/set_cookie/*/*' => sub {
+    my ($name, $value) = splat;
+    set_cookie $name => $value;
+};
+
+get '/set_session/*' => sub {
+    my ($name) = splat;
+    session name => $name;
+};
+
+get '/read_session' => sub {
+    my $name = session('name') || '';
+    "name='$name'"
+};
+
+put '/jsondata' => sub {
+    request->body;
+};
+
+post '/form' => sub {
+    params->{foo};
+};
+
+get '/unicode' => sub {
+    "cyrillic shcha \x{0429}",
+};
+
+get '/forward_to_unavailable_route' => sub {
+    forward "/some_route_that_does_not_exist"
+};
+
+get '/issues/499/true' => sub {
+    "OK" if system('true') == 0  
+};
+
+get '/issues/499/false' => sub {
+    "OK" if system('false') != 0  
+};
+
+true;
