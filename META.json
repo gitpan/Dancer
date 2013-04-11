@@ -39,13 +39,14 @@
             "HTTP::Server::Simple::PSGI" : "0.11",
             "LWP" : "0",
             "MIME::Types" : "0",
+            "Module::Runtime" : "0",
             "Time::HiRes" : "0",
             "Try::Tiny" : "0.09",
             "URI" : "1.59"
          }
       }
    },
-   "release_status" : "testing",
+   "release_status" : "stable",
    "resources" : {
       "bugtracker" : {
          "web" : "https://github.com/PerlDancer/Dancer/issues"
@@ -55,5 +56,5 @@
          "url" : "https://github.com/PerlDancer/Dancer"
       }
    },
-   "version" : "1.3111_02"
+   "version" : "1.3112"
 }
