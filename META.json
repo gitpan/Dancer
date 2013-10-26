@@ -4,7 +4,7 @@
       "unknown"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "ExtUtils::MakeMaker version 6.62, CPAN::Meta::Converter version 2.120921",
+   "generated_by" : "ExtUtils::MakeMaker version 6.76, CPAN::Meta::Converter version 2.120921",
    "license" : [
       "perl_5"
    ],
@@ -56,5 +56,5 @@
          "url" : "https://github.com/PerlDancer/Dancer"
       }
    },
-   "version" : "1.3118"
+   "version" : "1.3119"
 }
