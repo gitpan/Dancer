@@ -33,4 +33,4 @@ resources:
   bugtracker: https://github.com/PerlDancer/Dancer/issues
   homepage: http://perldancer.org/
   repository: https://github.com/PerlDancer/Dancer
-version: '1.3122'
+version: '1.3123'
