@@ -2,7 +2,7 @@ package Dancer::Continuation::Route::Forwarded;
 BEGIN {
   $Dancer::Continuation::Route::Forwarded::AUTHORITY = 'cpan:SUKRIA';
 }
-$Dancer::Continuation::Route::Forwarded::VERSION = '1.3127';
+$Dancer::Continuation::Route::Forwarded::VERSION = '1.3128';
 use strict;
 use warnings;
 use Carp;
@@ -23,7 +23,7 @@ Dancer::Continuation::Route::Forwarded
 
 =head1 VERSION
 
-version 1.3127
+version 1.3128
 
 =head1 AUTHOR
 

@@ -2,7 +2,7 @@ package Dancer::Logger::Diag;
 BEGIN {
   $Dancer::Logger::Diag::AUTHORITY = 'cpan:SUKRIA';
 }
-$Dancer::Logger::Diag::VERSION = '1.3127';
+$Dancer::Logger::Diag::VERSION = '1.3128';
 #ABSTRACT: Test::More diag() logging engine for Dancer
 use strict;
 use warnings;
@@ -36,7 +36,7 @@ Dancer::Logger::Diag - Test::More diag() logging engine for Dancer
 
 =head1 VERSION
 
-version 1.3127
+version 1.3128
 
 =head1 SYNOPSIS
 

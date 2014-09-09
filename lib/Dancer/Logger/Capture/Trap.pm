@@ -2,7 +2,7 @@ package Dancer::Logger::Capture::Trap;
 BEGIN {
   $Dancer::Logger::Capture::Trap::AUTHORITY = 'cpan:SUKRIA';
 }
-$Dancer::Logger::Capture::Trap::VERSION = '1.3127';
+$Dancer::Logger::Capture::Trap::VERSION = '1.3128';
 # ABSTRACT: a place to store captured Dancer logs
 #
 use base 'Dancer::Object';
@@ -47,7 +47,7 @@ Dancer::Logger::Capture::Trap - a place to store captured Dancer logs
 
 =head1 VERSION
 
-version 1.3127
+version 1.3128
 
 =head1 SYNOPSIS
 

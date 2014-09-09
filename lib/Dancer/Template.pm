@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Template::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: template wrapper for Dancer
-$Dancer::Template::VERSION = '1.3127';
+$Dancer::Template::VERSION = '1.3128';
 use strict;
 use warnings;
 use Dancer::ModuleLoader;
@@ -35,7 +35,7 @@ Dancer::Template - template wrapper for Dancer
 
 =head1 VERSION
 
-version 1.3127
+version 1.3128
 
 =head1 DESCRIPTION
 

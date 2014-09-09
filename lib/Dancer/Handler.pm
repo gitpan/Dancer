@@ -2,7 +2,7 @@ package Dancer::Handler;
 BEGIN {
   $Dancer::Handler::AUTHORITY = 'cpan:SUKRIA';
 }
-$Dancer::Handler::VERSION = '1.3127';
+$Dancer::Handler::VERSION = '1.3128';
 use strict;
 use warnings;
 use Carp;
@@ -225,7 +225,7 @@ Dancer::Handler
 
 =head1 VERSION
 
-version 1.3127
+version 1.3128
 
 =head1 AUTHOR
 

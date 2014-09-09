@@ -2,7 +2,7 @@ package Dancer::Plugin;
 BEGIN {
   $Dancer::Plugin::AUTHORITY = 'cpan:SUKRIA';
 }
-$Dancer::Plugin::VERSION = '1.3127';
+$Dancer::Plugin::VERSION = '1.3128';
 #ABSTRACT: helper for writing Dancer plugins
 use strict;
 use warnings;
@@ -126,7 +126,7 @@ Dancer::Plugin - helper for writing Dancer plugins
 
 =head1 VERSION
 
-version 1.3127
+version 1.3128
 
 =head1 SYNOPSIS
 

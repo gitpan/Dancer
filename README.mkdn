@@ -4,7 +4,7 @@ Dancer - lightweight yet powerful web application framework
 
 # VERSION
 
-version 1.3127
+version 1.3128
 
 # SYNOPSIS
 

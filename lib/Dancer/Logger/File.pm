@@ -2,7 +2,7 @@ package Dancer::Logger::File;
 BEGIN {
   $Dancer::Logger::File::AUTHORITY = 'cpan:SUKRIA';
 }
-$Dancer::Logger::File::VERSION = '1.3127';
+$Dancer::Logger::File::VERSION = '1.3128';
 #ABSTRACT: file-based logging engine for Dancer
 use strict;
 use warnings;
@@ -101,7 +101,7 @@ Dancer::Logger::File - file-based logging engine for Dancer
 
 =head1 VERSION
 
-version 1.3127
+version 1.3128
 
 =head1 SYNOPSIS
 

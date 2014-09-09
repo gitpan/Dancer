@@ -2,7 +2,7 @@ package Dancer::Template::Simple;
 BEGIN {
   $Dancer::Template::Simple::AUTHORITY = 'cpan:SUKRIA';
 }
-$Dancer::Template::Simple::VERSION = '1.3127';
+$Dancer::Template::Simple::VERSION = '1.3128';
 #ABSTRACT: pure Perl 5 template engine for Dancer
 use strict;
 use warnings;
@@ -171,7 +171,7 @@ Dancer::Template::Simple - pure Perl 5 template engine for Dancer
 
 =head1 VERSION
 
-version 1.3127
+version 1.3128
 
 =head1 DESCRIPTION
 

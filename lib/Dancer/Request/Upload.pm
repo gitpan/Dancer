@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Request::Upload::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: class representing file uploads requests
-$Dancer::Request::Upload::VERSION = '1.3127';
+$Dancer::Request::Upload::VERSION = '1.3128';
 use File::Spec;
 use Carp;
 
@@ -88,7 +88,7 @@ Dancer::Request::Upload - class representing file uploads requests
 
 =head1 VERSION
 
-version 1.3127
+version 1.3128
 
 =head1 SYNOPSIS
 

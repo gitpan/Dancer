@@ -13,7 +13,7 @@ Dancer::Cookbook - a quick-start guide to the Dancer web framework
 
 =head1 VERSION
 
-version 1.3127
+version 1.3128
 
 =head1 DESCRIPTION
 

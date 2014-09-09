@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Route::Cache::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: route caching mechanism for L<Dancer>
-$Dancer::Route::Cache::VERSION = '1.3127';
+$Dancer::Route::Cache::VERSION = '1.3128';
 use strict;
 use warnings;
 use Carp;
@@ -157,7 +157,7 @@ Dancer::Route::Cache - route caching mechanism for L<Dancer>
 
 =head1 VERSION
 
-version 1.3127
+version 1.3128
 
 =head1 SYNOPSIS
 
