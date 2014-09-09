@@ -1,6 +1,19 @@
+package Dancer::Introduction
+# ABSTRACT: A gentle introduction to Dancer
+$Dancer::Introduction::VERSION = '1.3127';
+__END__
+
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 Dancer::Introduction - A gentle introduction to Dancer
+
+=head1 VERSION
+
+version 1.3127
 
 =head1 DESCRIPTION
 
@@ -62,7 +75,6 @@ method 'get', so only GET requests will be honoured by that route:
         return "Hello ".param('name');
     };
 
-
 =head2 HTTP METHODS
 
 Here are some of the standard HTTP methods which you can use to define your
@@ -70,22 +82,30 @@ route handlers.
 
 =over 8
 
-=item B<GET>        The GET method retrieves information (when defining a route
-                    handler for the GET method, Dancer automatically defines a
-                    route handler for the HEAD method, in order to honour HEAD
-                    requests for each of your GET route handlers).
-                    To define a GET action, use the B<get> keyword.
+=item B<GET>
 
-=item B<POST>       The POST method is used to create a resource on the
-                    server.
-                    To define a POST action, use the B<post> keyword.
+The GET method retrieves information (when defining a route
+handler for the GET method, Dancer automatically defines a
+route handler for the HEAD method, in order to honour HEAD
+requests for each of your GET route handlers).
+To define a GET action, use the B<get> keyword.
 
-=item B<PUT>        The PUT method is used to update an existing resource.
-                    To define a PUT action, use the B<put> keyword.
+=item B<POST>
 
-=item B<DELETE>     The DELETE method requests that the origin server delete
-                    the resource identified by the Request-URI.
-                    To define a DELETE action, use the B<del> keyword.
+The POST method is used to create a resource on the
+server.
+To define a POST action, use the B<post> keyword.
+
+=item B<PUT>
+
+The PUT method is used to update an existing resource.
+To define a PUT action, use the B<put> keyword.
+
+=item B<DELETE>
+
+The DELETE method requests that the origin server delete
+the resource identified by the Request-URI.
+To define a DELETE action, use the B<del> keyword.
 
 =back
 
@@ -103,7 +123,6 @@ Or even, a route handler that would match any HTTP methods:
         # code
     };
 
-
 =head2 ROUTE HANDLERS
 
 The route action is the code reference declared. It can access parameters
@@ -119,7 +138,6 @@ A route pattern can contain one or more tokens (a word prefixed with ':'). Each
 token found in a route pattern is used as a named-pattern match. Any match will
 be set in the params hashref.
 
-
     get '/hello/:name' => sub {
         "Hey ".param('name').", welcome here!";
     };
@@ -129,7 +147,6 @@ Tokens can be optional, for example:
     get '/hello/:name?' => sub {
         "Hello there " . (param('name') || "whoever you are!");
     };
-
 
 =head2 WILDCARDS MATCHING
 
@@ -206,7 +223,6 @@ This is done with the B<pass> keyword, like in the following example
         "I say a number: ".params->{number};
     };
 
-
 =head2 DEFAULT ERROR PAGES
 
 When an error is rendered (the action responded with a status code different
@@ -248,7 +264,6 @@ variables which will be accessible in the action blocks with the keyword 'var'.
         vars->{note}; # 'Hi there'
     };
 
-
 For another example, this can be used along with session support to easily
 give non-logged-in users a login page:
 
@@ -259,7 +274,6 @@ give non-logged-in users a login page:
             request->path_info('/login');
         }
     };
-
 
 The request keyword returns the current Dancer::Request object representing the
 incoming request. See the documentation of the L<Dancer::Request> module for
@@ -277,7 +291,6 @@ The hook is given the response object as its first argument:
         my $response = shift;
         $response->{content} = 'after hook got here!';
     };
-
 
 =head2 Before template hook
 
@@ -365,7 +378,6 @@ the config keyword:
     get '/appname' => sub {
         return "This is " . config->{appname};
     };
-
 
 =head1 Importing just the syntax
 
@@ -627,5 +639,16 @@ This is a possible webapp created with Dancer:
 
     # run the webserver
     Dancer->dance;
+
+=head1 AUTHOR
+
+Dancer Core Developers
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2010 by Alexis Sukrieh.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut

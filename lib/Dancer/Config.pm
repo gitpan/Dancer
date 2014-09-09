@@ -1,10 +1,15 @@
 package Dancer::Config;
-
+BEGIN {
+  $Dancer::Config::AUTHORITY = 'cpan:SUKRIA';
+}
+#ABSTRACT:  how to configure Dancer to suit your needs
+$Dancer::Config::VERSION = '1.3127';
 use strict;
 use warnings;
 use base 'Exporter';
 use vars '@EXPORT_OK';
 
+use Hash::Merge::Simple;
 use Dancer::Config::Object 'hashref_to_object';
 use Dancer::Deprecation;
 use Dancer::Template;
@@ -224,24 +229,17 @@ sub load {
 sub load_settings_from_yaml {
     my ($file) = @_;
 
-    my $config;
+    my $config = eval { YAML::LoadFile($file) }
+        or confess "Unable to parse the configuration file: $file: $@";
 
-    eval { $config = YAML::LoadFile($file) };
-    if (my $err = $@ || (!$config)) {
-        confess "Unable to parse the configuration file: $file: $@";
+    # groom the values of $config
+    while( my ($k,$v) = each %$config ) {
+        $config->{$k} = Dancer::Config->normalize_setting($k,$v);
     }
 
-    for my $key (keys %{$config}) {
-        if ($MERGEABLE{$key}) {
-            my $setting = setting($key);
-            $setting->{$_} = $config->{$key}{$_} for keys %{$config->{$key}};
-        }
-        else {
-            _set_setting($key, $config->{$key});
-        }
-    }
+    $SETTINGS = Hash::Merge::Simple::merge( $SETTINGS, $config );
 
-    return scalar(keys %$config);
+    return scalar keys %$config;
 }
 
 sub load_default_settings {
@@ -249,13 +247,13 @@ sub load_default_settings {
     $SETTINGS->{port}          ||= $ENV{DANCER_PORT}          || '3000';
     $SETTINGS->{content_type}  ||= $ENV{DANCER_CONTENT_TYPE}  || 'text/html';
     $SETTINGS->{charset}       ||= $ENV{DANCER_CHARSET}       || '';
-    $SETTINGS->{startup_info}  ||= $ENV{DANCER_STARTUP_INFO}  || 1;
+    $SETTINGS->{startup_info}  ||= !$ENV{DANCER_NO_STARTUP_INFO};
     $SETTINGS->{daemon}        ||= $ENV{DANCER_DAEMON}        || 0;
     $SETTINGS->{apphandler}    ||= $ENV{DANCER_APPHANDLER}    || 'Standalone';
     $SETTINGS->{warnings}      ||= $ENV{DANCER_WARNINGS}      || 0;
     $SETTINGS->{auto_reload}   ||= $ENV{DANCER_AUTO_RELOAD}   || 0;
     $SETTINGS->{traces}        ||= $ENV{DANCER_TRACES}        || 0;
-    $SETTINGS->{server_tokens} ||= $ENV{DANCER_SERVER_TOKENS} || 1;
+    $SETTINGS->{server_tokens} ||= !$ENV{DANCER_NO_SERVER_TOKENS};
     $SETTINGS->{logger}        ||= $ENV{DANCER_LOGGER}        || 'file';
     $SETTINGS->{environment}   ||=
          $ENV{DANCER_ENVIRONMENT}
@@ -274,9 +272,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 Dancer::Config - how to configure Dancer to suit your needs
+
+=head1 VERSION
+
+version 1.3127
 
 =head1 DESCRIPTION
 
@@ -391,7 +395,6 @@ have a lot of files being served in the B<public> folder that do not
 have an extension, and are text files, set the C<default_mime_type> to
 C<text/plain>.
 
-
 =head2 File / directory locations
 
 =head3 environment (string)
@@ -443,7 +446,6 @@ use Template Toolkit, add the following to C<config.yml>:
 
     template: template_toolkit
 
-
 =head3 layout (string)
 
 The name of the layout to use when rendering view. Dancer will look for
@@ -451,7 +453,6 @@ a matching template in the directory $views/layout.
 
 Your can override the default layout using the third argument of the
 C<template> keyword. Check C<Dancer> manpage for details.
-
 
 =head2 Logging, debugging and error handling
 
@@ -468,9 +469,10 @@ by your Dancer application. Default is false.
 =head3 startup_info (boolean)
 
 If set to true (the default), prints a banner at server startup with information such as
-versions and the environment (or "dancefloor"). Default is true.
+versions and the environment (or "dancefloor").
 
-Conforms to the environment variable DANCER_STARTUP_INFO.
+Can also be disabled by setting the environment variable DANCER_NO_STARTUP_INFO to
+a true value.
 
 =head3 warnings (boolean)
 
@@ -493,7 +495,8 @@ Default to false.
 If set to true (the default), Dancer will add an "X-Powered-By" header and also append
 the Dancer version to the "Server" header.
 
-You can also use the environment variable C<DANCER_SERVER_TOKENS>.
+Can also be disabled by setting the environment variable C<DANCER_NO_SERVER_TOKENS> to
+a true value.
 
 =head3 log_path (string)
 
@@ -543,7 +546,6 @@ During development, you'll probably want to use C<debug> to see your own debug
 messages, and C<core> if you need to see what Dancer is doing.  In production,
 you'll likely want C<error> or C<warning> only, for less-chatty logs.
 
-
 =head3 show_errors (boolean)
 
 If set to true, Dancer will render a detailed debug screen whenever an error is
@@ -554,7 +556,6 @@ C<error_template> setting.
 The error screen attempts to sanitise sensitive looking information (passwords /
 card numbers in the request, etc) but you still should not have show_errors
 enabled whilst in production, as there is still a risk of divulging details.
-
 
 =head3 error_template (template path)
 
@@ -576,7 +577,6 @@ The error message.
 The code throwing that error.
 
 =back
-
 
 =head3 auto_reload (boolean)
 
@@ -633,7 +633,6 @@ override the default.  This is useful for setting the session cookie's
 domain to something like C<.domain.com> so that the same cookie will
 be applicable and usable across subdomains of a base domain.
 
-
 =head2 auto_page (boolean)
 
 For simple pages where you're not doing anything dynamic, but still
@@ -674,7 +673,6 @@ Maximum size of route cache (e.g. 1024, 2M). Defaults to 10M (10MB) - see L<Danc
 
 Maximum number of routes to cache. Defaults to 600 - see L<Dancer::Route::Cache>
 
-
 =head2 DANCER_CONFDIR and DANCER_ENVDIR
 
 It's possible to set the configuration directory and environment directory using this two
@@ -699,5 +697,16 @@ itself.
 =head1 SEE ALSO
 
 L<Dancer>
+
+=head1 AUTHOR
+
+Dancer Core Developers
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2010 by Alexis Sukrieh.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut

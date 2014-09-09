@@ -1,5 +1,9 @@
 package Dancer::Handler::Debug;
-
+BEGIN {
+  $Dancer::Handler::Debug::AUTHORITY = 'cpan:SUKRIA';
+}
+#ABSTRACT: a debug handler for easy tracing
+$Dancer::Handler::Debug::VERSION = '1.3127';
 use strict;
 use warnings;
 
@@ -13,7 +17,7 @@ use Dancer::SharedData;
 sub run {
     my ($self, $req) = @_;
 
-    my ($method, $path, $query) = @ARGV;
+    my ($method, $path, $query, @env ) = @ARGV;
     my $host    = "127.0.0.1";
     my $port    = "3000";
 
@@ -31,6 +35,7 @@ sub run {
         'SERVER_PROTOCOL' => 'HTTP/1.1',
         'SERVER_SOFTWARE' => 'HTTP::Server::Simple/0.41',
         'SERVER_URL'      => "http://$host:$port/",
+        map { /=/ ? split /=/, $_, 2 : () } @env
     };
 
     $req = Dancer::Request->new(env => $env);
@@ -73,9 +78,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 Dancer::Handler::Debug - a debug handler for easy tracing
+
+=head1 VERSION
+
+version 1.3127
 
 =head1 DESCRIPTION
 
@@ -83,8 +94,10 @@ When developing a Dancer application, it can be useful to trace precisely what
 happen when a query is processed. This handler is here to provide the developer
 with a way to easily run the dancer application with the Perl debugger.
 
-This handler will process only one query, based on the first argument given on
-the command line ($ARGV[0]).
+This handler will process only one query, based on the arguments given on
+the command line, which must follow the pattern
+
+    <verb> <path> <parameter segment> <env variable> <even variable>
 
 =head1 USAGE
 
@@ -92,8 +105,27 @@ the command line ($ARGV[0]).
     set apphandler => 'Debug';
 
     # then, run the app the following way
+    perl -d bin/app.pl GET '/some/path/to/test' 
+
+    # with arguments
     perl -d bin/app.pl GET '/some/path/to/test' 'with=parameters&other=42'
+
+    # with environment variables
+    perl -d bin/app.pl GET '/some/path/to/test' '' HTTP_X_REQUESTED_WITH=XMLHttpRequest SERVER_NAME=fake
 
 =head1 AUTHORS
 
 Dancer contributors
+
+=head1 AUTHOR
+
+Dancer Core Developers
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2010 by Alexis Sukrieh.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut
