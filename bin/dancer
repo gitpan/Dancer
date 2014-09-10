@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 #PODNAME: dancer
+#ABSTRACT: helper script to create new Dancer applications
 
 use strict;
 use warnings;
@@ -1321,15 +1322,27 @@ EOF
 }
 
 __END__
+
 =pod
+
+=encoding UTF-8
 
 =head1 NAME
 
 dancer - helper script to create new Dancer applications
 
+=head1 VERSION
+
+version 1.3129
+
 =head1 SYNOPSIS
 
 dancer [options] -a <appname>
+
+=head1 DESCRIPTION
+
+Helper script for providing a bootstrapping method to quickly and easily create
+the framework for a new Dancer application.
 
 =head1 OPTIONS
 
@@ -1340,11 +1353,6 @@ dancer [options] -a <appname>
     -x, --no-check        : don't check for the latest version of Dancer
                               (checking version implies internet connection)
     -v, --version         : print the version of dancer being used
-
-=head1 DESCRIPTION
-
-Helper script for providing a bootstrapping method to quickly and easily create
-the framework for a new Dancer application.
 
 =head1 EXAMPLE
 
@@ -1382,7 +1390,6 @@ Here is an application created with dancer:
 	+ MyWeb-App/t/001_base.t
 	+ MyWeb-App/Makefile.PL
 
-
 The application is ready to serve:
 
     $ cd MyWeb-App
@@ -1392,17 +1399,13 @@ The application is ready to serve:
 
 =head1 AUTHOR
 
-This script has been written by Sebastien Deseille
-<sebastien.deseille@gmail.com> and Alexis Sukrieh
-<sukria@cpan.org>.
+Dancer Core Developers
 
-=head1 SOURCE CODE
+=head1 COPYRIGHT AND LICENSE
 
-See L<Dancer> for more information.
+This software is copyright (c) 2010 by Alexis Sukrieh.
 
-=head1 LICENSE
-
-This module is free software and is published under the same
-terms as Perl itself.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut

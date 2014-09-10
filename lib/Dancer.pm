@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: lightweight yet powerful web application framework
-$Dancer::VERSION = '1.3128';
+$Dancer::VERSION = '1.3129';
 use strict;
 use warnings;
 use Carp;
@@ -497,7 +497,7 @@ Dancer - lightweight yet powerful web application framework
 
 =head1 VERSION
 
-version 1.3128
+version 1.3129
 
 =head1 SYNOPSIS
 

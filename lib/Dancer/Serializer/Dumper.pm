@@ -2,7 +2,7 @@ package Dancer::Serializer::Dumper;
 BEGIN {
   $Dancer::Serializer::Dumper::AUTHORITY = 'cpan:SUKRIA';
 }
-$Dancer::Serializer::Dumper::VERSION = '1.3128';
+$Dancer::Serializer::Dumper::VERSION = '1.3129';
 use strict;
 use warnings;
 use Carp;
@@ -53,7 +53,7 @@ Dancer::Serializer::Dumper
 
 =head1 VERSION
 
-version 1.3128
+version 1.3129
 
 =head1 AUTHOR
 

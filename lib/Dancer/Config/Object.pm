@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Config::Object::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: Access the config via methods instead of hashrefs
-$Dancer::Config::Object::VERSION = '1.3128';
+$Dancer::Config::Object::VERSION = '1.3129';
 use strict;
 use warnings;
 
@@ -107,7 +107,7 @@ Dancer::Config::Object - Access the config via methods instead of hashrefs
 
 =head1 VERSION
 
-version 1.3128
+version 1.3129
 
 =head1 DESCRIPTION
 

@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Handler::PSGI::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: a PSGI handler for Dancer applications
-$Dancer::Handler::PSGI::VERSION = '1.3128';
+$Dancer::Handler::PSGI::VERSION = '1.3129';
 use strict;
 use warnings;
 use Carp;
@@ -104,7 +104,7 @@ Dancer::Handler::PSGI - a PSGI handler for Dancer applications
 
 =head1 VERSION
 
-version 1.3128
+version 1.3129
 
 =head1 DESCRIPTION
 

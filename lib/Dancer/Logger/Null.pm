@@ -2,8 +2,8 @@ package Dancer::Logger::Null;
 BEGIN {
   $Dancer::Logger::Null::AUTHORITY = 'cpan:SUKRIA';
 }
-$Dancer::Logger::Null::VERSION = '1.3128';
 #ABSTRACT: blackhole-like silent logging engine for Dancer
+$Dancer::Logger::Null::VERSION = '1.3129';
 use strict;
 use warnings;
 use base 'Dancer::Logger::Abstract';
@@ -24,7 +24,7 @@ Dancer::Logger::Null - blackhole-like silent logging engine for Dancer
 
 =head1 VERSION
 
-version 1.3128
+version 1.3129
 
 =head1 SYNOPSIS
 

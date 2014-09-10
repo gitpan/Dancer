@@ -4,16 +4,13 @@ author:
   - 'Dancer Core Developers'
 build_requires:
   Devel::Hide: '0'
-  File::Path: '0'
   File::Spec: '0'
   HTTP::Cookies: '0'
   HTTP::Request: '0'
   IO::Handle: '0'
   IPC::Open3: '0'
-  LWP::UserAgent: '0'
   Plack::Builder: '0'
   Test::More: '0.88'
-  constant: '0'
   mro: '0'
   perl: '5.006'
   utf8: '0'
@@ -29,214 +26,214 @@ name: Dancer
 provides:
   Dancer:
     file: lib/Dancer.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::App:
     file: lib/Dancer/App.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Config:
     file: lib/Dancer/Config.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Config::Object:
     file: lib/Dancer/Config/Object.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Continuation:
     file: lib/Dancer/Continuation.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Continuation::Halted:
     file: lib/Dancer/Continuation/Halted.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Continuation::Route:
     file: lib/Dancer/Continuation/Route.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Continuation::Route::ErrorSent:
     file: lib/Dancer/Continuation/Route/ErrorSent.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Continuation::Route::FileSent:
     file: lib/Dancer/Continuation/Route/FileSent.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Continuation::Route::Forwarded:
     file: lib/Dancer/Continuation/Route/Forwarded.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Continuation::Route::Passed:
     file: lib/Dancer/Continuation/Route/Passed.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Continuation::Route::Templated:
     file: lib/Dancer/Continuation/Route/Templated.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Cookie:
     file: lib/Dancer/Cookie.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Cookies:
     file: lib/Dancer/Cookies.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Deprecation:
     file: lib/Dancer/Deprecation.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Engine:
     file: lib/Dancer/Engine.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Error:
     file: lib/Dancer/Error.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Exception:
     file: lib/Dancer/Exception.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Exception::Base:
     file: lib/Dancer/Exception/Base.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Factory::Hook:
     file: lib/Dancer/Factory/Hook.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::FileUtils:
     file: lib/Dancer/FileUtils.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::GetOpt:
     file: lib/Dancer/GetOpt.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::HTTP:
     file: lib/Dancer/HTTP.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Handler:
     file: lib/Dancer/Handler.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Handler::Debug:
     file: lib/Dancer/Handler/Debug.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Handler::PSGI:
     file: lib/Dancer/Handler/PSGI.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Handler::Standalone:
     file: lib/Dancer/Handler/Standalone.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Hook:
     file: lib/Dancer/Hook.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Hook::Properties:
     file: lib/Dancer/Hook/Properties.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Logger:
     file: lib/Dancer/Logger.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Logger::Abstract:
     file: lib/Dancer/Logger/Abstract.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Logger::Capture:
     file: lib/Dancer/Logger/Capture.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Logger::Capture::Trap:
     file: lib/Dancer/Logger/Capture/Trap.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Logger::Console:
     file: lib/Dancer/Logger/Console.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Logger::Diag:
     file: lib/Dancer/Logger/Diag.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Logger::File:
     file: lib/Dancer/Logger/File.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Logger::Note:
     file: lib/Dancer/Logger/Note.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Logger::Null:
     file: lib/Dancer/Logger/Null.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::MIME:
     file: lib/Dancer/MIME.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::ModuleLoader:
     file: lib/Dancer/ModuleLoader.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Object:
     file: lib/Dancer/Object.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Object::Singleton:
     file: lib/Dancer/Object/Singleton.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Plugin:
     file: lib/Dancer/Plugin.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Plugin::Ajax:
     file: lib/Dancer/Plugin/Ajax.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Renderer:
     file: lib/Dancer/Renderer.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Request:
     file: lib/Dancer/Request.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Request::Upload:
     file: lib/Dancer/Request/Upload.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Response:
     file: lib/Dancer/Response.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Route:
     file: lib/Dancer/Route.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Route::Cache:
     file: lib/Dancer/Route/Cache.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Route::Registry:
     file: lib/Dancer/Route/Registry.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Serializer:
     file: lib/Dancer/Serializer.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Serializer::Abstract:
     file: lib/Dancer/Serializer/Abstract.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Serializer::Dumper:
     file: lib/Dancer/Serializer/Dumper.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Serializer::JSON:
     file: lib/Dancer/Serializer/JSON.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Serializer::JSONP:
     file: lib/Dancer/Serializer/JSONP.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Serializer::Mutable:
     file: lib/Dancer/Serializer/Mutable.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Serializer::XML:
     file: lib/Dancer/Serializer/XML.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Serializer::YAML:
     file: lib/Dancer/Serializer/YAML.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Session:
     file: lib/Dancer/Session.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Session::Abstract:
     file: lib/Dancer/Session/Abstract.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Session::Simple:
     file: lib/Dancer/Session/Simple.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Session::YAML:
     file: lib/Dancer/Session/YAML.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::SharedData:
     file: lib/Dancer/SharedData.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Template:
     file: lib/Dancer/Template.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Template::Abstract:
     file: lib/Dancer/Template/Abstract.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Template::Simple:
     file: lib/Dancer/Template/Simple.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Template::TemplateToolkit:
     file: lib/Dancer/Template/TemplateToolkit.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Test:
     file: lib/Dancer/Test.pm
-    version: '1.3128'
+    version: '1.3129'
   Dancer::Timer:
     file: lib/Dancer/Timer.pm
-    version: '1.3128'
+    version: '1.3129'
 requires:
   Carp: '0'
   Cwd: '0'
@@ -246,7 +243,9 @@ requires:
   Fcntl: '0'
   File::Basename: '0'
   File::Copy: '0'
+  File::Path: '0'
   File::Spec: '0'
+  File::Spec::Functions: '0'
   File::Temp: '0'
   File::stat: '0'
   FindBin: '0'
@@ -257,9 +256,11 @@ requires:
   HTTP::Server::Simple::PSGI: '0'
   Hash::Merge::Simple: '0'
   IO::File: '0'
+  LWP::UserAgent: '0'
   MIME::Types: '0'
   Module::Runtime: '0'
   POSIX: '0'
+  Pod::Usage: '0'
   Scalar::Util: '0'
   Test::Builder: '0'
   Test::More: '0.88'
@@ -269,6 +270,7 @@ requires:
   URI::Escape: '0'
   base: '0'
   bytes: '0'
+  constant: '0'
   lib: '0'
   overload: '0'
   parent: '0'
@@ -279,7 +281,7 @@ resources:
   bugtracker: https://github.com/PerlDancer/Dancer/issues
   homepage: http://search.cpan.org/dist/Dancer/
   repository: https://github.com/PerlDancer/Dancer.git
-version: '1.3128'
+version: '1.3129'
 x_authority: cpan:SUKRIA
 x_contributors:
   - 'Achim Adam <achim.adam@(none).com>'
