@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Logger::Note::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: Test::More note() logging engine for Dancer
-$Dancer::Logger::Note::VERSION = '1.3129';
+$Dancer::Logger::Note::VERSION = '1.3130';
 use strict;
 use warnings;
 use base 'Dancer::Logger::Abstract';
@@ -36,7 +36,7 @@ Dancer::Logger::Note - Test::More note() logging engine for Dancer
 
 =head1 VERSION
 
-version 1.3129
+version 1.3130
 
 =head1 SYNOPSIS
 

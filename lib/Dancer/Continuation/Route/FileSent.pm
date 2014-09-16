@@ -2,7 +2,7 @@ package Dancer::Continuation::Route::FileSent;
 BEGIN {
   $Dancer::Continuation::Route::FileSent::AUTHORITY = 'cpan:SUKRIA';
 }
-$Dancer::Continuation::Route::FileSent::VERSION = '1.3129';
+$Dancer::Continuation::Route::FileSent::VERSION = '1.3130';
 use strict;
 use warnings;
 use Carp;
@@ -23,7 +23,7 @@ Dancer::Continuation::Route::FileSent
 
 =head1 VERSION
 
-version 1.3129
+version 1.3130
 
 =head1 AUTHOR
 

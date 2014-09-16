@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Logger::Capture::AUTHORITY = 'cpan:SUKRIA';
 }
 # ABSTRACT: Capture dancer logs
-$Dancer::Logger::Capture::VERSION = '1.3129';
+$Dancer::Logger::Capture::VERSION = '1.3130';
 use strict;
 use warnings;
 
@@ -41,7 +41,7 @@ Dancer::Logger::Capture - Capture dancer logs
 
 =head1 VERSION
 
-version 1.3129
+version 1.3130
 
 =head1 SYNOPSIS
 

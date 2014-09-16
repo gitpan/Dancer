@@ -50,7 +50,6 @@ on 'test' => sub {
   requires "IPC::Open3" => "0";
   requires "Plack::Builder" => "0";
   requires "Test::More" => "0.88";
-  requires "mro" => "0";
   requires "perl" => "5.006";
   requires "utf8" => "0";
 };

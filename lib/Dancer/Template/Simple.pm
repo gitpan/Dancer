@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Template::Simple::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: pure Perl 5 template engine for Dancer
-$Dancer::Template::Simple::VERSION = '1.3129';
+$Dancer::Template::Simple::VERSION = '1.3130';
 use strict;
 use warnings;
 use Carp;
@@ -171,7 +171,7 @@ Dancer::Template::Simple - pure Perl 5 template engine for Dancer
 
 =head1 VERSION
 
-version 1.3129
+version 1.3130
 
 =head1 DESCRIPTION
 

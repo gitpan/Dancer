@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Hook::Properties::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: Properties attached to a hook
-$Dancer::Hook::Properties::VERSION = '1.3129';
+$Dancer::Hook::Properties::VERSION = '1.3130';
 use strict;
 use warnings;
 
@@ -53,7 +53,7 @@ Dancer::Hook::Properties - Properties attached to a hook
 
 =head1 VERSION
 
-version 1.3129
+version 1.3130
 
 =head1 SYNOPSIS
 

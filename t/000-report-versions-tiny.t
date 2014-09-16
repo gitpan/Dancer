@@ -92,7 +92,6 @@ eval { $v .= pmver('base','any version') };
 eval { $v .= pmver('bytes','any version') };
 eval { $v .= pmver('constant','any version') };
 eval { $v .= pmver('lib','any version') };
-eval { $v .= pmver('mro','any version') };
 eval { $v .= pmver('overload','any version') };
 eval { $v .= pmver('parent','any version') };
 eval { $v .= pmver('strict','any version') };

@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Serializer::JSON::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: serializer for handling JSON data
-$Dancer::Serializer::JSON::VERSION = '1.3129';
+$Dancer::Serializer::JSON::VERSION = '1.3130';
 use strict;
 use warnings;
 use Carp;
@@ -117,7 +117,7 @@ Dancer::Serializer::JSON - serializer for handling JSON data
 
 =head1 VERSION
 
-version 1.3129
+version 1.3130
 
 =head1 SYNOPSIS
 
