@@ -2,7 +2,7 @@ NAME
     Dancer - lightweight yet powerful web application framework
 
 VERSION
-    version 1.3130
+    version 1.3131_0
 
 SYNOPSIS
         #!/usr/bin/perl
@@ -649,6 +649,20 @@ FUNCTIONS
            my $password = param "pass";
            # ...
        }
+
+  param_array
+    *This method should be called from a route handler*. Like *param*, but
+    always returns the parameter value or values as a list. Returns the
+    number of values in scalar context.
+
+        # if request is '/tickets?tag=open&tag=closed&order=desc'...
+        get '/tickets' => sub {
+            my @tags = param_array 'tag';  # ( 'open', 'closed' )
+            my $tags = param 'tag';        # array ref
+
+            my @order = param_array 'order';  # ( 'desc' )
+            my $order = param 'order';        # 'desc'
+        };
 
   pass
     *This method should be called from a route handler*. Tells Dancer to

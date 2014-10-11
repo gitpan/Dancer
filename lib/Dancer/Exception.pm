@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Exception::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: class for throwing and catching exceptions
-$Dancer::Exception::VERSION = '1.3130';
+$Dancer::Exception::VERSION = '1.3131_0';
 use strict;
 use warnings;
 use Carp;
@@ -141,7 +141,7 @@ Dancer::Exception - class for throwing and catching exceptions
 
 =head1 VERSION
 
-version 1.3130
+version 1.3131_0
 
 =head1 SYNOPSIS
 

@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Serializer::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: serializer wrapper for Dancer
-$Dancer::Serializer::VERSION = '1.3130';
+$Dancer::Serializer::VERSION = '1.3131_0';
 # Factory for serializer engines
 
 use strict;
@@ -135,7 +135,7 @@ Dancer::Serializer - serializer wrapper for Dancer
 
 =head1 VERSION
 
-version 1.3130
+version 1.3131_0
 
 =head1 DESCRIPTION
 

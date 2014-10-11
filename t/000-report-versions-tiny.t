@@ -88,6 +88,7 @@ eval { $v .= pmver('Time::HiRes','any version') };
 eval { $v .= pmver('Try::Tiny','any version') };
 eval { $v .= pmver('URI','any version') };
 eval { $v .= pmver('URI::Escape','any version') };
+eval { $v .= pmver('YAML','any version') };
 eval { $v .= pmver('base','any version') };
 eval { $v .= pmver('bytes','any version') };
 eval { $v .= pmver('constant','any version') };

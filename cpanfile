@@ -40,6 +40,7 @@ requires "parent" => "0";
 requires "strict" => "0";
 requires "vars" => "0";
 requires "warnings" => "0";
+recommends "YAML" => "0";
 
 on 'test' => sub {
   requires "Devel::Hide" => "0";

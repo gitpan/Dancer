@@ -13,7 +13,7 @@ Dancer::Deployment - common ways to put your Dancer app into use
 
 =head1 VERSION
 
-version 1.3130
+version 1.3131_0
 
 =head1 DESCRIPTION
 
@@ -298,6 +298,11 @@ mod_proxy and mod_proxy_http must be enabled.
     a2enmod headers
     a2enmod proxy
     a2enmod proxy_http
+
+Note that Apache does not pass protocol information when proxying, so if
+needed then you will need to set it manually in your Apache config:
+
+    RequestHeader set X_FORWARDED_PROTO "https"
 
 It is also important to set permissions for proxying for security purposes,
 below is an example.

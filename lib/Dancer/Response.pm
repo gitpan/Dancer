@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Response::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: Response object for Dancer
-$Dancer::Response::VERSION = '1.3130';
+$Dancer::Response::VERSION = '1.3131_0';
 use strict;
 use warnings;
 use Carp;
@@ -199,7 +199,7 @@ Dancer::Response - Response object for Dancer
 
 =head1 VERSION
 
-version 1.3130
+version 1.3131_0
 
 =head1 SYNOPSIS
 

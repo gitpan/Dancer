@@ -3,11 +3,12 @@ BEGIN {
   $Dancer::Serializer::YAML::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: serializer for handling YAML data
-$Dancer::Serializer::YAML::VERSION = '1.3130';
+$Dancer::Serializer::YAML::VERSION = '1.3131_0';
 use strict;
 use warnings;
 use Carp;
 use Dancer::ModuleLoader;
+use Dancer::Config;
 use Dancer::Exception qw(:all);
 use base 'Dancer::Serializer::Abstract';
 
@@ -27,12 +28,19 @@ sub to_yaml {
 
 # class definition
 
-sub loaded { Dancer::ModuleLoader->load('YAML') }
+sub loaded { 
+    my $module = Dancer::Config::settings->{engines}{YAML}{module} || 'YAML';
+
+    raise core_serializer => q{Dancer::Serializer::YAML only support 'YAML' or 'YAML::XS', not $module}
+        unless $module =~ /^YAML(?:::XS)?$/;
+
+    Dancer::ModuleLoader->load($module) 
+        or raise core_serializer => "$module is needed and is not installed";
+}
 
 sub init {
     my ($self) = @_;
-    raise core_serializer => 'YAML is needed and is not installed'
-      unless $self->loaded;
+    $self->loaded;
 }
 
 sub serialize {
@@ -61,11 +69,35 @@ Dancer::Serializer::YAML - serializer for handling YAML data
 
 =head1 VERSION
 
-version 1.3130
+version 1.3131_0
 
 =head1 SYNOPSIS
 
 =head1 DESCRIPTION
+
+This class is an interface between Dancer's serializer engine abstraction layer
+and the L<YAML> (or L<YAML::XS>) module.
+
+In order to use this engine, use the template setting:
+
+    serializer: YAML
+
+This can be done in your config.yml file or directly in your app code with the
+B<set> keyword. This serializer will also be used when the serializer is set
+to B<mutable> and the correct Accept headers are supplied.
+
+By default, the module L<YAML> will be used to serialize/deserialize data and
+the application configuration files. This can be changed via the
+configuration:
+
+    engines:
+        YAML:
+            module: YAML::XS
+
+Note that if you want all configuration files to be read using C<YAML::XS>, 
+that configuration has to be set via application code:
+
+   config->{engines}{YAML}{module} = 'YAML::XS';
 
 =head1 METHODS
 

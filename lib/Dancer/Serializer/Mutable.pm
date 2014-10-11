@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Serializer::Mutable::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: Serialize and deserialize content using the appropriate HTTP header
-$Dancer::Serializer::Mutable::VERSION = '1.3130';
+$Dancer::Serializer::Mutable::VERSION = '1.3131_0';
 use strict;
 use warnings;
 
@@ -152,7 +152,7 @@ Dancer::Serializer::Mutable - Serialize and deserialize content using the approp
 
 =head1 VERSION
 
-version 1.3130
+version 1.3131_0
 
 =head1 SYNOPSIS
 

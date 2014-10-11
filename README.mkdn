@@ -4,7 +4,7 @@ Dancer - lightweight yet powerful web application framework
 
 # VERSION
 
-version 1.3130
+version 1.3131\_0
 
 # SYNOPSIS
 
@@ -700,6 +700,21 @@ This method is an accessor to the parameters hash table.
         my $password = param "pass";
         # ...
     }
+
+## param\_array
+
+_This method should be called from a route handler_.
+Like _param_, but always returns the parameter value or values as a list.
+Returns the number of values in scalar context.
+
+    # if request is '/tickets?tag=open&tag=closed&order=desc'...
+    get '/tickets' => sub {
+        my @tags = param_array 'tag';  # ( 'open', 'closed' )
+        my $tags = param 'tag';        # array ref
+
+        my @order = param_array 'order';  # ( 'desc' )
+        my $order = param 'order';        # 'desc'
+    };
 
 ## pass
 

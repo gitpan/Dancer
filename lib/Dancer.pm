@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: lightweight yet powerful web application framework
-$Dancer::VERSION = '1.3130';
+$Dancer::VERSION = '1.3131_0';
 use strict;
 use warnings;
 use Carp;
@@ -76,6 +76,7 @@ our @EXPORT    = qw(
   mime
   options
   param
+  param_array
   params
   pass
   path
@@ -178,6 +179,16 @@ sub mime            { Dancer::MIME->instance() }
 sub options         { Dancer::App->current->registry->universal_add('options', @_) }
 sub params          { Dancer::SharedData->request->params(@_) }
 sub param           { params->{$_[0]} }
+sub param_array     { 
+    my $value = param(shift);
+
+    my @array = ref $value eq 'ARRAY' ? @$value 
+              : defined $value        ? ( $value ) 
+              :                         ()
+              ;
+
+    return @array;
+}
 sub pass            { Dancer::SharedData->response->pass(1);
                       # throw a special continuation exception
                       Dancer::Continuation::Route::Passed->new->throw;
@@ -483,6 +494,7 @@ sub _start {
     return $handler->dance;
 }
 
+
 1;
 
 __END__
@@ -497,7 +509,7 @@ Dancer - lightweight yet powerful web application framework
 
 =head1 VERSION
 
-version 1.3130
+version 1.3131_0
 
 =head1 SYNOPSIS
 
@@ -1201,6 +1213,21 @@ This method is an accessor to the parameters hash table.
        my $password = param "pass";
        # ...
    }
+
+=head2 param_array
+
+I<This method should be called from a route handler>.
+Like I<param>, but always returns the parameter value or values as a list.
+Returns the number of values in scalar context.
+
+    # if request is '/tickets?tag=open&tag=closed&order=desc'...
+    get '/tickets' => sub {
+        my @tags = param_array 'tag';  # ( 'open', 'closed' )
+        my $tags = param 'tag';        # array ref
+
+        my @order = param_array 'order';  # ( 'desc' )
+        my $order = param 'order';        # 'desc'
+    };
 
 =head2 pass
 

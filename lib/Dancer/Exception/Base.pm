@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Exception::Base::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: the base class of all Dancer exceptions
-$Dancer::Exception::Base::VERSION = '1.3130';
+$Dancer::Exception::Base::VERSION = '1.3131_0';
 use strict;
 use warnings;
 use Carp;
@@ -109,7 +109,7 @@ Dancer::Exception::Base - the base class of all Dancer exceptions
 
 =head1 VERSION
 
-version 1.3130
+version 1.3131_0
 
 =head1 DESCRIPTION
 

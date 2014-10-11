@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Cookies::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: a singleton storage for all cookies
-$Dancer::Cookies::VERSION = '1.3130';
+$Dancer::Cookies::VERSION = '1.3131_0';
 use strict;
 use warnings;
 
@@ -91,7 +91,7 @@ Dancer::Cookies - a singleton storage for all cookies
 
 =head1 VERSION
 
-version 1.3130
+version 1.3131_0
 
 =head1 SYNOPSIS
 
