@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Session::Abstract::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: abstract class for session engine
-$Dancer::Session::Abstract::VERSION = '1.3131_0';
+$Dancer::Session::Abstract::VERSION = '1.3131_1';
 use strict;
 use warnings;
 use Carp;
@@ -146,7 +146,7 @@ Dancer::Session::Abstract - abstract class for session engine
 
 =head1 VERSION
 
-version 1.3131_0
+version 1.3131_1
 
 =head1 DESCRIPTION
 

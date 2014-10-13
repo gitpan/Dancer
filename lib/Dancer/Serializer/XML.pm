@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Serializer::XML::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: serializer for handling XML data
-$Dancer::Serializer::XML::VERSION = '1.3131_0';
+$Dancer::Serializer::XML::VERSION = '1.3131_1';
 use strict;
 use warnings;
 use Carp;
@@ -93,7 +93,7 @@ Dancer::Serializer::XML - serializer for handling XML data
 
 =head1 VERSION
 
-version 1.3131_0
+version 1.3131_1
 
 =head1 SYNOPSIS
 

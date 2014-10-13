@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Config::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT:  how to configure Dancer to suit your needs
-$Dancer::Config::VERSION = '1.3131_0';
+$Dancer::Config::VERSION = '1.3131_1';
 use strict;
 use warnings;
 use base 'Exporter';
@@ -280,7 +280,7 @@ Dancer::Config - how to configure Dancer to suit your needs
 
 =head1 VERSION
 
-version 1.3131_0
+version 1.3131_1
 
 =head1 DESCRIPTION
 

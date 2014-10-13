@@ -2,7 +2,7 @@ package Dancer::Continuation::Halted;
 BEGIN {
   $Dancer::Continuation::Halted::AUTHORITY = 'cpan:SUKRIA';
 }
-$Dancer::Continuation::Halted::VERSION = '1.3131_0';
+$Dancer::Continuation::Halted::VERSION = '1.3131_1';
 use strict;
 use warnings;
 use Carp;
@@ -23,7 +23,7 @@ Dancer::Continuation::Halted
 
 =head1 VERSION
 
-version 1.3131_0
+version 1.3131_1
 
 =head1 AUTHOR
 

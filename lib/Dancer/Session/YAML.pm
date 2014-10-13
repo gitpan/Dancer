@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Session::YAML::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: YAML-file-based session backend for Dancer
-$Dancer::Session::YAML::VERSION = '1.3131_0';
+$Dancer::Session::YAML::VERSION = '1.3131_1';
 use strict;
 use warnings;
 use Carp;
@@ -112,7 +112,7 @@ Dancer::Session::YAML - YAML-file-based session backend for Dancer
 
 =head1 VERSION
 
-version 1.3131_0
+version 1.3131_1
 
 =head1 DESCRIPTION
 

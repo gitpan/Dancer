@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Timer::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: a timer for Dancer
-$Dancer::Timer::VERSION = '1.3131_0';
+$Dancer::Timer::VERSION = '1.3131_1';
 use strict;
 use warnings;
 use base 'Dancer::Object';
@@ -43,7 +43,7 @@ Dancer::Timer - a timer for Dancer
 
 =head1 VERSION
 
-version 1.3131_0
+version 1.3131_1
 
 =head1 SYNOPSIS
 

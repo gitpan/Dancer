@@ -2,7 +2,7 @@ NAME
     Dancer - lightweight yet powerful web application framework
 
 VERSION
-    version 1.3131_0
+    version 1.3131_1
 
 SYNOPSIS
         #!/usr/bin/perl

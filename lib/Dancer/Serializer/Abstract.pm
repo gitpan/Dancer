@@ -2,7 +2,7 @@ package Dancer::Serializer::Abstract;
 BEGIN {
   $Dancer::Serializer::Abstract::AUTHORITY = 'cpan:SUKRIA';
 }
-$Dancer::Serializer::Abstract::VERSION = '1.3131_0';
+$Dancer::Serializer::Abstract::VERSION = '1.3131_1';
 use strict;
 use warnings;
 use Carp;
@@ -42,7 +42,7 @@ Dancer::Serializer::Abstract
 
 =head1 VERSION
 
-version 1.3131_0
+version 1.3131_1
 
 =head1 AUTHOR
 

@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Session::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: session engine for the Dancer framework
-$Dancer::Session::VERSION = '1.3131_0';
+$Dancer::Session::VERSION = '1.3131_1';
 use strict;
 use warnings;
 
@@ -82,7 +82,7 @@ Dancer::Session - session engine for the Dancer framework
 
 =head1 VERSION
 
-version 1.3131_0
+version 1.3131_1
 
 =head1 DESCRIPTION
 

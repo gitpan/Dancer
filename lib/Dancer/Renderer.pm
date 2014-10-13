@@ -2,7 +2,7 @@ package Dancer::Renderer;
 BEGIN {
   $Dancer::Renderer::AUTHORITY = 'cpan:SUKRIA';
 }
-$Dancer::Renderer::VERSION = '1.3131_0';
+$Dancer::Renderer::VERSION = '1.3131_1';
 use strict;
 use warnings;
 use Carp;
@@ -332,7 +332,7 @@ Dancer::Renderer
 
 =head1 VERSION
 
-version 1.3131_0
+version 1.3131_1
 
 =head1 AUTHOR
 

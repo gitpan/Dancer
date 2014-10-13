@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Object::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: Objects base class for Dancer
-$Dancer::Object::VERSION = '1.3131_0';
+$Dancer::Object::VERSION = '1.3131_1';
 # This class is a root class for each object in Dancer.
 # It provides basic OO tools for Perl5 without being... Moose ;-)
 
@@ -114,7 +114,7 @@ Dancer::Object - Objects base class for Dancer
 
 =head1 VERSION
 
-version 1.3131_0
+version 1.3131_1
 
 =head1 SYNOPSIS
 

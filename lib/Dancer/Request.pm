@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Request::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: interface for accessing incoming requests
-$Dancer::Request::VERSION = '1.3131_0';
+$Dancer::Request::VERSION = '1.3131_1';
 use strict;
 use warnings;
 use Carp;
@@ -623,7 +623,7 @@ Dancer::Request - interface for accessing incoming requests
 
 =head1 VERSION
 
-version 1.3131_0
+version 1.3131_1
 
 =head1 DESCRIPTION
 
