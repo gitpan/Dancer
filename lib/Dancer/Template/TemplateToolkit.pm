@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Template::TemplateToolkit::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: Template Toolkit wrapper for Dancer
-$Dancer::Template::TemplateToolkit::VERSION = '1.3131_1';
+$Dancer::Template::TemplateToolkit::VERSION = '1.3132';
 use strict;
 use warnings;
 use Carp;
@@ -135,7 +135,7 @@ Dancer::Template::TemplateToolkit - Template Toolkit wrapper for Dancer
 
 =head1 VERSION
 
-version 1.3131_1
+version 1.3132
 
 =head1 DESCRIPTION
 

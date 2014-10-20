@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Cookie::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: class representing cookies
-$Dancer::Cookie::VERSION = '1.3131_1';
+$Dancer::Cookie::VERSION = '1.3132';
 use strict;
 use warnings;
 
@@ -134,7 +134,7 @@ Dancer::Cookie - class representing cookies
 
 =head1 VERSION
 
-version 1.3131_1
+version 1.3132
 
 =head1 SYNOPSIS
 

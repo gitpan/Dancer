@@ -2,7 +2,7 @@ package Dancer::SharedData;
 BEGIN {
   $Dancer::SharedData::AUTHORITY = 'cpan:SUKRIA';
 }
-$Dancer::SharedData::VERSION = '1.3131_1';
+$Dancer::SharedData::VERSION = '1.3132';
 use strict;
 use warnings;
 use Dancer::Timer;
@@ -78,7 +78,7 @@ Dancer::SharedData
 
 =head1 VERSION
 
-version 1.3131_1
+version 1.3132
 
 =head1 AUTHOR
 

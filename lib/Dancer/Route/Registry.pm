@@ -2,7 +2,7 @@ package Dancer::Route::Registry;
 BEGIN {
   $Dancer::Route::Registry::AUTHORITY = 'cpan:SUKRIA';
 }
-$Dancer::Route::Registry::VERSION = '1.3131_1';
+$Dancer::Route::Registry::VERSION = '1.3132';
 use strict;
 use warnings;
 use Carp;
@@ -160,7 +160,7 @@ Dancer::Route::Registry
 
 =head1 VERSION
 
-version 1.3131_1
+version 1.3132
 
 =head1 AUTHOR
 
