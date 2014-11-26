@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Logger::Console::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: console-based logging engine for Dancer
-$Dancer::Logger::Console::VERSION = '1.3132';
+$Dancer::Logger::Console::VERSION = '1.3133'; # TRIAL
 use strict;
 use warnings;
 use base 'Dancer::Logger::Abstract';
@@ -27,7 +27,7 @@ Dancer::Logger::Console - console-based logging engine for Dancer
 
 =head1 VERSION
 
-version 1.3132
+version 1.3133
 
 =head1 SYNOPSIS
 

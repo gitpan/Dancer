@@ -2,7 +2,7 @@ package Dancer::Factory::Hook;
 BEGIN {
   $Dancer::Factory::Hook::AUTHORITY = 'cpan:SUKRIA';
 }
-$Dancer::Factory::Hook::VERSION = '1.3132';
+$Dancer::Factory::Hook::VERSION = '1.3133'; # TRIAL
 use strict;
 use warnings;
 use Carp;
@@ -91,7 +91,7 @@ Dancer::Factory::Hook
 
 =head1 VERSION
 
-version 1.3132
+version 1.3133
 
 =head1 AUTHOR
 

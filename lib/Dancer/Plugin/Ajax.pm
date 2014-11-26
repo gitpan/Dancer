@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Plugin::Ajax::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: a plugin for adding Ajax route handlers
-$Dancer::Plugin::Ajax::VERSION = '1.3132';
+$Dancer::Plugin::Ajax::VERSION = '1.3133'; # TRIAL
 use strict;
 use warnings;
 
@@ -74,7 +74,7 @@ Dancer::Plugin::Ajax - a plugin for adding Ajax route handlers
 
 =head1 VERSION
 
-version 1.3132
+version 1.3133
 
 =head1 SYNOPSIS
 
@@ -111,10 +111,6 @@ Disable the layout
 The action built matches POST / GET requests.
 
 =back
-
-=head1 NAME
-
-Dancer::Plugin::Ajax - 
 
 =head1 CONFIGURATION
 

@@ -127,6 +127,12 @@
   </helper>
   <helper>
     <foaf:Person>
+      <foaf:name>Ashley Willis</foaf:name>
+      <foaf:mbox rdf:resource="mailto:ashley@gitable.org" />
+    </foaf:Person>
+  </helper>
+  <helper>
+    <foaf:Person>
       <foaf:name>Ask Bjørn Hansen</foaf:name>
       <foaf:mbox rdf:resource="mailto:ask@develooper.com" />
     </foaf:Person>
@@ -801,6 +807,12 @@
   </helper>
   <helper>
     <foaf:Person>
+      <foaf:name>Sniperovitch</foaf:name>
+      <foaf:mbox rdf:resource="mailto:sniperovitch@gmail.com" />
+    </foaf:Person>
+  </helper>
+  <helper>
+    <foaf:Person>
       <foaf:name>Squeeks</foaf:name>
       <foaf:mbox rdf:resource="mailto:squeek@cpan.org" />
     </foaf:Person>
@@ -1041,7 +1053,7 @@
     </foaf:Person>
   </helper>
   <license rdf:resource="http://dev.perl.org/licenses/" />
-  <homepage rdf:resource="http://search.cpan.org/dist/Dancer/" />
+  <homepage rdf:resource="https://github.com/PerlDancer/Dancer" />
   <bug-database rdf:resource="https://github.com/PerlDancer/Dancer/issues" />
   <repository>
     <GitRepository>
@@ -1845,6 +1857,12 @@
     <Version>
       <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.3131_1</revision>
       <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2014-10-13</dc:issued>
+    </Version>
+  </release>
+  <release>
+    <Version>
+      <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.3132</revision>
+      <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2014-10-20</dc:issued>
     </Version>
   </release>
   <programming-language>Perl</programming-language>

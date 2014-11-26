@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::ModuleLoader::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: dynamic module loading helpers for Dancer core components
-$Dancer::ModuleLoader::VERSION = '1.3132';
+$Dancer::ModuleLoader::VERSION = '1.3133'; # TRIAL
 # Abstraction layer for dynamic module loading
 
 use strict;
@@ -78,7 +78,7 @@ Dancer::ModuleLoader - dynamic module loading helpers for Dancer core components
 
 =head1 VERSION
 
-version 1.3132
+version 1.3133
 
 =head1 SYNOPSIS
 

@@ -4,7 +4,7 @@ Dancer - lightweight yet powerful web application framework
 
 # VERSION
 
-version 1.3132
+version 1.3133
 
 # SYNOPSIS
 
@@ -928,7 +928,7 @@ the path of the file must be relative to the **public** directory unless you use
 the `system_path` option (see below).
 
     get '/download/:file' => sub {
-        return send_file(params->{file});
+        send_file(params->{file});
     }
 
 **WARNING** : Issuing a send\_file immediately exits the current route, and perform
@@ -948,7 +948,7 @@ Send file supports streaming possibility using PSGI streaming. The server should
 support it but normal streaming is supported on most, if not all.
 
     get '/download/:file' => sub {
-        return send_file( params->{file}, streaming => 1 );
+        send_file( params->{file}, streaming => 1 );
     }
 
 You can control what happens using callbacks.
@@ -957,7 +957,7 @@ First, `around_content` allows you to get the writer object and the chunk of
 content read, and then decide what to do with each chunk:
 
     get '/download/:file' => sub {
-        return send_file(
+        send_file(
             params->{file},
             streaming => 1,
             callbacks => {
@@ -974,7 +974,7 @@ a regular file or a full string if it's a scalar ref) and decide what to do with
 it:
 
     get '/download/:file' => sub {
-        return send_file(
+        send_file(
             params->{file},
             streaming => 1,
             callbacks => {
@@ -994,7 +994,7 @@ it:
 Or you could use `override` to control the entire streaming callback request:
 
     get '/download/:file' => sub {
-        return send_file(
+        send_file(
             params->{file},
             streaming => 1,
             callbacks => {
@@ -1012,7 +1012,7 @@ You can also set the number of bytes that will be read at a time (default being
 42K bytes) using `bytes`:
 
     get '/download/:file' => sub {
-        return send_file(
+        send_file(
             params->{file},
             streaming => 1,
             bytes     => 524288, # 512K
@@ -1025,24 +1025,24 @@ The content-type will be set depending on the current MIME types definition
 If your filename does not have an extension, or you need to force a
 specific mime type, you can pass it to `send_file` as follows:
 
-    return send_file(params->{file}, content_type => 'image/png');
+    send_file(params->{file}, content_type => 'image/png');
 
 Also, you can use your aliases or file extension names on
 `content_type`, like this:
 
-    return send_file(params->{file}, content_type => 'png');
+    send_file(params->{file}, content_type => 'png');
 
 For files outside your **public** folder, you can use the `system_path`
 switch. Just bear in mind that its use needs caution as it can be
 dangerous.
 
-    return send_file('/etc/passwd', system_path => 1);
+    send_file('/etc/passwd', system_path => 1);
 
 If you have your data in a scalar variable, `send_file` can be useful
 as well. Pass a reference to that scalar, and `send_file` will behave
 as if there was a file with that contents:
 
-    return send_file( \$data, content_type => 'image/png' );
+    send_file( \$data, content_type => 'image/png' );
 
 Note that Dancer is unable to guess the content type from the data
 contents. Therefore you might need to set the `content_type`
@@ -1050,11 +1050,8 @@ properly. For this kind of usage an attribute named `filename` can be
 useful.  It is used as the Content-Disposition header, to hint the
 browser about the filename it should use.
 
-    return send_file( \$data, content_type => 'image/png'
+    send_file( \$data, content_type => 'image/png'
                               filename     => 'onion.png' );
-
-Note that you should always use `return send_file ...` to stop execution of
-your route handler at that point.
 
 ## set
 

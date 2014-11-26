@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Logger::Abstract::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: Abstract logging engine for Dancer
-$Dancer::Logger::Abstract::VERSION = '1.3132';
+$Dancer::Logger::Abstract::VERSION = '1.3133'; # TRIAL
 use strict;
 use warnings;
 use Carp;
@@ -159,7 +159,7 @@ Dancer::Logger::Abstract - Abstract logging engine for Dancer
 
 =head1 VERSION
 
-version 1.3132
+version 1.3133
 
 =head1 SYNOPSIS
 

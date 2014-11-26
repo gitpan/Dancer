@@ -2,7 +2,7 @@ package Dancer::Continuation;
 BEGIN {
   $Dancer::Continuation::AUTHORITY = 'cpan:SUKRIA';
 }
-$Dancer::Continuation::VERSION = '1.3132';
+$Dancer::Continuation::VERSION = '1.3133'; # TRIAL
 use strict;
 use warnings;
 use Carp;
@@ -30,7 +30,7 @@ Dancer::Continuation
 
 =head1 VERSION
 
-version 1.3132
+version 1.3133
 
 =head1 AUTHOR
 

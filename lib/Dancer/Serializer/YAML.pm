@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Serializer::YAML::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: serializer for handling YAML data
-$Dancer::Serializer::YAML::VERSION = '1.3132';
+$Dancer::Serializer::YAML::VERSION = '1.3133'; # TRIAL
 use strict;
 use warnings;
 use Carp;
@@ -69,7 +69,7 @@ Dancer::Serializer::YAML - serializer for handling YAML data
 
 =head1 VERSION
 
-version 1.3132
+version 1.3133
 
 =head1 SYNOPSIS
 

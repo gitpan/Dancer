@@ -2,7 +2,7 @@ package Dancer::GetOpt;
 BEGIN {
   $Dancer::GetOpt::AUTHORITY = 'cpan:SUKRIA';
 }
-$Dancer::GetOpt::VERSION = '1.3132';
+$Dancer::GetOpt::VERSION = '1.3133'; # TRIAL
 use strict;
 use warnings;
 
@@ -103,7 +103,7 @@ Dancer::GetOpt
 
 =head1 VERSION
 
-version 1.3132
+version 1.3133
 
 =head1 AUTHOR
 

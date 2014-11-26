@@ -1,6 +1,6 @@
 package Dancer::Introduction
 # ABSTRACT: A gentle introduction to Dancer
-$Dancer::Introduction::VERSION = '1.3132';
+$Dancer::Introduction::VERSION = '1.3133'; # TRIAL
 __END__
 
 =pod
@@ -13,7 +13,7 @@ Dancer::Introduction - A gentle introduction to Dancer
 
 =head1 VERSION
 
-version 1.3132
+version 1.3133
 
 =head1 DESCRIPTION
 

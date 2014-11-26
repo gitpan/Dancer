@@ -3,7 +3,7 @@ BEGIN {
   $Dancer::Request::AUTHORITY = 'cpan:SUKRIA';
 }
 #ABSTRACT: interface for accessing incoming requests
-$Dancer::Request::VERSION = '1.3132';
+$Dancer::Request::VERSION = '1.3133'; # TRIAL
 use strict;
 use warnings;
 use Carp;
@@ -530,25 +530,25 @@ sub _parse_get_params {
 }
 
 sub _read_to_end {
-    my ($self) = @_;
+    my $self = shift;
+    
+    return unless $self->_has_something_to_read;
 
-    my $content_length = $self->content_length;
-    return unless $self->_has_something_to_read();
+    if ( $self->content_length > 0 ) {
+        my $body = '';
 
-    if ($content_length > 0) {
-        my $buffer;
-        while (defined ($buffer = $self->_read())) {
-            $self->{body} .= $buffer;
-            $self->{_http_body}->add($buffer);
+        while ( my $buffer = $self->_read ) {
+            $body .= $buffer;
         }
+
+        $self->{_http_body}->add( $self->{body} = $body );
     }
 
     return $self->{body};
 }
 
 sub _has_something_to_read {
-    my ($self) = @_;
-    return 0 unless defined $self->input_handle;
+    defined $_[0]->input_handle;
 }
 
 # taken from Miyagawa's Plack::Request::BodyParser
@@ -623,7 +623,7 @@ Dancer::Request - interface for accessing incoming requests
 
 =head1 VERSION
 
-version 1.3132
+version 1.3133
 
 =head1 DESCRIPTION
 
